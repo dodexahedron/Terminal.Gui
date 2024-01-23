@@ -1,15 +1,15 @@
 ﻿using Terminal.Gui;
 
 namespace UICatalog.Scenarios;
-[ScenarioMetadata (Name: "Date Picker", Description: "Demonstrates how to use DatePicker class")]
-[ScenarioCategory ("Controls")]
-[ScenarioCategory ("DateTime")]
+
+[ScenarioMetadata ("Date Picker", "Demonstrates how to use DatePicker class")]
+[ScenarioCategory ("Controls"), ScenarioCategory ("DateTime")]
 public class DatePickers : Scenario {
 
 
 	public override void Setup ()
 	{
-		var datePicker = new DatePicker () {
+		var datePicker = new DatePicker {
 			Y = Pos.Center (),
 			X = Pos.Center ()
 		};
@@ -18,4 +18,3 @@ public class DatePickers : Scenario {
 		Win.Add (datePicker);
 	}
 }
-
