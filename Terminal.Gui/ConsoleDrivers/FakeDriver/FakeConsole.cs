@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Terminal.Gui.ConsoleDrivers;
-using Rune = System.Text.Rune;
 
 namespace Terminal.Gui;
 
@@ -52,6 +51,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static int WindowWidth { get; set; } = WIDTH;
+
 	//
 	// Summary:
 	//	Gets a value that indicates whether output has been redirected from the standard
@@ -63,6 +63,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static bool IsOutputRedirected { get; }
+
 	//
 	// Summary:
 	//	Gets a value that indicates whether the error output stream has been redirected
@@ -74,6 +75,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static bool IsErrorRedirected { get; }
+
 	//
 	// Summary:
 	//	Gets the standard input stream.
@@ -84,6 +86,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static TextReader In { get; }
+
 	//
 	// Summary:
 	//	Gets the standard output stream.
@@ -94,6 +97,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static TextWriter Out { get; }
+
 	//
 	// Summary:
 	//	Gets the standard error output stream.
@@ -104,6 +108,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static TextWriter Error { get; }
+
 	//
 	// Summary:
 	//	Gets or sets the encoding the console uses to read input.
@@ -124,6 +129,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static Encoding InputEncoding { get; set; }
+
 	//
 	// Summary:
 	//	Gets or sets the encoding the console uses to write output.
@@ -162,7 +168,7 @@ public static class FakeConsole {
 	//	T:System.IO.IOException:
 	//	An I/O error occurred.
 
-	static ConsoleColor _defaultBackgroundColor = ConsoleColor.Black;
+	static readonly ConsoleColor _defaultBackgroundColor = ConsoleColor.Black;
 
 	/// <summary>
 	/// 
@@ -187,12 +193,13 @@ public static class FakeConsole {
 	//	T:System.IO.IOException:
 	//	An I/O error occurred.
 
-	static ConsoleColor _defaultForegroundColor = ConsoleColor.Gray;
+	static readonly ConsoleColor _defaultForegroundColor = ConsoleColor.Gray;
 
 	/// <summary>
 	/// 
 	/// </summary>
 	public static ConsoleColor ForegroundColor { get; set; } = _defaultForegroundColor;
+
 	//
 	// Summary:
 	//	Gets or sets the height of the buffer area.
@@ -215,6 +222,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static int BufferHeight { get; set; } = HEIGHT;
+
 	//
 	// Summary:
 	//	Gets or sets the width of the buffer area.
@@ -261,6 +269,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static int WindowHeight { get; set; } = HEIGHT;
+
 	//
 	// Summary:
 	//	Gets or sets a value indicating whether the combination of the System.ConsoleModifiers.Control
@@ -277,6 +286,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static bool TreatControlCAsInput { get; set; }
+
 	//
 	// Summary:
 	//	Gets the largest possible number of console window columns, based on the current
@@ -288,6 +298,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static int LargestWindowWidth { get; }
+
 	//
 	// Summary:
 	//	Gets the largest possible number of console window rows, based on the current
@@ -299,6 +310,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static int LargestWindowHeight { get; }
+
 	//
 	// Summary:
 	//	Gets or sets the leftmost position of the console window area relative to the
@@ -319,6 +331,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static int WindowLeft { get; set; }
+
 	//
 	// Summary:
 	//	Gets or sets the top position of the console window area relative to the screen
@@ -339,6 +352,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static int WindowTop { get; set; }
+
 	//
 	// Summary:
 	//	Gets or sets the column position of the cursor within the buffer area.
@@ -360,6 +374,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static int CursorLeft { get; set; }
+
 	//
 	// Summary:
 	//	Gets or sets the row position of the cursor within the buffer area.
@@ -381,6 +396,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static int CursorTop { get; set; }
+
 	//
 	// Summary:
 	//	Gets or sets the height of the cursor within a character cell.
@@ -402,6 +418,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static int CursorSize { get; set; }
+
 	//
 	// Summary:
 	//	Gets or sets a value indicating whether the cursor is visible.
@@ -419,6 +436,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static bool CursorVisible { get; set; }
+
 	//
 	// Summary:
 	//	Gets or sets the title to display in the console title bar.
@@ -443,6 +461,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static string Title { get; set; }
+
 	//
 	// Summary:
 	//	Gets a value indicating whether a key press is available in the input stream.
@@ -460,6 +479,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	public static bool KeyAvailable { get; }
+
 	//
 	// Summary:
 	//	Gets a value that indicates whether input has been redirected from the standard
@@ -483,10 +503,8 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static void Beep ()
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Beep () => throw new NotImplementedException ();
+
 	//
 	// Summary:
 	//	Plays the sound of a beep of a specified frequency and duration through the console
@@ -510,10 +528,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static void Beep (int frequency, int duration)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Beep (int frequency, int duration) => throw new NotImplementedException ();
 	//
 	// Summary:
 	//	Clears the console buffer and corresponding console window of display information.
@@ -573,10 +588,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static void MoveBufferArea (int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void MoveBufferArea (int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -632,10 +644,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static void MoveBufferArea (int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop, char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void MoveBufferArea (int sourceLeft, int sourceTop, int sourceWidth, int sourceHeight, int targetLeft, int targetTop, char sourceChar, ConsoleColor sourceForeColor, ConsoleColor sourceBackColor) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -646,10 +655,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static Stream OpenStandardError ()
-	{
-		throw new NotImplementedException ();
-	}
+	public static Stream OpenStandardError () => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -668,10 +674,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static Stream OpenStandardError (int bufferSize)
-	{
-		throw new NotImplementedException ();
-	}
+	public static Stream OpenStandardError (int bufferSize) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -690,10 +693,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static Stream OpenStandardInput (int bufferSize)
-	{
-		throw new NotImplementedException ();
-	}
+	public static Stream OpenStandardInput (int bufferSize) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -704,10 +704,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static Stream OpenStandardInput ()
-	{
-		throw new NotImplementedException ();
-	}
+	public static Stream OpenStandardInput () => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -726,10 +723,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static Stream OpenStandardOutput (int bufferSize)
-	{
-		throw new NotImplementedException ();
-	}
+	public static Stream OpenStandardOutput (int bufferSize) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -740,10 +734,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static Stream OpenStandardOutput ()
-	{
-		throw new NotImplementedException ();
-	}
+	public static Stream OpenStandardOutput () => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -759,10 +750,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static int Read ()
-	{
-		throw new NotImplementedException ();
-	}
+	public static int Read () => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -790,21 +778,18 @@ public static class FakeConsole {
 	/// <summary>
 	/// A stack of keypresses to return when ReadKey is called.
 	/// </summary>
-	public static Stack<ConsoleKeyInfo> MockKeyPresses = new Stack<ConsoleKeyInfo> ();
+	public static Stack<ConsoleKeyInfo> MockKeyPresses = new ();
 
 	/// <summary>
-	///  Helper to push a <see cref="KeyCode"/> onto <see cref="MockKeyPresses"/>.
+	/// Helper to push a <see cref="KeyCode"/> onto <see cref="MockKeyPresses"/>.
 	/// </summary>
 	/// <param name="key"></param>
-	public static void PushMockKeyPress (KeyCode key)
-	{
-		MockKeyPresses.Push (new ConsoleKeyInfo (
-			(char)(key & ~KeyCode.CtrlMask & ~KeyCode.ShiftMask & ~KeyCode.AltMask),
-			ConsoleKeyMapping.GetConsoleKeyInfoFromKeyCode (key).Key,
-			key.HasFlag (KeyCode.ShiftMask),
-			key.HasFlag (KeyCode.AltMask),
-			key.HasFlag (KeyCode.CtrlMask)));
-	}
+	public static void PushMockKeyPress (KeyCode key) => MockKeyPresses.Push (new ConsoleKeyInfo (
+		(char)(key & ~KeyCode.CtrlMask & ~KeyCode.ShiftMask & ~KeyCode.AltMask),
+		ConsoleKeyMapping.GetConsoleKeyInfoFromKeyCode (key).Key,
+		key.HasFlag (KeyCode.ShiftMask),
+		key.HasFlag (KeyCode.AltMask),
+		key.HasFlag (KeyCode.CtrlMask)));
 
 	//
 	// Summary:
@@ -825,10 +810,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static ConsoleKeyInfo ReadKey ()
-	{
-		throw new NotImplementedException ();
-	}
+	public static ConsoleKeyInfo ReadKey () => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -850,10 +832,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static string ReadLine ()
-	{
-		throw new NotImplementedException ();
-	}
+	public static string ReadLine () => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -963,10 +942,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static void SetError (TextWriter newError)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void SetError (TextWriter newError) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -986,10 +962,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static void SetIn (TextReader newIn)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void SetIn (TextReader newIn) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1010,10 +983,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="newOut"></param>
-	public static void SetOut (TextWriter newOut)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void SetOut (TextWriter newOut) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1099,10 +1069,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void Write (string value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (string value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1146,10 +1113,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void Write (ulong value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (ulong value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1167,10 +1131,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void Write (long value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (long value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1202,10 +1163,7 @@ public static class FakeConsole {
 	/// <param name="format"></param>
 	/// <param name="arg0"></param>
 	/// <param name="arg1"></param>
-	public static void Write (string format, object arg0, object arg1)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (string format, object arg0, object arg1) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1223,10 +1181,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void Write (int value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (int value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1254,10 +1209,7 @@ public static class FakeConsole {
 	/// </summary>
 	/// <param name="format"></param>
 	/// <param name="arg0"></param>
-	public static void Write (string format, object arg0)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (string format, object arg0) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1276,10 +1228,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void Write (uint value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (uint value) => throw new NotImplementedException ();
 
 	//[CLSCompliant (false)]
 	/// <summary>
@@ -1290,10 +1239,7 @@ public static class FakeConsole {
 	/// <param name="arg1"></param>
 	/// <param name="arg2"></param>
 	/// <param name="arg3"></param>
-	public static void Write (string format, object arg0, object arg1, object arg2, object arg3)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (string format, object arg0, object arg1, object arg2, object arg3) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1321,10 +1267,7 @@ public static class FakeConsole {
 	/// </summary>
 	/// <param name="format"></param>
 	/// <param name="arg"></param>
-	public static void Write (string format, params object [] arg)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (string format, params object [] arg) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1342,10 +1285,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void Write (bool value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (bool value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1362,10 +1302,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void Write (char value)
-	{
-		_buffer [CursorLeft, CursorTop] = value;
-	}
+	public static void Write (char value) => _buffer [CursorLeft, CursorTop] = value;
 
 	//
 	// Summary:
@@ -1422,10 +1359,7 @@ public static class FakeConsole {
 	/// <param name="buffer"></param>
 	/// <param name="index"></param>
 	/// <param name="count"></param>
-	public static void Write (char [] buffer, int index, int count)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (char [] buffer, int index, int count) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1461,10 +1395,7 @@ public static class FakeConsole {
 	/// <param name="arg0"></param>
 	/// <param name="arg1"></param>
 	/// <param name="arg2"></param>
-	public static void Write (string format, object arg0, object arg1, object arg2)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (string format, object arg0, object arg1, object arg2) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1482,10 +1413,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void Write (decimal value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (decimal value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1503,10 +1431,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void Write (float value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (float value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1524,10 +1449,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void Write (double value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void Write (double value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1539,10 +1461,7 @@ public static class FakeConsole {
 	/// <summary>
 	/// 
 	/// </summary>
-	public static void WriteLine ()
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine () => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1560,10 +1479,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void WriteLine (float value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (float value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1581,10 +1497,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void WriteLine (int value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (int value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1603,10 +1516,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void WriteLine (uint value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (uint value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1624,10 +1534,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void WriteLine (long value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (long value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1646,10 +1553,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void WriteLine (ulong value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (ulong value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1667,10 +1571,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void WriteLine (object value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (object value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1688,10 +1589,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void WriteLine (string value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (string value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1719,10 +1617,7 @@ public static class FakeConsole {
 	/// </summary>
 	/// <param name="format"></param>
 	/// <param name="arg0"></param>
-	public static void WriteLine (string format, object arg0)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (string format, object arg0) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1758,10 +1653,7 @@ public static class FakeConsole {
 	/// <param name="arg0"></param>
 	/// <param name="arg1"></param>
 	/// <param name="arg2"></param>
-	public static void WriteLine (string format, object arg0, object arg1, object arg2)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (string format, object arg0, object arg1, object arg2) => throw new NotImplementedException ();
 
 	//[CLSCompliant (false)]
 	/// <summary>
@@ -1772,10 +1664,7 @@ public static class FakeConsole {
 	/// <param name="arg1"></param>
 	/// <param name="arg2"></param>
 	/// <param name="arg3"></param>
-	public static void WriteLine (string format, object arg0, object arg1, object arg2, object arg3)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (string format, object arg0, object arg1, object arg2, object arg3) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1804,10 +1693,7 @@ public static class FakeConsole {
 	/// </summary>
 	/// <param name="format"></param>
 	/// <param name="arg"></param>
-	public static void WriteLine (string format, params object [] arg)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (string format, params object [] arg) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1842,10 +1728,7 @@ public static class FakeConsole {
 	/// <param name="buffer"></param>
 	/// <param name="index"></param>
 	/// <param name="count"></param>
-	public static void WriteLine (char [] buffer, int index, int count)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (char [] buffer, int index, int count) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1863,10 +1746,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void WriteLine (decimal value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (decimal value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1884,10 +1764,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="buffer"></param>
-	public static void WriteLine (char [] buffer)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (char [] buffer) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1905,10 +1782,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void WriteLine (char value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (char value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1926,10 +1800,7 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void WriteLine (bool value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (bool value) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1961,10 +1832,7 @@ public static class FakeConsole {
 	/// <param name="format"></param>
 	/// <param name="arg0"></param>
 	/// <param name="arg1"></param>
-	public static void WriteLine (string format, object arg0, object arg1)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (string format, object arg0, object arg1) => throw new NotImplementedException ();
 
 	//
 	// Summary:
@@ -1982,9 +1850,6 @@ public static class FakeConsole {
 	/// 
 	/// </summary>
 	/// <param name="value"></param>
-	public static void WriteLine (double value)
-	{
-		throw new NotImplementedException ();
-	}
+	public static void WriteLine (double value) => throw new NotImplementedException ();
 
 }

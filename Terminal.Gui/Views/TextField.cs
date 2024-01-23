@@ -15,11 +15,11 @@ namespace Terminal.Gui;
 /// The <see cref="TextField"/> <see cref="View"/> provides editing functionality and mouse support.
 /// </remarks>
 public class TextField : View {
+	readonly HistoryText _historyText = new ();
 	CultureInfo _currentCulture;
+	int _cursorPosition;
 
 	CursorVisibility _desiredCursorVisibility = CursorVisibility.Default;
-	int _cursorPosition;
-	readonly HistoryText _historyText = new ();
 	bool _isButtonPressed;
 	bool _isButtonReleased = true;
 
@@ -695,7 +695,7 @@ public class TextField : View {
 			ScrollOffset = _cursorPosition;
 			need = true;
 		} else if (Frame.Width > 0 && (ScrollOffset + _cursorPosition - (Frame.Width + offB) == 0 ||
-					       TextModel.DisplaySize (_text, ScrollOffset, _cursorPosition).size >= Frame.Width + offB)) {
+		                               TextModel.DisplaySize (_text, ScrollOffset, _cursorPosition).size >= Frame.Width + offB)) {
 
 			ScrollOffset = Math.Max (TextModel.CalculateLeftColumn (_text, ScrollOffset,
 				_cursorPosition, Frame.Width + offB), 0);
@@ -1200,7 +1200,7 @@ public class TextField : View {
 			var x = PositionCursor (ev);
 			var sbw = x;
 			if (x == _text.Count || x > 0 && (char)_text [x - 1].Value != ' '
-					     || x > 0 && (char)_text [x].Value == ' ') {
+			                     || x > 0 && (char)_text [x].Value == ' ') {
 
 				var newPosBw = GetModel ().WordBackward (x, 0);
 				if (newPosBw == null) {
@@ -1352,7 +1352,7 @@ public class TextField : View {
 		SetSelectedStartSelectedLength ();
 		var selStart = SelectedStart > -1 ? _start : _cursorPosition;
 		var newText = StringExtensions.ToString (_text.GetRange (0, selStart)) +
-			      StringExtensions.ToString (_text.GetRange (selStart + SelectedLength, _text.Count - (selStart + SelectedLength)));
+		              StringExtensions.ToString (_text.GetRange (selStart + SelectedLength, _text.Count - (selStart + SelectedLength)));
 
 		ClearAllSelection ();
 		_cursorPosition = selStart >= newText.GetRuneCount () ? newText.GetRuneCount () : selStart;
@@ -1375,11 +1375,11 @@ public class TextField : View {
 		       cbTxt +
 		       StringExtensions.ToString (_text.GetRange (selStart + SelectedLength, _text.Count - (selStart + SelectedLength)));
 
-			_cursorPosition = Math.Min (selStart + cbTxt.GetRuneCount (), _text.Count);
-			ClearAllSelection ();
-			SetNeedsDisplay ();
-			Adjust ();
-		}
+		_cursorPosition = Math.Min (selStart + cbTxt.GetRuneCount (), _text.Count);
+		ClearAllSelection ();
+		SetNeedsDisplay ();
+		Adjust ();
+	}
 
 	/// <summary>
 	/// Virtual method that invoke the <see cref="TextChanging"/> event if it's defined.

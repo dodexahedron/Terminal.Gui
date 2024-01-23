@@ -1,11 +1,10 @@
 //
 // ConsoleDriver.cs: Base class for Terminal.Gui ConsoleDriver implementations.
 //
-using System.Text;
 using System;
 using System.Diagnostics;
 using System.Linq;
-using Terminal.Gui.ConsoleDrivers;
+using System.Text;
 
 namespace Terminal.Gui;
 
@@ -20,6 +19,34 @@ namespace Terminal.Gui;
 /// - <see cref="FakeConsole"/> for unit testing.
 /// </remarks>
 public abstract class ConsoleDriver {
+
+	/// <summary>
+	/// Enables diagnostic functions
+	/// </summary>
+	[Flags]
+	public enum DiagnosticFlags : uint {
+		/// <summary>
+		/// All diagnostics off
+		/// </summary>
+		Off = 0b_0000_0000,
+
+		/// <summary>
+		/// When enabled, <see cref="View.OnDrawAdornments"/> will draw a
+		/// ruler in the frame for any side with a padding value greater than 0.
+		/// </summary>
+		FrameRuler = 0b_0000_0001,
+
+		/// <summary>
+		/// When enabled, <see cref="View.OnDrawAdornments"/> will draw a
+		/// 'L', 'R', 'T', and 'B' when clearing <see cref="Thickness"/>'s instead of ' '.
+		/// </summary>
+		FramePadding = 0b_0000_0010
+	}
+
+	// As performance is a concern, we keep track of the dirty lines and only refresh those.
+	// This is in addition to the dirty flag on each cell.
+	internal bool [] _dirtyLines;
+
 	/// <summary>
 	/// Set this to true in any unit tests that attempt to test drivers other than FakeDriver.
 	/// <code>
@@ -30,30 +57,6 @@ public abstract class ConsoleDriver {
 	/// </code>
 	/// </summary>
 	internal static bool RunningUnitTests { get; set; }
-
-	#region Setup & Teardown
-	/// <summary>
-	/// Initializes the driver
-	/// </summary>
-	/// <returns>Returns an instance of <see cref="MainLoop"/> using the <see cref="IMainLoopDriver"/> for the driver.</returns>
-	internal abstract MainLoop Init ();
-
-	/// <summary>
-	/// Ends the execution of the console driver.
-	/// </summary>
-	internal abstract void End ();
-	#endregion
-
-	/// <summary>
-	/// The event fired when the terminal is resized.
-	/// </summary>
-	public event EventHandler<SizeChangedEventArgs> SizeChanged;
-
-	/// <summary>
-	/// Called when the terminal size changes. Fires the <see cref="SizeChanged"/> event.
-	/// </summary>
-	/// <param name="args"></param>
-	public void OnSizeChanged (SizeChangedEventArgs args) => SizeChanged?.Invoke (this, args);
 
 	/// <summary>
 	/// The number of columns visible in the terminal.
@@ -114,17 +117,46 @@ public abstract class ConsoleDriver {
 	public int Row { get; internal set; }
 
 	/// <summary>
+	/// Gets or sets the clip rectangle that <see cref="AddRune(Rune)"/> and <see cref="AddStr(string)"/> are
+	/// subject to.
+	/// </summary>
+	/// <value>The rectangle describing the bounds of <see cref="Clip"/>.</value>
+	public Rect Clip { get; set; }
+
+	/// <summary>
+	/// Set flags to enable/disable <see cref="ConsoleDriver"/> diagnostics.
+	/// </summary>
+	public static DiagnosticFlags Diagnostics { get; set; }
+
+	/// <summary>
+	/// Gets the dimensions of the terminal.
+	/// </summary>
+	public Rect Bounds => new (0, 0, Cols, Rows);
+
+	/// <summary>
+	/// The event fired when the terminal is resized.
+	/// </summary>
+	public event EventHandler<SizeChangedEventArgs> SizeChanged;
+
+	/// <summary>
+	/// Called when the terminal size changes. Fires the <see cref="SizeChanged"/> event.
+	/// </summary>
+	/// <param name="args"></param>
+	public void OnSizeChanged (SizeChangedEventArgs args) => SizeChanged?.Invoke (this, args);
+
+	/// <summary>
 	/// Updates <see cref="Col"/> and <see cref="Row"/> to the specified column and row in <see cref="Contents"/>.
 	/// Used by <see cref="AddRune(Rune)"/> and <see cref="AddStr"/> to determine where to add content.
 	/// </summary>
 	/// <remarks>
-	/// <para>
-	/// This does not move the cursor on the screen, it only updates the internal state of the driver.
-	/// </para>
-	/// <para>
-	/// If <paramref name="col"/> or <paramref name="row"/> are negative or beyond  <see cref="Cols"/> and <see cref="Rows"/>,
-	/// the method still sets those properties.
-	/// </para>
+	///         <para>
+	///         This does not move the cursor on the screen, it only updates the internal state of the driver.
+	///         </para>
+	///         <para>
+	///         If <paramref name="col"/> or <paramref name="row"/> are negative or beyond  <see cref="Cols"/> and
+	///         <see cref="Rows"/>,
+	///         the method still sets those properties.
+	///         </para>
 	/// </remarks>
 	/// <param name="col">Column to move to.</param>
 	/// <param name="row">Row to move to.</param>
@@ -138,28 +170,34 @@ public abstract class ConsoleDriver {
 	/// Tests if the specified rune is supported by the driver.
 	/// </summary>
 	/// <param name="rune"></param>
-	/// <returns><see langword="true"/> if the rune can be properly presented; <see langword="false"/> if the driver
-	/// does not support displaying this rune.</returns>
+	/// <returns>
+	/// <see langword="true"/> if the rune can be properly presented; <see langword="false"/> if the driver
+	/// does not support displaying this rune.
+	/// </returns>
 	public virtual bool IsRuneSupported (Rune rune) => Rune.IsValid (rune.Value);
 
 	/// <summary>
-	/// Adds the specified rune to the display at the current cursor position. 
+	/// Adds the specified rune to the display at the current cursor position.
 	/// </summary>
 	/// <remarks>
-	/// <para>
-	/// When the method returns, <see cref="Col"/> will be incremented by the number of columns <paramref name="rune"/> required,
-	/// even if the new column value is outside of the <see cref="Clip"/> or screen dimensions defined by <see cref="Cols"/>.
-	/// </para>
-	/// <para>
-	/// If <paramref name="rune"/> requires more than one column, and <see cref="Col"/> plus the number of columns needed
-	/// exceeds the <see cref="Clip"/> or screen dimensions, the default Unicode replacement character (U+FFFD) will be added instead.
-	/// </para>
+	///         <para>
+	///         When the method returns, <see cref="Col"/> will be incremented by the number of columns <paramref name="rune"/>
+	///         required,
+	///         even if the new column value is outside of the <see cref="Clip"/> or screen dimensions defined by
+	///         <see cref="Cols"/>.
+	///         </para>
+	///         <para>
+	///         If <paramref name="rune"/> requires more than one column, and <see cref="Col"/> plus the number of columns
+	///         needed
+	///         exceeds the <see cref="Clip"/> or screen dimensions, the default Unicode replacement character (U+FFFD) will be
+	///         added instead.
+	///         </para>
 	/// </remarks>
 	/// <param name="rune">Rune to add.</param>
 	public void AddRune (Rune rune)
 	{
-		int runeWidth = -1;
-		bool validLocation = IsValidLocation (Col, Row);
+		var runeWidth = -1;
+		var validLocation = IsValidLocation (Col, Row);
 		if (validLocation) {
 			rune = rune.MakePrintable ();
 			runeWidth = rune.GetColumns ();
@@ -179,10 +217,10 @@ public abstract class ConsoleDriver {
 						// Ignore. Don't move to next column (let the driver figure out what to do).
 					} else {
 						// Attempt to normalize the cell to our left combined with this mark
-						string combined = Contents [Row, Col - 1].Rune + rune.ToString ();
+						var combined = Contents [Row, Col - 1].Rune + rune.ToString ();
 
 						// Normalize to Form C (Canonical Composition)
-						string normalized = combined.Normalize (NormalizationForm.FormC);
+						var normalized = combined.Normalize (NormalizationForm.FormC);
 						if (normalized.Length == 1) {
 							// It normalized! We can just set the Cell to the left with the
 							// normalized codepoint 
@@ -279,19 +317,21 @@ public abstract class ConsoleDriver {
 	/// Adds the <paramref name="str"/> to the display at the cursor position.
 	/// </summary>
 	/// <remarks>
-	/// <para>
-	/// When the method returns, <see cref="Col"/> will be incremented by the number of columns <paramref name="str"/> required,
-	/// unless the new column value is outside of the <see cref="Clip"/> or screen dimensions defined by <see cref="Cols"/>.
-	/// </para>
-	/// <para>
-	/// If <paramref name="str"/> requires more columns than are available, the output will be clipped.
-	/// </para>
+	///         <para>
+	///         When the method returns, <see cref="Col"/> will be incremented by the number of columns <paramref name="str"/>
+	///         required,
+	///         unless the new column value is outside of the <see cref="Clip"/> or screen dimensions defined by
+	///         <see cref="Cols"/>.
+	///         </para>
+	///         <para>
+	///         If <paramref name="str"/> requires more columns than are available, the output will be clipped.
+	///         </para>
 	/// </remarks>
 	/// <param name="str">String.</param>
 	public void AddStr (string str)
 	{
 		var runes = str.EnumerateRunes ().ToList ();
-		for (int i = 0; i < runes.Count; i++) {
+		for (var i = 0; i < runes.Count; i++) {
 			//if (runes [i].IsCombiningMark()) {
 
 			//	// Attempt to normalize
@@ -306,29 +346,19 @@ public abstract class ConsoleDriver {
 		}
 	}
 
-	Rect _clip;
-
 	/// <summary>
-	/// Tests whether the specified coordinate are valid for drawing. 
+	/// Tests whether the specified coordinate are valid for drawing.
 	/// </summary>
 	/// <param name="col">The column.</param>
 	/// <param name="row">The row.</param>
-	/// <returns><see langword="false"/> if the coordinate is outside of the
-	/// screen bounds or outside of <see cref="Clip"/>. <see langword="true"/> otherwise.</returns>
+	/// <returns>
+	/// <see langword="false"/> if the coordinate is outside of the
+	/// screen bounds or outside of <see cref="Clip"/>. <see langword="true"/> otherwise.
+	/// </returns>
 	public bool IsValidLocation (int col, int row) =>
 		col >= 0 && row >= 0 &&
 		col < Cols && row < Rows &&
 		Clip.Contains (col, row);
-
-	/// <summary>
-	/// Gets or sets the clip rectangle that <see cref="AddRune(Rune)"/> and <see cref="AddStr(string)"/> are 
-	/// subject to.
-	/// </summary>
-	/// <value>The rectangle describing the bounds of <see cref="Clip"/>.</value>
-	public Rect Clip {
-		get => _clip;
-		set => _clip = value;
-	}
 
 	/// <summary>
 	/// Updates the screen to reflect all the changes that have been done to the display buffer
@@ -360,10 +390,6 @@ public abstract class ConsoleDriver {
 	/// <returns><see langword="true"/> upon success</returns>
 	public abstract bool EnsureCursorVisibility ();
 
-	// As performance is a concern, we keep track of the dirty lines and only refresh those.
-	// This is in addition to the dirty flag on each cell.
-	internal bool [] _dirtyLines;
-
 	/// <summary>
 	/// Clears the <see cref="Contents"/> of the driver.
 	/// </summary>
@@ -377,9 +403,9 @@ public abstract class ConsoleDriver {
 		lock (Contents) {
 			// Can raise an exception while is still resizing.
 			try {
-				for (int row = 0; row < Rows; row++) {
-					for (int c = 0; c < Cols; c++) {
-						Contents [row, c] = new Cell () {
+				for (var row = 0; row < Rows; row++) {
+					for (var c = 0; c < Cols; c++) {
+						Contents [row, c] = new Cell {
 							Rune = (Rune)' ',
 							Attribute = new Attribute (Color.White, Color.Black),
 							IsDirty = true
@@ -396,6 +422,55 @@ public abstract class ConsoleDriver {
 	/// </summary>
 	public abstract void UpdateScreen ();
 
+	/// <summary>
+	/// Suspends the application (e.g. on Linux via SIGTSTP) and upon resume, resets the console driver.
+	/// </summary>
+	/// <remarks>This is only implemented in <see cref="CursesDriver"/>.</remarks>
+	public abstract void Suspend ();
+
+	// TODO: Move FillRect to ./Drawing	
+	/// <summary>
+	/// Fills the specified rectangle with the specified rune.
+	/// </summary>
+	/// <param name="rect"></param>
+	/// <param name="rune"></param>
+	public void FillRect (Rect rect, Rune rune = default)
+	{
+		for (var r = rect.Y; r < rect.Y + rect.Height; r++) {
+			for (var c = rect.X; c < rect.X + rect.Width; c++) {
+				Application.Driver.Move (c, r);
+				Application.Driver.AddRune (rune == default ? new Rune (' ') : rune);
+			}
+		}
+	}
+
+	/// <summary>
+	/// Fills the specified rectangle with the specified <see langword="char"/>. This method
+	/// is a convenience method that calls <see cref="FillRect(Rect, Rune)"/>.
+	/// </summary>
+	/// <param name="rect"></param>
+	/// <param name="c"></param>
+	public void FillRect (Rect rect, char c) => FillRect (rect, new Rune (c));
+
+	/// <summary>
+	/// Returns the name of the driver and relevant library version information.
+	/// </summary>
+	/// <returns></returns>
+	public virtual string GetVersionInfo () => GetType ().Name;
+
+	#region Setup & Teardown
+	/// <summary>
+	/// Initializes the driver
+	/// </summary>
+	/// <returns>Returns an instance of <see cref="MainLoop"/> using the <see cref="IMainLoopDriver"/> for the driver.</returns>
+	internal abstract MainLoop Init ();
+
+	/// <summary>
+	/// Ends the execution of the console driver.
+	/// </summary>
+	internal abstract void End ();
+	#endregion
+
 	#region Color Handling
 	/// <summary>
 	/// Gets whether the <see cref="ConsoleDriver"/> supports TrueColor output.
@@ -403,14 +478,16 @@ public abstract class ConsoleDriver {
 	public virtual bool SupportsTrueColor => true;
 
 	/// <summary>
-	/// Gets or sets whether the <see cref="ConsoleDriver"/> should use 16 colors instead of the default TrueColors. See <see cref="Application.Force16Colors"/>
+	/// Gets or sets whether the <see cref="ConsoleDriver"/> should use 16 colors instead of the default TrueColors. See
+	/// <see cref="Application.Force16Colors"/>
 	/// to change this setting via <see cref="ConfigurationManager"/>.
 	/// </summary>
 	/// <remarks>
-	/// <para>
-	/// Will be forced to <see langword="true"/> if <see cref="ConsoleDriver.SupportsTrueColor"/> is  <see langword="false"/>, indicating
-	/// that the <see cref="ConsoleDriver"/> cannot support TrueColor.
-	/// </para>
+	///         <para>
+	///         Will be forced to <see langword="true"/> if <see cref="ConsoleDriver.SupportsTrueColor"/> is
+	///         <see langword="false"/>, indicating
+	///         that the <see cref="ConsoleDriver"/> cannot support TrueColor.
+	///         </para>
 	/// </remarks>
 	internal virtual bool Force16Colors {
 		get => Application.Force16Colors || !SupportsTrueColor;
@@ -486,7 +563,7 @@ public abstract class ConsoleDriver {
 	public void OnKeyDown (Key a) => KeyDown?.Invoke (this, a);
 
 	/// <summary>
-	/// Event fired when a key is released. 
+	/// Event fired when a key is released.
 	/// </summary>
 	/// <remarks>
 	/// Drivers that do not support key release events will fire this event after <see cref="KeyDown"/> processing is complete.
@@ -497,7 +574,8 @@ public abstract class ConsoleDriver {
 	/// Called when a key is released. Fires the <see cref="KeyUp"/> event.
 	/// </summary>
 	/// <remarks>
-	/// Drivers that do not support key release events will calls this method after <see cref="OnKeyDown"/> processing is complete.
+	/// Drivers that do not support key release events will calls this method after <see cref="OnKeyDown"/> processing is
+	/// complete.
 	/// </remarks>
 	/// <param name="a"></param>
 	public void OnKeyUp (Key a) => KeyUp?.Invoke (this, a);
@@ -523,75 +601,6 @@ public abstract class ConsoleDriver {
 	/// <param name="ctrl">If <see langword="true"/> simulates the Ctrl key being pressed.</param>
 	public abstract void SendKeys (char keyChar, ConsoleKey key, bool shift, bool alt, bool ctrl);
 	#endregion
-
-	/// <summary>
-	/// Enables diagnostic functions
-	/// </summary>
-	[Flags]
-	public enum DiagnosticFlags : uint {
-		/// <summary>
-		/// All diagnostics off
-		/// </summary>
-		Off = 0b_0000_0000,
-
-		/// <summary>
-		/// When enabled, <see cref="View.OnDrawAdornments"/> will draw a 
-		/// ruler in the frame for any side with a padding value greater than 0.
-		/// </summary>
-		FrameRuler = 0b_0000_0001,
-
-		/// <summary>
-		/// When enabled, <see cref="View.OnDrawAdornments"/> will draw a 
-		/// 'L', 'R', 'T', and 'B' when clearing <see cref="Thickness"/>'s instead of ' '.
-		/// </summary>
-		FramePadding = 0b_0000_0010
-	}
-
-	/// <summary>
-	/// Set flags to enable/disable <see cref="ConsoleDriver"/> diagnostics.
-	/// </summary>
-	public static DiagnosticFlags Diagnostics { get; set; }
-
-	/// <summary>
-	/// Gets the dimensions of the terminal.
-	/// </summary>
-	public Rect Bounds => new Rect (0, 0, Cols, Rows);
-
-	/// <summary>
-	/// Suspends the application (e.g. on Linux via SIGTSTP) and upon resume, resets the console driver.
-	/// </summary>
-	/// <remarks>This is only implemented in <see cref="CursesDriver"/>.</remarks>
-	public abstract void Suspend ();
-
-	// TODO: Move FillRect to ./Drawing	
-	/// <summary>
-	/// Fills the specified rectangle with the specified rune.
-	/// </summary>
-	/// <param name="rect"></param>
-	/// <param name="rune"></param>
-	public void FillRect (Rect rect, Rune rune = default)
-	{
-		for (int r = rect.Y; r < rect.Y + rect.Height; r++) {
-			for (int c = rect.X; c < rect.X + rect.Width; c++) {
-				Application.Driver.Move (c, r);
-				Application.Driver.AddRune (rune == default ? new Rune (' ') : rune);
-			}
-		}
-	}
-
-	/// <summary>
-	/// Fills the specified rectangle with the specified <see langword="char"/>. This method
-	/// is a convenience method that calls <see cref="FillRect(Rect, Rune)"/>.
-	/// </summary>
-	/// <param name="rect"></param>
-	/// <param name="c"></param>
-	public void FillRect (Rect rect, char c) => FillRect (rect, new Rune (c));
-
-	/// <summary>
-	/// Returns the name of the driver and relevant library version information.
-	/// </summary>
-	/// <returns></returns>
-	public virtual string GetVersionInfo () => GetType ().Name;
 }
 
 /// <summary>
@@ -599,62 +608,66 @@ public abstract class ConsoleDriver {
 /// </summary>
 /// <remarks>
 /// Hex value are set as 0xAABBCCDD where :
-///
-///     AA stand for the TERMINFO DECSUSR parameter value to be used under Linux and MacOS
-///     BB stand for the NCurses curs_set parameter value to be used under Linux and MacOS
-///     CC stand for the CONSOLE_CURSOR_INFO.bVisible parameter value to be used under Windows
-///     DD stand for the CONSOLE_CURSOR_INFO.dwSize parameter value to be used under Windows
-///</remarks>
+/// 
+/// AA stand for the TERMINFO DECSUSR parameter value to be used under Linux and MacOS
+/// BB stand for the NCurses curs_set parameter value to be used under Linux and MacOS
+/// CC stand for the CONSOLE_CURSOR_INFO.bVisible parameter value to be used under Windows
+/// DD stand for the CONSOLE_CURSOR_INFO.dwSize parameter value to be used under Windows
+/// </remarks>
 public enum CursorVisibility {
 	/// <summary>
-	///	Cursor caret has default
+	/// Cursor caret has default
 	/// </summary>
-	/// <remarks>Works under Xterm-like terminal otherwise this is equivalent to <see ref="Underscore"/>. This default directly depends of the XTerm user configuration settings so it could be Block, I-Beam, Underline with possible blinking.</remarks>
+	/// <remarks>
+	/// Works under Xterm-like terminal otherwise this is equivalent to <see ref="Underscore"/>. This default directly depends
+	/// of the XTerm user configuration settings so it could be Block, I-Beam, Underline with possible blinking.
+	/// </remarks>
 	Default = 0x00010119,
 
 	/// <summary>
-	///	Cursor caret is hidden
+	/// Cursor caret is hidden
 	/// </summary>
 	Invisible = 0x03000019,
 
 	/// <summary>
-	///	Cursor caret is normally shown as a blinking underline bar _
+	/// Cursor caret is normally shown as a blinking underline bar _
 	/// </summary>
 	Underline = 0x03010119,
 
 	/// <summary>
-	///	Cursor caret is normally shown as a underline bar _
+	/// Cursor caret is normally shown as a underline bar _
 	/// </summary>
 	/// <remarks>Under Windows, this is equivalent to <see ref="UnderscoreBlinking"/></remarks>
 	UnderlineFix = 0x04010119,
 
 	/// <summary>
-	///	Cursor caret is displayed a blinking vertical bar |
+	/// Cursor caret is displayed a blinking vertical bar |
 	/// </summary>
 	/// <remarks>Works under Xterm-like terminal otherwise this is equivalent to <see ref="Underscore"/></remarks>
 	Vertical = 0x05010119,
 
 	/// <summary>
-	///	Cursor caret is displayed a blinking vertical bar |
+	/// Cursor caret is displayed a blinking vertical bar |
 	/// </summary>
 	/// <remarks>Works under Xterm-like terminal otherwise this is equivalent to <see ref="Underscore"/></remarks>
 	VerticalFix = 0x06010119,
 
 	/// <summary>
-	///	Cursor caret is displayed as a blinking block ▉
+	/// Cursor caret is displayed as a blinking block ▉
 	/// </summary>
 	Box = 0x01020164,
 
 	/// <summary>
-	///	Cursor caret is displayed a block ▉
+	/// Cursor caret is displayed a block ▉
 	/// </summary>
 	/// <remarks>Works under Xterm-like terminal otherwise this is equivalent to <see ref="Block"/></remarks>
 	BoxFix = 0x02020164
 }
 
 /// <summary>
-/// The <see cref="KeyCode"/> enumeration encodes key information from <see cref="ConsoleDriver"/>s and provides a consistent
-/// way for application code to specify keys and receive key events. 
+/// The <see cref="KeyCode"/> enumeration encodes key information from <see cref="ConsoleDriver"/>s and provides a
+/// consistent
+/// way for application code to specify keys and receive key events.
 /// <para>
 /// The <see cref="Key"/> class provides a higher-level abstraction, with helper methods and properties for common
 /// operations. For example, <see cref="Key.IsAlt"/> and <see cref="Key.IsCtrl"/> provide a convenient way
@@ -662,28 +675,35 @@ public enum CursorVisibility {
 /// </para>
 /// </summary>
 /// <remarks>
-/// <para>
-/// Lowercase alpha keys are encoded as values between 65 and 90 corresponding to the un-shifted A to Z keys on a keyboard. Enum values
-/// are provided for these (e.g. <see cref="KeyCode.A"/>, <see cref="KeyCode.B"/>, etc.). Even though the values are the same as the ASCII
-/// values for uppercase characters, these enum values represent *lowercase*, un-shifted characters.
-/// </para>
-/// <para>
-/// Numeric keys are the values between 48 and 57 corresponding to 0 to 9 (e.g. <see cref="KeyCode.D0"/>, <see cref="KeyCode.D1"/>, etc.).
-/// </para>
-/// <para>
-/// The shift modifiers (<see cref="KeyCode.ShiftMask"/>, <see cref="KeyCode.CtrlMask"/>, and <see cref="KeyCode.AltMask"/>) can be combined (with logical or)
-/// with the other key codes to represent shifted keys. For example, the <see cref="KeyCode.A"/> enum value represents the un-shifted 'a' key, while
-/// <see cref="KeyCode.ShiftMask"/> | <see cref="KeyCode.A"/> represents the 'A' key (shifted 'a' key). Likewise, <see cref="KeyCode.AltMask"/> | <see cref="KeyCode.A"/>
-/// represents the 'Alt+A' key combination.
-/// </para>
-/// <para>
-/// All other keys that produce a printable character are encoded as the Unicode value of the character. For example, the <see cref="KeyCode"/>
-/// for the '!' character is 33, which is the Unicode value for '!'. Likewise, `â` is 226, `Â` is 194, etc.
-/// </para>
-/// <para>
-/// If the <see cref="SpecialMask"/> is set, then the value is that of the special mask,
-/// otherwise, the value is the one of the lower bits (as extracted by <see cref="CharMask"/>).
-/// </para>
+///         <para>
+///         Lowercase alpha keys are encoded as values between 65 and 90 corresponding to the un-shifted A to Z keys on a
+///         keyboard. Enum values
+///         are provided for these (e.g. <see cref="KeyCode.A"/>, <see cref="KeyCode.B"/>, etc.). Even though the values
+///         are the same as the ASCII
+///         values for uppercase characters, these enum values represent *lowercase*, un-shifted characters.
+///         </para>
+///         <para>
+///         Numeric keys are the values between 48 and 57 corresponding to 0 to 9 (e.g. <see cref="KeyCode.D0"/>,
+///         <see cref="KeyCode.D1"/>, etc.).
+///         </para>
+///         <para>
+///         The shift modifiers (<see cref="KeyCode.ShiftMask"/>, <see cref="KeyCode.CtrlMask"/>, and
+///         <see cref="KeyCode.AltMask"/>) can be combined (with logical or)
+///         with the other key codes to represent shifted keys. For example, the <see cref="KeyCode.A"/> enum value
+///         represents the un-shifted 'a' key, while
+///         <see cref="KeyCode.ShiftMask"/> | <see cref="KeyCode.A"/> represents the 'A' key (shifted 'a' key). Likewise,
+///         <see cref="KeyCode.AltMask"/> | <see cref="KeyCode.A"/>
+///         represents the 'Alt+A' key combination.
+///         </para>
+///         <para>
+///         All other keys that produce a printable character are encoded as the Unicode value of the character. For
+///         example, the <see cref="KeyCode"/>
+///         for the '!' character is 33, which is the Unicode value for '!'. Likewise, `â` is 226, `Â` is 194, etc.
+///         </para>
+///         <para>
+///         If the <see cref="SpecialMask"/> is set, then the value is that of the special mask,
+///         otherwise, the value is the one of the lower bits (as extracted by <see cref="CharMask"/>).
+///         </para>
 /// </remarks>
 [Flags]
 public enum KeyCode : uint {
@@ -945,7 +965,7 @@ public enum KeyCode : uint {
 
 	/// <summary>
 	/// The maximum Unicode codepoint value. Used to encode the non-alphanumeric control
-	/// keys. 
+	/// keys.
 	/// </summary>
 	MaxCodePoint = 0x10FFFF,
 
@@ -1122,5 +1142,5 @@ public enum KeyCode : uint {
 	/// <summary>
 	/// F24 key.
 	/// </summary>
-	F24 = MaxCodePoint + ConsoleKey.F24,
+	F24 = MaxCodePoint + ConsoleKey.F24
 }

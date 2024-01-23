@@ -417,17 +417,17 @@ public class DimTests {
 
 			Assert.Equal ("Combine(View(Width,FrameView(f1)(0,0,49,5))-Absolute(2))", v1.Width.ToString ());
 			Assert.Equal ("Combine(Fill(0)-Absolute(2))", v1.Height.ToString ());
-			Assert.Equal (47, v1.Frame.Width);  // 49-2=47
+			Assert.Equal (47, v1.Frame.Width); // 49-2=47
 			Assert.Equal (89, v1.Frame.Height); // 98-5-2-2=89
 
 			Assert.Equal ("Combine(View(Width,FrameView(f2)(49,0,49,5))-Absolute(2))", v2.Width.ToString ());
 			Assert.Equal ("Combine(Fill(0)-Absolute(2))", v2.Height.ToString ());
-			Assert.Equal (47, v2.Frame.Width);  // 49-2=47
+			Assert.Equal (47, v2.Frame.Width); // 49-2=47
 			Assert.Equal (89, v2.Frame.Height); // 98-5-2-2=89
 
 			Assert.Equal ("Factor(0.1,False)", v3.Width.ToString ());
 			Assert.Equal ("Factor(0.1,False)", v3.Height.ToString ());
-			Assert.Equal (9, v3.Frame.Width);  // 98*10%=9
+			Assert.Equal (9, v3.Frame.Width); // 98*10%=9
 			Assert.Equal (9, v3.Frame.Height); // 98*10%=9
 
 			Assert.Equal ("Absolute(50)", v4.Width.ToString ());
@@ -437,12 +437,12 @@ public class DimTests {
 
 			Assert.Equal ("Combine(View(Width,Button(v1)(2,7,47,89))-View(Width,Button(v3)(0,0,9,9)))", v5.Width.ToString ());
 			Assert.Equal ("Combine(View(Height,Button(v1)(2,7,47,89))-View(Height,Button(v3)(0,0,9,9)))", v5.Height.ToString ());
-			Assert.Equal (38, v5.Frame.Width);  // 47-9=38
+			Assert.Equal (38, v5.Frame.Width); // 47-9=38
 			Assert.Equal (80, v5.Frame.Height); // 89-9=80
 
 			Assert.Equal ("Factor(0.2,True)", v6.Width.ToString ());
 			Assert.Equal ("Factor(0.2,True)", v6.Height.ToString ());
-			Assert.Equal (9, v6.Frame.Width);  // 47*20%=9
+			Assert.Equal (9, v6.Frame.Width); // 47*20%=9
 			Assert.Equal (18, v6.Frame.Height); // 89*20%=18
 
 			w.Width = 200;
@@ -470,19 +470,19 @@ public class DimTests {
 			v1.Text = "Button1";
 			Assert.Equal ("Combine(View(Width,FrameView(f1)(0,0,99,5))-Absolute(2))", v1.Width.ToString ());
 			Assert.Equal ("Combine(Fill(0)-Absolute(2))", v1.Height.ToString ());
-			Assert.Equal (97, v1.Frame.Width);  // 99-2=97
+			Assert.Equal (97, v1.Frame.Width); // 99-2=97
 			Assert.Equal (189, v1.Frame.Height); // 198-2-7=189
 
 			v2.Text = "Button2";
 			Assert.Equal ("Combine(View(Width,FrameView(f2)(99,0,99,5))-Absolute(2))", v2.Width.ToString ());
 			Assert.Equal ("Combine(Fill(0)-Absolute(2))", v2.Height.ToString ());
-			Assert.Equal (97, v2.Frame.Width);  // 99-2=97
+			Assert.Equal (97, v2.Frame.Width); // 99-2=97
 			Assert.Equal (189, v2.Frame.Height); // 198-2-7=189
 
 			v3.Text = "Button3";
 			Assert.Equal ("Factor(0.1,False)", v3.Width.ToString ());
 			Assert.Equal ("Factor(0.1,False)", v3.Height.ToString ());
-			Assert.Equal (19, v3.Frame.Width);  // 198*10%=19 * Percent is related to the super-view if it isn't null otherwise the view width
+			Assert.Equal (19, v3.Frame.Width); // 198*10%=19 * Percent is related to the super-view if it isn't null otherwise the view width
 			Assert.Equal (19, v3.Frame.Height); // 199*10%=19
 
 			v4.Text = "Button4";
@@ -494,19 +494,19 @@ public class DimTests {
 			v4.AutoSize = true;
 			Assert.Equal ("Absolute(11)", v4.Width.ToString ());
 			Assert.Equal ("Absolute(1)", v4.Height.ToString ());
-			Assert.Equal (11, v4.Frame.Width);  // 11 is the text length and because is Dim.DimAbsolute
+			Assert.Equal (11, v4.Frame.Width); // 11 is the text length and because is Dim.DimAbsolute
 			Assert.Equal (1, v4.Frame.Height); // 1 because is Dim.DimAbsolute
 
 			v5.Text = "Button5";
 			Assert.Equal ("Combine(View(Width,Button(v1)(2,7,97,189))-View(Width,Button(v3)(0,0,19,19)))", v5.Width.ToString ());
 			Assert.Equal ("Combine(View(Height,Button(v1)(2,7,97,189))-View(Height,Button(v3)(0,0,19,19)))", v5.Height.ToString ());
-			Assert.Equal (78, v5.Frame.Width);  // 97-9=78
+			Assert.Equal (78, v5.Frame.Width); // 97-9=78
 			Assert.Equal (170, v5.Frame.Height); // 189-19=170
 
 			v6.Text = "Button6";
 			Assert.Equal ("Factor(0.2,True)", v6.Width.ToString ());
 			Assert.Equal ("Factor(0.2,True)", v6.Height.ToString ());
-			Assert.Equal (19, v6.Frame.Width);  // 99*20%=19
+			Assert.Equal (19, v6.Frame.Width); // 99*20%=19
 			Assert.Equal (38, v6.Frame.Height); // 198-7*20=18
 		};
 
@@ -547,16 +547,16 @@ public class DimTests {
 		var t = new View { Width = 80, Height = 25 };
 
 		var w = new Window {
-			Width = Dim.Width (t) - 2,  // 78
+			Width = Dim.Width (t) - 2, // 78
 			Height = Dim.Height (t) - 2 // 23
 		};
 		var f = new FrameView ();
 		var v1 = new View {
-			Width = Dim.Width (w) - 2,  // 76
+			Width = Dim.Width (w) - 2, // 76
 			Height = Dim.Height (w) - 2 // 21
 		};
 		var v2 = new View {
-			Width = Dim.Width (v1) - 2,  // 74
+			Width = Dim.Width (v1) - 2, // 74
 			Height = Dim.Height (v1) - 2 // 19
 		};
 
@@ -566,7 +566,7 @@ public class DimTests {
 		t.BeginInit ();
 		t.EndInit ();
 
-		f.Width = Dim.Width (t) - Dim.Width (v2);    // 80 - 74 = 6
+		f.Width = Dim.Width (t) - Dim.Width (v2); // 80 - 74 = 6
 		f.Height = Dim.Height (t) - Dim.Height (v2); // 25 - 19 = 6
 
 		Assert.Throws<InvalidOperationException> (t.LayoutSubviews);
@@ -592,16 +592,16 @@ public class DimTests {
 		var t = new View ("top") { Width = 80, Height = 25 };
 
 		var w = new Window {
-			Width = Dim.Width (t) - 2,  // 78
+			Width = Dim.Width (t) - 2, // 78
 			Height = Dim.Height (t) - 2 // 23
 		};
 		var f = new FrameView ();
 		var v1 = new View {
-			Width = Dim.Width (w) - 2,  // 76
+			Width = Dim.Width (w) - 2, // 76
 			Height = Dim.Height (w) - 2 // 21
 		};
 		var v2 = new View {
-			Width = Dim.Width (v1) - 2,  // 74
+			Width = Dim.Width (v1) - 2, // 74
 			Height = Dim.Height (v1) - 2 // 19
 		};
 
@@ -611,7 +611,7 @@ public class DimTests {
 		t.BeginInit ();
 		t.EndInit ();
 
-		f.Width = Dim.Width (t) - Dim.Width (w) + 4;    // 80 - 74 = 6
+		f.Width = Dim.Width (t) - Dim.Width (w) + 4; // 80 - 74 = 6
 		f.Height = Dim.Height (t) - Dim.Height (w) + 4; // 25 - 19 = 6
 
 		// BUGBUG: v2 - f references t and w here; t is f's super-superview and w is f's superview. This is supported!
@@ -727,7 +727,7 @@ public class DimTests {
 		var count = 20;
 		var listLabels = new List<Label> ();
 
-		for (int i = 0; i < count; i++) {
+		for (var i = 0; i < count; i++) {
 			field.Text = $"Label {i}";
 			var label = new Label (field.Text) { X = 0, Y = view.Bounds.Height, Width = 20 };
 			view.Add (label);
@@ -879,7 +879,7 @@ public class DimTests {
 			Height = 10
 		};
 		var view = new View ("view") {
-			Width = Dim.Width (super),  // this is allowed
+			Width = Dim.Width (super), // this is allowed
 			Height = Dim.Height (super) // this is allowed
 		};
 
@@ -907,7 +907,7 @@ public class DimTests {
 			Height = 10
 		};
 		var view = new View ("view") {
-			Width = Dim.Width (view2),  // this is not allowed
+			Width = Dim.Width (view2), // this is not allowed
 			Height = Dim.Height (view2) // this is not allowed
 		};
 

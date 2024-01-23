@@ -9,6 +9,7 @@ using System;
 using System.Text;
 
 namespace Terminal.Gui;
+
 /// <summary>
 /// Button is a <see cref="View"/> that provides an item that invokes raises the <see cref="Clicked"/> event.
 /// </summary>
@@ -42,7 +43,7 @@ public class Button : View {
 	/// The width of the <see cref="Button"/> is computed based on the
 	/// text length. The height will always be 1.
 	/// </remarks>
-	public Button () : this (string.Empty, false) { }
+	public Button () : this (string.Empty) { }
 
 	/// <summary>
 	/// Initializes a new instance of <see cref="Button"/> using <see cref="LayoutStyle.Computed"/> layout.

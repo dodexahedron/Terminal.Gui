@@ -12,7 +12,7 @@ namespace Terminal.Gui;
 /// <remarks>
 ///         <para>
 ///         Toplevels can run as modal (popup) views, started by calling
-///         <see cref="Application.Run(Toplevel, Func{Exception,bool})"/>.
+///         <see cref="Application.Run(Toplevel, System.Func{System.Exception,bool}(System.Exception))"/>.
 ///         They return control to the caller when <see cref="Application.RequestStop(Toplevel)"/> has
 ///         been called (which sets the <see cref="Toplevel.Running"/> property to <c>false</c>).
 ///         </para>
@@ -26,6 +26,9 @@ namespace Terminal.Gui;
 ///         </para>
 /// </remarks>
 public partial class Toplevel : View {
+
+	internal static Point? _dragPosition;
+	Point _startGrabPoint;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="Toplevel"/> class with the specified
@@ -450,9 +453,9 @@ public partial class Toplevel : View {
 			return;
 		}
 
-		bool found = false;
-		bool focusProcessed = false;
-		int idx = 0;
+		var found = false;
+		var focusProcessed = false;
+		var idx = 0;
 
 		foreach (var v in views) {
 			if (v == this) {
@@ -527,12 +530,13 @@ public partial class Toplevel : View {
 	}
 
 	/// <summary>
-	///  Gets a new location of the <see cref="Toplevel"/> that is within the Bounds of the <paramref name="top"/>'s 
-	///  <see cref="View.SuperView"/> (e.g. for dragging a Window).
-	///  The `out` parameters are the new X and Y coordinates.
+	/// Gets a new location of the <see cref="Toplevel"/> that is within the Bounds of the <paramref name="top"/>'s
+	/// <see cref="View.SuperView"/> (e.g. for dragging a Window).
+	/// The `out` parameters are the new X and Y coordinates.
 	/// </summary>
 	/// <remarks>
-	/// If <paramref name="top"/> does not have a <see cref="View.SuperView"/> or it's SuperView is not <see cref="Application.Top"/>
+	/// If <paramref name="top"/> does not have a <see cref="View.SuperView"/> or it's SuperView is not
+	/// <see cref="Application.Top"/>
 	/// the position will be bound by the <see cref="ConsoleDriver.Cols"/> and <see cref="ConsoleDriver.Rows"/>.
 	/// </remarks>
 	/// <param name="top">The Toplevel that is to be moved.</param>
@@ -543,11 +547,11 @@ public partial class Toplevel : View {
 	/// <param name="menuBar">The new top most menuBar</param>
 	/// <param name="statusBar">The new top most statusBar</param>
 	/// <returns>
-	///  Either <see cref="Application.Top"/> (if <paramref name="top"/> does not have a Super View) or
-	///  <paramref name="top"/>'s SuperView. This can be used to ensure LayoutSubviews is called on the correct View.
-	///  </returns>
+	/// Either <see cref="Application.Top"/> (if <paramref name="top"/> does not have a Super View) or
+	/// <paramref name="top"/>'s SuperView. This can be used to ensure LayoutSubviews is called on the correct View.
+	/// </returns>
 	internal View GetLocationThatFits (Toplevel top, int targetX, int targetY,
-					out int nx, out int ny, out MenuBar menuBar, out StatusBar statusBar)
+		out int nx, out int ny, out MenuBar menuBar, out StatusBar statusBar)
 	{
 		int maxWidth;
 		View superView;
@@ -640,9 +644,9 @@ public partial class Toplevel : View {
 	public virtual void PositionToplevel (Toplevel top)
 	{
 		var superView = GetLocationThatFits (top, top.Frame.X, top.Frame.Y,
-			out int nx, out int ny, out _, out var sb);
-		bool layoutSubviews = false;
-		int maxWidth = 0;
+			out var nx, out var ny, out _, out var sb);
+		var layoutSubviews = false;
+		var maxWidth = 0;
 		if (superView.Margin != null && superView == top.SuperView) {
 			maxWidth -= superView.GetAdornmentsThickness ().Left + superView.GetAdornmentsThickness ().Right;
 		}
@@ -730,9 +734,6 @@ public partial class Toplevel : View {
 		return false;
 	}
 
-	internal static Point? _dragPosition;
-	Point _startGrabPoint;
-
 	void Application_UnGrabbingMouse (object sender, GrabMouseEventArgs e)
 	{
 		if (Application.MouseGrabView == this && _dragPosition.HasValue) {
@@ -758,8 +759,8 @@ public partial class Toplevel : View {
 
 		int nx, ny;
 		if (!_dragPosition.HasValue && (mouseEvent.Flags == MouseFlags.Button1Pressed
-						|| mouseEvent.Flags == MouseFlags.Button2Pressed
-						|| mouseEvent.Flags == MouseFlags.Button3Pressed)) {
+		                                || mouseEvent.Flags == MouseFlags.Button2Pressed
+		                                || mouseEvent.Flags == MouseFlags.Button3Pressed)) {
 
 			SetFocus ();
 			Application.BringOverlappedTopToFront ();
@@ -777,8 +778,9 @@ public partial class Toplevel : View {
 
 			//System.Diagnostics.Debug.WriteLine ($"Starting at {dragPosition}");
 			return true;
-		} else if (mouseEvent.Flags == (MouseFlags.Button1Pressed | MouseFlags.ReportMousePosition) ||
-			mouseEvent.Flags == MouseFlags.Button3Pressed) {
+		}
+		if (mouseEvent.Flags == (MouseFlags.Button1Pressed | MouseFlags.ReportMousePosition) ||
+		    mouseEvent.Flags == MouseFlags.Button3Pressed) {
 			if (_dragPosition.HasValue) {
 				if (SuperView == null) {
 					// Redraw the entire app window using just our Frame. Since we are 
@@ -816,15 +818,15 @@ public partial class Toplevel : View {
 	}
 
 	/// <summary>
-	/// Stops and closes this <see cref="Toplevel"/>. If this Toplevel is the top-most Toplevel, 
+	/// Stops and closes this <see cref="Toplevel"/>. If this Toplevel is the top-most Toplevel,
 	/// <see cref="Application.RequestStop(Toplevel)"/> will be called, causing the application to exit.
 	/// </summary>
 	public virtual void RequestStop ()
 	{
 		if (IsOverlappedContainer && Running
-					&& (Application.Current == this
-					|| Application.Current?.Modal == false
-					|| Application.Current?.Modal == true && Application.Current?.Running == false)) {
+		                          && (Application.Current == this
+		                              || Application.Current?.Modal == false
+		                              || Application.Current?.Modal == true && Application.Current?.Running == false)) {
 
 			foreach (var child in Application.OverlappedChildren) {
 				var ev = new ToplevelClosingEventArgs (this);
@@ -855,7 +857,8 @@ public partial class Toplevel : View {
 	}
 
 	/// <summary>
-	/// Stops and closes the <see cref="Toplevel"/> specified by <paramref name="top"/>. If <paramref name="top"/> is the top-most Toplevel, 
+	/// Stops and closes the <see cref="Toplevel"/> specified by <paramref name="top"/>. If <paramref name="top"/> is the
+	/// top-most Toplevel,
 	/// <see cref="Application.RequestStop(Toplevel)"/> will be called, causing the application to exit.
 	/// </summary>
 	/// <param name="top">The Toplevel to request stop.</param>
@@ -905,58 +908,71 @@ public partial class Toplevel : View {
 		base.Dispose (disposing);
 	}
 }
+
 /// <summary>
 /// Implements the <see cref="IEqualityComparer{T}"/> for comparing two <see cref="Toplevel"/>s
 /// used by <see cref="StackExtensions"/>.
 /// </summary>
 public class ToplevelEqualityComparer : IEqualityComparer<Toplevel> {
 	/// <summary>Determines whether the specified objects are equal.</summary>
-	/// <param name="x">The first object of type <see cref="Toplevel" /> to compare.</param>
-	/// <param name="y">The second object of type <see cref="Toplevel" /> to compare.</param>
+	/// <param name="x">The first object of type <see cref="Toplevel"/> to compare.</param>
+	/// <param name="y">The second object of type <see cref="Toplevel"/> to compare.</param>
 	/// <returns>
-	///     <see langword="true" /> if the specified objects are equal; otherwise, <see langword="false" />.</returns>
+	/// <see langword="true"/> if the specified objects are equal; otherwise, <see langword="false"/>.
+	/// </returns>
 	public bool Equals (Toplevel x, Toplevel y)
 	{
 		if (y == null && x == null) {
 			return true;
-		} else if (x == null || y == null) {
+		}
+		if (x == null || y == null) {
 			return false;
-		} else if (x.Id == y.Id) {
+		}
+		if (x.Id == y.Id) {
 			return true;
 		}
 		return false;
 	}
 
 	/// <summary>Returns a hash code for the specified object.</summary>
-	/// <param name="obj">The <see cref="Toplevel" /> for which a hash code is to be returned.</param>
+	/// <param name="obj">The <see cref="Toplevel"/> for which a hash code is to be returned.</param>
 	/// <returns>A hash code for the specified object.</returns>
-	/// <exception cref="ArgumentNullException">The type of <paramref name="obj" /> 
-	/// is a reference type and <paramref name="obj" /> is <see langword="null" />.</exception>
+	/// <exception cref="ArgumentNullException">
+	/// The type of <paramref name="obj"/>
+	/// is a reference type and <paramref name="obj"/> is <see langword="null"/>.
+	/// </exception>
 	public int GetHashCode (Toplevel obj)
 	{
 		if (obj == null) {
 			throw new ArgumentNullException ();
 		}
 
-		int hCode = 0;
-		if (int.TryParse (obj.Id, out int result)) {
+		var hCode = 0;
+		if (int.TryParse (obj.Id, out var result)) {
 			hCode = result;
 		}
 		return hCode.GetHashCode ();
 	}
 }
+
 /// <summary>
-/// Implements the <see cref="IComparer{T}"/> to sort the <see cref="Toplevel"/> 
+/// Implements the <see cref="IComparer{T}"/> to sort the <see cref="Toplevel"/>
 /// from the <see cref="Application.OverlappedChildren"/> if needed.
 /// </summary>
 public sealed class ToplevelComparer : IComparer<Toplevel> {
-	/// <summary>Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the other.</summary>
+	/// <summary>
+	/// Compares two objects and returns a value indicating whether one is less than, equal to, or greater than the
+	/// other.
+	/// </summary>
 	/// <param name="x">The first object to compare.</param>
 	/// <param name="y">The second object to compare.</param>
-	/// <returns>A signed integer that indicates the relative values of <paramref name="x" /> and <paramref name="y" />, as shown in the following table.Value Meaning Less than zero
-	///             <paramref name="x" /> is less than <paramref name="y" />.Zero
-	///             <paramref name="x" /> equals <paramref name="y" />.Greater than zero
-	///             <paramref name="x" /> is greater than <paramref name="y" />.</returns>
+	/// <returns>
+	/// A signed integer that indicates the relative values of <paramref name="x"/> and <paramref name="y"/>, as shown in the
+	/// following table.Value Meaning Less than zero
+	/// <paramref name="x"/> is less than <paramref name="y"/>.Zero
+	/// <paramref name="x"/> equals <paramref name="y"/>.Greater than zero
+	/// <paramref name="x"/> is greater than <paramref name="y"/>.
+	/// </returns>
 	public int Compare (Toplevel x, Toplevel y)
 	{
 		if (ReferenceEquals (x, y)) {

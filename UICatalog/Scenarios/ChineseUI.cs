@@ -1,6 +1,6 @@
 ﻿using Terminal.Gui;
 
-namespace UICatalog.Scenarios; 
+namespace UICatalog.Scenarios;
 
 [ScenarioMetadata ("ChineseUI", "Chinese UI")]
 [ScenarioCategory ("Unicode")]
@@ -10,7 +10,7 @@ public class ChineseUI : Scenario {
 		Application.Init ();
 		var top = Application.Top;
 
-		var win = new Window () {
+		var win = new Window {
 			Title = "Test",
 			X = 0,
 			Y = 0,
@@ -19,7 +19,7 @@ public class ChineseUI : Scenario {
 		};
 		top.Add (win);
 
-		var buttonPanel = new FrameView () {
+		var buttonPanel = new FrameView {
 			Title = "Command",
 			X = 0,
 			Y = 1,
@@ -30,7 +30,7 @@ public class ChineseUI : Scenario {
 
 		var btn = new Button (1, 1, "你", true); // v1: A
 		btn.Clicked += (s, e) => {
-			int result = MessageBox.Query ("Confirm",
+			var result = MessageBox.Query ("Confirm",
 				"Are you sure you want to quit ui?", 0,
 				"Yes", "No");
 			if (result == 0) {
@@ -47,7 +47,5 @@ public class ChineseUI : Scenario {
 		Application.Run ();
 	}
 
-	public override void Run ()
-	{
-	}
+	public override void Run () { }
 }

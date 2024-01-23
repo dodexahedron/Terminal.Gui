@@ -1,13 +1,8 @@
-﻿using Xunit;
-using Terminal.Gui;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Xunit;
 using static Terminal.Gui.ConfigurationManager;
 
-namespace Terminal.Gui.ConfigurationTests; 
+namespace Terminal.Gui.ConfigurationTests;
 
 public class SettingsScopeTests {
 	[Fact]
@@ -34,7 +29,7 @@ public class SettingsScopeTests {
 
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void Apply_ShouldApplyProperties ()
 	{
 		// arrange
@@ -58,7 +53,7 @@ public class SettingsScopeTests {
 		Assert.True (Application.IsMouseDisabled);
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void CopyUpdatedPropertiesFrom_ShouldCopyChangedPropertiesOnly ()
 	{
 		Settings ["Application.QuitKey"].PropertyValue = new Key (KeyCode.End);

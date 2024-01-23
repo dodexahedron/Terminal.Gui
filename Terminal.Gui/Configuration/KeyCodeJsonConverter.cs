@@ -9,7 +9,7 @@ class KeyCodeJsonConverter : JsonConverter<KeyCode> {
 	public override KeyCode Read (ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{
 		if (reader.TokenType == JsonTokenType.StartObject) {
-			KeyCode key = KeyCode.Null;
+			var key = KeyCode.Null;
 			var modifierDict = new Dictionary<string, KeyCode> (comparer: StringComparer.InvariantCultureIgnoreCase) {
 				{ "Shift", KeyCode.ShiftMask },
 				{ "Ctrl", KeyCode.CtrlMask },
@@ -24,7 +24,7 @@ class KeyCodeJsonConverter : JsonConverter<KeyCode> {
 				}
 
 				if (reader.TokenType == JsonTokenType.PropertyName) {
-					string propertyName = reader.GetString ();
+					var propertyName = reader.GetString ();
 					reader.Read ();
 
 					switch (propertyName.ToLowerInvariant ()) {
@@ -51,7 +51,6 @@ class KeyCodeJsonConverter : JsonConverter<KeyCode> {
 							} catch (FormatException ioe) {
 								throw new JsonException ($"Error parsing Key value: {ioe.Message}", ioe);
 							}
-							break;
 						}
 						break;
 
@@ -61,7 +60,7 @@ class KeyCodeJsonConverter : JsonConverter<KeyCode> {
 								if (reader.TokenType == JsonTokenType.EndArray) {
 									break;
 								}
-								string mod = reader.GetString ();
+								var mod = reader.GetString ();
 								try {
 									modifiers.Add (modifierDict [mod]);
 								} catch (KeyNotFoundException e) {
@@ -92,7 +91,7 @@ class KeyCodeJsonConverter : JsonConverter<KeyCode> {
 	{
 		writer.WriteStartObject ();
 
-		string keyName = (value & ~KeyCode.CtrlMask & ~KeyCode.ShiftMask & ~KeyCode.AltMask).ToString ();
+		var keyName = (value & ~KeyCode.CtrlMask & ~KeyCode.ShiftMask & ~KeyCode.AltMask).ToString ();
 		if (keyName != null) {
 			writer.WriteString ("Key", keyName);
 		} else {
@@ -115,7 +114,7 @@ class KeyCodeJsonConverter : JsonConverter<KeyCode> {
 		if (modifiers.Count > 0) {
 			writer.WritePropertyName ("Modifiers");
 			writer.WriteStartArray ();
-			foreach (string modifier in modifiers) {
+			foreach (var modifier in modifiers) {
 				writer.WriteStringValue (modifier);
 			}
 			writer.WriteEndArray ();

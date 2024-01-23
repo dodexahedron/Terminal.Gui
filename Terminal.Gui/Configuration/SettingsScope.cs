@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -6,15 +8,14 @@ using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-#nullable enable
-
 namespace Terminal.Gui;
 
 /// <summary>
-/// The root object of Terminal.Gui configuration settings / JSON schema. Contains only properties 
+/// The root object of Terminal.Gui configuration settings / JSON schema. Contains only properties
 /// attributed with  <see cref="SettingsScope"/>.
 /// </summary>
-/// <example><code>
+/// <example>
+///         <code>
 ///  {
 ///    "$schema" : "https://gui-cs.github.io/Terminal.Gui/schemas/tui-config-schema.json",
 ///    "Application.UseSystemConsole" : true,
@@ -22,21 +23,23 @@ namespace Terminal.Gui;
 ///    "Themes": {
 ///    },
 ///  },
-/// </code></example>
+/// </code>
+/// </example>
 /// <remarks>
 /// </remarks>
 [JsonConverter (typeof (ScopeJsonConverter<SettingsScope>))]
 public class SettingsScope : Scope<SettingsScope> {
-	/// <summary>
-	/// Points to our JSON schema.
-	/// </summary>
-	[JsonInclude, JsonPropertyName ("$schema")]
-	public string Schema { get; set; } = "https://gui-cs.github.io/Terminal.Gui/schemas/tui-config-schema.json";
 
 	/// <summary>
 	/// The list of paths to the configuration files.
 	/// </summary>
-	public List<string> Sources = new List<string> ();
+	public List<string> Sources = new ();
+
+	/// <summary>
+	/// Points to our JSON schema.
+	/// </summary>
+	[JsonInclude] [JsonPropertyName ("$schema")]
+	public string Schema { get; set; } = "https://gui-cs.github.io/Terminal.Gui/schemas/tui-config-schema.json";
 
 	/// <summary>
 	/// Updates the <see cref="SettingsScope"/> with the settings in a JSON string.
@@ -47,17 +50,16 @@ public class SettingsScope : Scope<SettingsScope> {
 	{
 		// Update the existing settings with the new settings.
 		try {
-			Update (JsonSerializer.Deserialize<SettingsScope> (stream, ConfigurationManager._serializerOptions)!);
-			ConfigurationManager.OnUpdated ();
+			Update (JsonSerializer.Deserialize<SettingsScope> (stream, _serializerOptions)!);
+			OnUpdated ();
 			Debug.WriteLine ($"ConfigurationManager: Read configuration from \"{source}\"");
 			Sources.Add (source);
 			return this;
 		} catch (JsonException e) {
-			if (ConfigurationManager.ThrowOnJsonErrors ?? false) {
+			if (ThrowOnJsonErrors ?? false) {
 				throw;
-			} else {
-				ConfigurationManager.AddJsonError ($"Error deserializing {source}: {e.Message}");
 			}
+			AddJsonError ($"Error deserializing {source}: {e.Message}");
 		}
 		return this;
 	}
@@ -94,7 +96,7 @@ public class SettingsScope : Scope<SettingsScope> {
 			return this;
 		}
 
-		using Stream? stream = assembly.GetManifestResourceStream (resourceName)!;
+		using var stream = assembly.GetManifestResourceStream (resourceName)!;
 		if (stream == null) {
 			Debug.WriteLine ($"ConfigurationManager: Failed to read resource \"{resourceName}\" from \"{assembly.GetName ().Name}\".");
 			return this;

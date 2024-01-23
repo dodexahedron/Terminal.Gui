@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text.Unicode;
 using Xunit;
 
-namespace Terminal.Gui.ConfigurationTests; 
+namespace Terminal.Gui.ConfigurationTests;
 
 public class ColorJsonConverterTests {
 	[Theory]
@@ -26,7 +26,7 @@ public class ColorJsonConverterTests {
 	public void TestColorDeserializationFromHumanReadableColorNames (string colorName, ColorName expectedColor)
 	{
 		// Arrange
-		string json = $"\"{colorName}\"";
+		var json = $"\"{colorName}\"";
 
 		// Act
 		var actualColor = JsonSerializer.Deserialize<Color> (json, ConfigurationManagerTests._jsonOptions);
@@ -57,7 +57,7 @@ public class ColorJsonConverterTests {
 		var converter = new ColorJsonConverter ();
 		var options = new JsonSerializerOptions { Converters = { converter } };
 
-		string serialized = JsonSerializer.Serialize<Color> (new Color (colorName), options);
+		var serialized = JsonSerializer.Serialize (new Color (colorName), options);
 
 		Assert.Equal ($"\"{expectedJson}\"", serialized);
 	}
@@ -66,10 +66,10 @@ public class ColorJsonConverterTests {
 	public void TestSerializeColor_Black ()
 	{
 		// Arrange
-		string expectedJson = "\"Black\"";
+		var expectedJson = "\"Black\"";
 
 		// Act
-		string json = JsonSerializer.Serialize<Color> (new Color (Color.Black), new JsonSerializerOptions {
+		var json = JsonSerializer.Serialize (new Color (Color.Black), new JsonSerializerOptions {
 			Converters = { new ColorJsonConverter () }
 		});
 
@@ -81,10 +81,10 @@ public class ColorJsonConverterTests {
 	public void TestSerializeColor_BrightRed ()
 	{
 		// Arrange
-		string expectedJson = "\"BrightRed\"";
+		var expectedJson = "\"BrightRed\"";
 
 		// Act
-		string json = JsonSerializer.Serialize<Color> (new Color (Color.BrightRed), new JsonSerializerOptions {
+		var json = JsonSerializer.Serialize (new Color (Color.BrightRed), new JsonSerializerOptions {
 			Converters = { new ColorJsonConverter () }
 		});
 
@@ -96,7 +96,7 @@ public class ColorJsonConverterTests {
 	public void TestDeserializeColor_Black ()
 	{
 		// Arrange
-		string json = "\"Black\"";
+		var json = "\"Black\"";
 		var expectedColor = new Color (ColorName.Black);
 
 		// Act
@@ -112,7 +112,7 @@ public class ColorJsonConverterTests {
 	public void TestDeserializeColor_BrightRed ()
 	{
 		// Arrange
-		string json = "\"BrightRed\"";
+		var json = "\"BrightRed\"";
 		var expectedColor = new Color (ColorName.BrightRed);
 
 		// Act
@@ -132,7 +132,7 @@ public class ColorJsonConverterTests {
 		// Arrange
 
 		// Act
-		string actual = JsonSerializer.Serialize (new Color (r, g, b), new JsonSerializerOptions {
+		var actual = JsonSerializer.Serialize (new Color (r, g, b), new JsonSerializerOptions {
 			Converters = { new ColorJsonConverter () }
 		});
 
@@ -179,7 +179,7 @@ public class AttributeJsonConverterTests {
 	public void TestDeserialize ()
 	{
 		// Test deserializing from human-readable color names
-		string json = "{\"Foreground\":\"Blue\",\"Background\":\"Green\"}";
+		var json = "{\"Foreground\":\"Blue\",\"Background\":\"Green\"}";
 		var attribute = JsonSerializer.Deserialize<Attribute> (json, ConfigurationManagerTests._jsonOptions);
 		Assert.Equal (Color.Blue, attribute.Foreground.ColorName);
 		Assert.Equal (Color.Green, attribute.Background.ColorName);
@@ -191,12 +191,12 @@ public class AttributeJsonConverterTests {
 		Assert.Equal (Color.BrightGreen, attribute.Background.ColorName);
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void TestSerialize ()
 	{
 		// Test serializing to human-readable color names
 		var attribute = new Attribute (Color.Blue, Color.Green);
-		string json = JsonSerializer.Serialize<Attribute> (attribute, ConfigurationManagerTests._jsonOptions);
+		var json = JsonSerializer.Serialize (attribute, ConfigurationManagerTests._jsonOptions);
 		Assert.Equal ("{\"Foreground\":\"Blue\",\"Background\":\"Green\"}", json);
 	}
 }
@@ -229,7 +229,7 @@ public class ColorSchemeJsonConverterTests {
 	//		}
 	//		}
 	//	}";
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void TestColorSchemesSerialization ()
 	{
 		// Arrange
@@ -240,7 +240,7 @@ public class ColorSchemeJsonConverterTests {
 			HotFocus = new Attribute (Color.BrightBlue, Color.Gray),
 			Disabled = new Attribute (Color.DarkGray, Color.Blue)
 		};
-		string serializedColorScheme = JsonSerializer.Serialize<ColorScheme> (expectedColorScheme, ConfigurationManagerTests._jsonOptions);
+		var serializedColorScheme = JsonSerializer.Serialize (expectedColorScheme, ConfigurationManagerTests._jsonOptions);
 
 		// Act
 		var actualColorScheme = JsonSerializer.Deserialize<ColorScheme> (serializedColorScheme, ConfigurationManagerTests._jsonOptions);
@@ -268,7 +268,7 @@ public class KeyCodeJsonConverterTests {
 		options.Converters.Add (new KeyCodeJsonConverter ());
 
 		// Act
-		string json = JsonSerializer.Serialize (key, options);
+		var json = JsonSerializer.Serialize (key, options);
 		var deserializedKey = JsonSerializer.Deserialize<KeyCode> (json, options);
 
 		// Assert
@@ -296,7 +296,7 @@ public class KeyJsonConverterTests {
 		options.Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
 
 		// Act
-		string json = JsonSerializer.Serialize ((Key)key, options);
+		var json = JsonSerializer.Serialize ((Key)key, options);
 
 		// Assert
 		Assert.Equal (expected, json);
@@ -323,7 +323,7 @@ public class KeyJsonConverterTests {
 		options.Encoder = JavaScriptEncoder.Create (encoderSettings);
 
 		// Act
-		string json = JsonSerializer.Serialize ((Key)key, options);
+		var json = JsonSerializer.Serialize ((Key)key, options);
 		var deserializedKey = JsonSerializer.Deserialize<Key> (json, options);
 
 		// Assert

@@ -1,11 +1,13 @@
 ﻿#nullable enable
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
 namespace Terminal.Gui;
+
 /// <summary>
 /// Extensions to <see cref="string"/> to support TUI text manipulation.
 /// </summary>
@@ -19,8 +21,8 @@ public static class StringExtensions {
 	/// <param name="str">The text to repeat.</param>
 	/// <param name="n">Number of times to repeat the text.</param>
 	/// <returns>
-	///  The text repeated if <paramref name="n"/> is greater than zero, 
-	///  otherwise <see langword="null"/>.
+	/// The text repeated if <paramref name="n"/> is greater than zero,
+	/// otherwise <see langword="null"/>.
 	/// </returns>
 	public static string? Repeat (this string str, int n)
 	{
@@ -45,10 +47,7 @@ public static class StringExtensions {
 	/// </remarks>
 	/// <param name="str">The string to measure.</param>
 	/// <returns></returns>
-	public static int GetColumns (this string str)
-	{
-		return str == null ? 0 : str.EnumerateRunes ().Sum (r => Math.Max (r.GetColumns (), 0));
-	}
+	public static int GetColumns (this string str) => str == null ? 0 : str.EnumerateRunes ().Sum (r => Math.Max (r.GetColumns (), 0));
 
 	/// <summary>
 	/// Gets the number of runes in the string.
@@ -97,8 +96,8 @@ public static class StringExtensions {
 		if (count == -1) {
 			count = bytes.Length;
 		}
-		var operationStatus = Rune.DecodeFromUtf8 (bytes, out rune, out int bytesConsumed);
-		if (operationStatus == System.Buffers.OperationStatus.Done && bytesConsumed >= count) {
+		var operationStatus = Rune.DecodeFromUtf8 (bytes, out rune, out var bytesConsumed);
+		if (operationStatus == OperationStatus.Done && bytesConsumed >= count) {
 			return (rune, bytesConsumed);
 		}
 		return (Rune.ReplacementChar, 1);
@@ -117,8 +116,8 @@ public static class StringExtensions {
 	{
 		var rune = str.EnumerateRunes ().ToArray () [end == -1 ? ^1 : end];
 		var bytes = Encoding.UTF8.GetBytes (rune.ToString ());
-		var operationStatus = Rune.DecodeFromUtf8 (bytes, out rune, out int bytesConsumed);
-		if (operationStatus == System.Buffers.OperationStatus.Done) {
+		var operationStatus = Rune.DecodeFromUtf8 (bytes, out rune, out var bytesConsumed);
+		if (operationStatus == OperationStatus.Done) {
 			return (rune, bytesConsumed);
 		}
 		return (Rune.ReplacementChar, 1);

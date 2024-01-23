@@ -1,135 +1,136 @@
-﻿using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.IO;
+using System.Text;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 using Terminal.Gui;
 using Color = Terminal.Gui.Color;
 
-namespace UICatalog.Scenarios {
-	[ScenarioMetadata (Name: "Images", Description: "Demonstration of how to render an image with/without true color support.")]
-	[ScenarioCategory ("Colors")]
-	[ScenarioCategory ("Drawing")]
-	public class Images : Scenario {
-		public override void Setup ()
-		{
-			base.Setup ();
+namespace UICatalog.Scenarios; 
 
-			var canTrueColor = Application.Driver.SupportsTrueColor;
+[ScenarioMetadata ("Images", "Demonstration of how to render an image with/without true color support.")]
+[ScenarioCategory ("Colors")]
+[ScenarioCategory ("Drawing")]
+public class Images : Scenario {
+	public override void Setup ()
+	{
+		base.Setup ();
 
-			var lblDriverName = new Label ($"Driver is {Application.Driver.GetType ().Name}") {
-				X = 0,
-				Y = 0
-			};
-			Win.Add (lblDriverName);
+		var canTrueColor = Application.Driver.SupportsTrueColor;
 
-			var cbSupportsTrueColor = new CheckBox ("supports true color ") {
-				X = Pos.Right(lblDriverName) + 2,
-				Y = 0,
-				Checked = canTrueColor,
-				CanFocus = false
-			};
-			Win.Add (cbSupportsTrueColor);
+		var lblDriverName = new Label ($"Driver is {Application.Driver.GetType ().Name}") {
+			X = 0,
+			Y = 0
+		};
+		Win.Add (lblDriverName);
 
-			var cbUseTrueColor = new CheckBox ("Use true color") {
-				X = Pos.Right(cbSupportsTrueColor) + 2,
-				Y = 0,
-				Checked = !Application.Force16Colors,
-				Enabled = canTrueColor,
-			};
-			cbUseTrueColor.Toggled += (_, evt) => Application.Force16Colors = !evt.NewValue ?? false;
-			Win.Add (cbUseTrueColor);
+		var cbSupportsTrueColor = new CheckBox ("supports true color ") {
+			X = Pos.Right (lblDriverName) + 2,
+			Y = 0,
+			Checked = canTrueColor,
+			CanFocus = false
+		};
+		Win.Add (cbSupportsTrueColor);
 
-			var btnOpenImage = new Button ("Open Image") {
-				X = Pos.Right (cbUseTrueColor) + 2,
-				Y = 0
-			};
-			Win.Add (btnOpenImage);
+		var cbUseTrueColor = new CheckBox ("Use true color") {
+			X = Pos.Right (cbSupportsTrueColor) + 2,
+			Y = 0,
+			Checked = !Application.Force16Colors,
+			Enabled = canTrueColor
+		};
+		cbUseTrueColor.Toggled += (_, evt) => Application.Force16Colors = !evt.NewValue ?? false;
+		Win.Add (cbUseTrueColor);
 
-			var imageView = new ImageView () {
-				X = 0,
-				Y = Pos.Bottom(lblDriverName),
-				Width = Dim.Fill (),
-				Height = Dim.Fill (),
-			};
-			Win.Add (imageView);
+		var btnOpenImage = new Button ("Open Image") {
+			X = Pos.Right (cbUseTrueColor) + 2,
+			Y = 0
+		};
+		Win.Add (btnOpenImage);
+
+		var imageView = new ImageView {
+			X = 0,
+			Y = Pos.Bottom (lblDriverName),
+			Width = Dim.Fill (),
+			Height = Dim.Fill ()
+		};
+		Win.Add (imageView);
 
 
-			btnOpenImage.Clicked += (_, _) => {
-				var ofd = new OpenDialog ("Open Image") { AllowsMultipleSelection = false,  };
-				Application.Run (ofd);
+		btnOpenImage.Clicked += (_, _) => {
+			var ofd = new OpenDialog ("Open Image") { AllowsMultipleSelection = false };
+			Application.Run (ofd);
 
-				if (ofd.Path is not null) {
-					Directory.SetCurrentDirectory (Path.GetFullPath(Path.GetDirectoryName(ofd.Path)!));
-				}
-
-				if (ofd.Canceled) {
-					return;
-				}
-
-				var path = ofd.FilePaths [0];
-
-				if (string.IsNullOrWhiteSpace (path)) {
-					return;
-				}
-
-				if (!File.Exists (path)) {
-					return;
-				}
-
-				Image<Rgba32> img;
-
-				try {
-					img = Image.Load<Rgba32> (File.ReadAllBytes (path));
-				} catch (Exception ex) {
-
-					MessageBox.ErrorQuery ("Could not open file", ex.Message, "Ok");
-					return;
-				}
-
-				imageView.SetImage (img);
-				Application.Refresh ();
-			};
-		}
-
-		class ImageView : View {
-
-			private Image<Rgba32> fullResImage;
-			private Image<Rgba32> matchSize;
-
-			ConcurrentDictionary<Rgba32, Attribute> cache = new ConcurrentDictionary<Rgba32, Attribute> ();
-
-			internal void SetImage (Image<Rgba32> image)
-			{
-				fullResImage = image;
-				this.SetNeedsDisplay ();
+			if (ofd.Path is not null) {
+				Directory.SetCurrentDirectory (Path.GetFullPath (Path.GetDirectoryName (ofd.Path)!));
 			}
 
-			public override void OnDrawContent(Rect bounds)
-			{
-				base.OnDrawContent (bounds);
+			if (ofd.Canceled) {
+				return;
+			}
 
-				if (fullResImage == null) {
-					return;
-				}
+			var path = ofd.FilePaths [0];
 
-				// if we have not got a cached resized image of this size
-				if (matchSize == null || bounds.Width != matchSize.Width || bounds.Height != matchSize.Height) {
+			if (string.IsNullOrWhiteSpace (path)) {
+				return;
+			}
 
-					// generate one
-					matchSize = fullResImage.Clone (x => x.Resize (bounds.Width, bounds.Height));
-				}
+			if (!File.Exists (path)) {
+				return;
+			}
 
-				for (int y = 0; y < bounds.Height; y++) {
-					for (int x = 0; x < bounds.Width; x++) {
-						var rgb = matchSize [x, y];
+			Image<Rgba32> img;
 
-						var attr = cache.GetOrAdd (rgb, (rgb) => new Attribute (new Color (), new Color (rgb.R, rgb.G, rgb.B)));
+			try {
+				img = Image.Load<Rgba32> (File.ReadAllBytes (path));
+			} catch (Exception ex) {
 
-						Driver.SetAttribute (attr);
-						AddRune (x, y, (System.Text.Rune)' ');
-					}
+				MessageBox.ErrorQuery ("Could not open file", ex.Message, "Ok");
+				return;
+			}
+
+			imageView.SetImage (img);
+			Application.Refresh ();
+		};
+	}
+
+	class ImageView : View {
+
+		readonly ConcurrentDictionary<Rgba32, Attribute> cache = new ();
+
+		Image<Rgba32> fullResImage;
+		Image<Rgba32> matchSize;
+
+		internal void SetImage (Image<Rgba32> image)
+		{
+			fullResImage = image;
+			SetNeedsDisplay ();
+		}
+
+		public override void OnDrawContent (Rect bounds)
+		{
+			base.OnDrawContent (bounds);
+
+			if (fullResImage == null) {
+				return;
+			}
+
+			// if we have not got a cached resized image of this size
+			if (matchSize == null || bounds.Width != matchSize.Width || bounds.Height != matchSize.Height) {
+
+				// generate one
+				matchSize = fullResImage.Clone (x => x.Resize (bounds.Width, bounds.Height));
+			}
+
+			for (var y = 0; y < bounds.Height; y++) {
+				for (var x = 0; x < bounds.Width; x++) {
+					var rgb = matchSize [x, y];
+
+					var attr = cache.GetOrAdd (rgb, rgb => new Attribute (new Color (), new Color (rgb.R, rgb.G, rgb.B)));
+
+					Driver.SetAttribute (attr);
+					AddRune (x, y, (Rune)' ');
 				}
 			}
 		}

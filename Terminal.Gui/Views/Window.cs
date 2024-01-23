@@ -5,13 +5,13 @@ namespace Terminal.Gui;
 
 /// <summary>
 /// A <see cref="Toplevel"/> <see cref="View"/> with <see cref="View.BorderStyle"/> set to
-/// <see cref="LineStyle.Single"/>. Provides a container for other views. 
+/// <see cref="LineStyle.Single"/>. Provides a container for other views.
 /// </summary>
 /// <remarks>
-/// <para>
-/// If any subview is a button and the <see cref="Button.IsDefault"/> property is set to true, the Enter key
-/// will invoke the <see cref="Command.Accept"/> command on that subview.
-/// </para>
+///         <para>
+///         If any subview is a button and the <see cref="Button.IsDefault"/> property is set to true, the Enter key
+///         will invoke the <see cref="Command.Accept"/> command on that subview.
+///         </para>
 /// </remarks>
 public class Window : Toplevel {
 	/// <summary>

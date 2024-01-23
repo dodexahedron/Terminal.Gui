@@ -7,20 +7,7 @@ namespace Terminal.Gui.DriverTests;
 public class KeyCodeTests {
 	readonly ITestOutputHelper _output;
 
-	public KeyCodeTests (ITestOutputHelper output)
-	{
-		_output = output;
-	}
-
-	enum SimpleEnum { Zero, One, Two, Three, Four, Five }
-
-	[Flags]
-	enum FlaggedEnum { Zero, One, Two, Three, Four, Five }
-
-	enum SimpleHighValueEnum { Zero, One, Two, Three, Four, Last = 0x40000000 }
-
-	[Flags]
-	enum FlaggedHighValueEnum { Zero, One, Two, Three, Four, Last = 0x40000000 }
+	public KeyCodeTests (ITestOutputHelper output) => _output = output;
 
 	[Fact]
 	public void SimpleEnum_And_FlagedEnum ()
@@ -130,16 +117,13 @@ public class KeyCodeTests {
 		Assert.Equal ("Y, CtrlMask", key.ToString ());
 
 		// This will be well compared, because the Key.CtrlMask have a high value.
-		Assert.False ((Key)key == Application.QuitKey);
+		Assert.False (key == Application.QuitKey);
 		switch (key) {
 		case KeyCode.Q | KeyCode.CtrlMask:
 			// Never goes here.
 			break;
 		case KeyCode.Y | KeyCode.CtrlMask:
 			Assert.True (key == (KeyCode.Y | KeyCode.CtrlMask));
-			break;
-		default:
-			// Never goes here.
 			break;
 		}
 	}
@@ -178,4 +162,14 @@ public class KeyCodeTests {
 		k = KeyCode.D | KeyCode.ShiftMask;
 		Assert.Equal ("D, ShiftMask", k.ToString ());
 	}
+
+	enum SimpleEnum { Zero, One, Two, Three, Four, Five }
+
+	[Flags]
+	enum FlaggedEnum { Zero, One, Two, Three, Four, Five }
+
+	enum SimpleHighValueEnum { Zero, One, Two, Three, Four, Last = 0x40000000 }
+
+	[Flags]
+	enum FlaggedHighValueEnum { Zero, One, Two, Three, Four, Last = 0x40000000 }
 }

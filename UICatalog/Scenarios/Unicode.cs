@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Terminal.Gui;
 
-namespace UICatalog.Scenarios; 
+namespace UICatalog.Scenarios;
 
 [ScenarioMetadata ("Unicode", "Tries to test Unicode in all controls (#204)")]
 [ScenarioCategory ("Text and Formatting")]
@@ -10,9 +11,9 @@ namespace UICatalog.Scenarios;
 public class UnicodeInMenu : Scenario {
 	public override void Setup ()
 	{
-		string unicode = "Τὴ γλῶσσα μοῦ ἔδωσαν ἑλληνικὴ\nτὸ σπίτι φτωχικὸ στὶς ἀμμουδιὲς τοῦ Ὁμήρου.\nΜονάχη ἔγνοια ἡ γλῶσσα μου στὶς ἀμμουδιὲς τοῦ Ὁμήρου.";
+		var unicode = "Τὴ γλῶσσα μοῦ ἔδωσαν ἑλληνικὴ\nτὸ σπίτι φτωχικὸ στὶς ἀμμουδιὲς τοῦ Ὁμήρου.\nΜονάχη ἔγνοια ἡ γλῶσσα μου στὶς ἀμμουδιὲς τοῦ Ὁμήρου.";
 
-		string gitString = $"gui.cs 糊 (hú) {ConfigurationManager.Glyphs.IdenticalTo} {ConfigurationManager.Glyphs.DownArrow}18 {ConfigurationManager.Glyphs.UpArrow}10 {ConfigurationManager.Glyphs.VerticalFourDots}1 {ConfigurationManager.Glyphs.HorizontalEllipsis}";
+		var gitString = $"gui.cs 糊 (hú) {CM.Glyphs.IdenticalTo} {CM.Glyphs.DownArrow}18 {CM.Glyphs.UpArrow}10 {CM.Glyphs.VerticalFourDots}1 {CM.Glyphs.HorizontalEllipsis}";
 
 		var menu = new MenuBar (new MenuBarItem [] {
 			new ("_Файл", new MenuItem [] {
@@ -62,19 +63,19 @@ public class UnicodeInMenu : Scenario {
 
 		label = new Label ("ComboBox:") { X = Pos.X (label), Y = Pos.Bottom (checkBoxRight) + 1 };
 		Win.Add (label);
-		var comboBox = new ComboBox () {
+		var comboBox = new ComboBox {
 			X = 20,
 			Y = Pos.Y (label),
 			Width = Dim.Percent (50)
 		};
-		comboBox.SetSource (new List<string> () { gitString, "Со_хранить" });
+		comboBox.SetSource (new List<string> { gitString, "Со_хранить" });
 
 		Win.Add (comboBox);
 		comboBox.Text = gitString;
 
 		label = new Label ("HexView:") { X = Pos.X (label), Y = Pos.Bottom (label) + 2 };
 		Win.Add (label);
-		var hexView = new HexView (new System.IO.MemoryStream (Encoding.ASCII.GetBytes (gitString + " Со_хранить"))) {
+		var hexView = new HexView (new MemoryStream (Encoding.ASCII.GetBytes (gitString + " Со_хранить"))) {
 			X = 20,
 			Y = Pos.Y (label),
 			Width = Dim.Percent (60),
@@ -84,7 +85,7 @@ public class UnicodeInMenu : Scenario {
 
 		label = new Label ("ListView:") { X = Pos.X (label), Y = Pos.Bottom (hexView) + 1 };
 		Win.Add (label);
-		var listView = new ListView (new List<string> () { "item #1", gitString, "Со_хранить", unicode }) {
+		var listView = new ListView (new List<string> { "item #1", gitString, "Со_хранить", unicode }) {
 			X = 20,
 			Y = Pos.Y (label),
 			Width = Dim.Percent (60),
@@ -94,7 +95,7 @@ public class UnicodeInMenu : Scenario {
 
 		label = new Label ("RadioGroup:") { X = Pos.X (label), Y = Pos.Bottom (listView) + 1 };
 		Win.Add (label);
-		var radioGroup = new RadioGroup (new string [] { "item #1", gitString, "Со_хранить", "𝔽𝕆𝕆𝔹𝔸ℝ" }, 0) {
+		var radioGroup = new RadioGroup (new [] { "item #1", gitString, "Со_хранить", "𝔽𝕆𝕆𝔹𝔸ℝ" }) {
 			X = 20,
 			Y = Pos.Y (label),
 			Width = Dim.Percent (60)
@@ -108,7 +109,7 @@ public class UnicodeInMenu : Scenario {
 
 		label = new Label ("TextView:") { X = Pos.X (label), Y = Pos.Bottom (textField) + 1 };
 		Win.Add (label);
-		var textView = new TextView () {
+		var textView = new TextView {
 			X = 20,
 			Y = Pos.Y (label),
 			Width = Dim.Percent (60),

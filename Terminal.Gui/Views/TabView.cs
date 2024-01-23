@@ -8,7 +8,6 @@ namespace Terminal.Gui;
 /// Control that hosts multiple sub views, presenting a single one at once.
 /// </summary>
 public class TabView : View {
-	private Tab _selectedTab;
 
 	/// <summary>
 	/// The default <see cref="MaxTabTextWidth"/> to set on new <see cref="TabView"/> controls.
@@ -16,22 +15,91 @@ public class TabView : View {
 	public const uint DefaultMaxTabTextWidth = 30;
 
 	/// <summary>
-	/// This sub view is the 2 or 3 line control that represents the actual tabs themselves.
-	/// </summary>
-	TabRowView _tabsBar;
-
-	/// <summary>
-	/// This sub view is the main client area of the current tab.  It hosts the <see cref="Tab.View"/> 
+	/// This sub view is the main client area of the current tab.  It hosts the <see cref="Tab.View"/>
 	/// of the tab, the <see cref="SelectedTab"/>.
 	/// </summary>
-	View _contentView;
-	private List<Tab> _tabs = new List<Tab> ();
+	readonly View _contentView;
+
+	Tab _selectedTab;
+
+	TabToRender [] _tabLocations;
+	readonly List<Tab> _tabs = new ();
+
+	/// <summary>
+	/// This sub view is the 2 or 3 line control that represents the actual tabs themselves.
+	/// </summary>
+	readonly TabRowView _tabsBar;
+
+	int _tabScrollOffset;
+
+	/// <summary>
+	/// Initializes a <see cref="TabView"/> class using <see cref="LayoutStyle.Computed"/> layout.
+	/// </summary>
+	public TabView ()
+	{
+		CanFocus = true;
+		_tabsBar = new TabRowView (this);
+		_contentView = new View ();
+
+		ApplyStyleChanges ();
+
+		base.Add (_tabsBar);
+		base.Add (_contentView);
+
+		// Things this view knows how to do
+		AddCommand (Command.Left, () => {
+			SwitchTabBy (-1);
+			return true;
+		});
+		AddCommand (Command.Right, () => {
+			SwitchTabBy (1);
+			return true;
+		});
+		AddCommand (Command.LeftHome, () => {
+			TabScrollOffset = 0;
+			SelectedTab = Tabs.FirstOrDefault ();
+			return true;
+		});
+		AddCommand (Command.RightEnd, () => {
+			TabScrollOffset = Tabs.Count - 1;
+			SelectedTab = Tabs.LastOrDefault ();
+			return true;
+		});
+		AddCommand (Command.NextView, () => {
+			_contentView.SetFocus ();
+			return true;
+		});
+		AddCommand (Command.PreviousView, () => {
+			SuperView?.FocusPrev ();
+			return true;
+		});
+		AddCommand (Command.PageDown, () => {
+			TabScrollOffset += _tabLocations.Length;
+			SelectedTab = Tabs.ElementAt (TabScrollOffset);
+			return true;
+		});
+		AddCommand (Command.PageUp, () => {
+			TabScrollOffset -= _tabLocations.Length;
+			SelectedTab = Tabs.ElementAt (TabScrollOffset);
+			return true;
+		});
+
+		// Default keybindings for this view
+		KeyBindings.Add (KeyCode.CursorLeft, Command.Left);
+		KeyBindings.Add (KeyCode.CursorRight, Command.Right);
+		KeyBindings.Add (KeyCode.Home, Command.LeftHome);
+		KeyBindings.Add (KeyCode.End, Command.RightEnd);
+		KeyBindings.Add (KeyCode.CursorDown, Command.NextView);
+		KeyBindings.Add (KeyCode.CursorUp, Command.PreviousView);
+		KeyBindings.Add (KeyCode.PageDown, Command.PageDown);
+		KeyBindings.Add (KeyCode.PageUp, Command.PageUp);
+	}
 
 	/// <summary>
 	/// All tabs currently hosted by the control.
 	/// </summary>
 	/// <value></value>
-	public IReadOnlyCollection<Tab> Tabs { get => _tabs.AsReadOnly (); }
+	public IReadOnlyCollection<Tab> Tabs => _tabs.AsReadOnly ();
 
 	/// <summary>
 	/// When there are too many tabs to render, this indicates the first
@@ -40,27 +108,14 @@ public class TabView : View {
 	/// <value></value>
 	public int TabScrollOffset {
 		get => _tabScrollOffset;
-		set {
-			_tabScrollOffset = EnsureValidScrollOffsets (value);
-		}
+		set => _tabScrollOffset = EnsureValidScrollOffsets (value);
 	}
 
 	/// <summary>
-	/// The maximum number of characters to render in a Tab header.  This prevents one long tab 
+	/// The maximum number of characters to render in a Tab header.  This prevents one long tab
 	/// from pushing out all the others.
 	/// </summary>
 	public uint MaxTabTextWidth { get; set; } = DefaultMaxTabTextWidth;
-
-	/// <summary>
-	/// Event for when <see cref="SelectedTab"/> changes.
-	/// </summary>
-	public event EventHandler<TabChangedEventArgs> SelectedTabChanged;
-
-	/// <summary>
-	/// Event fired when a <see cref="Tab"/> is clicked.  Can be used to cancel navigation,
-	/// show context menu (e.g. on right click) etc.
-	/// </summary>
-	public event EventHandler<TabMouseEventArgs> TabClicked;
 
 	/// <summary>
 	/// The currently selected member of <see cref="Tabs"/> chosen by the user.
@@ -104,47 +159,23 @@ public class TabView : View {
 	/// Render choices for how to display tabs.  After making changes, call <see cref="ApplyStyleChanges()"/>.
 	/// </summary>
 	/// <value></value>
-	public TabStyle Style { get; set; } = new TabStyle ();
+	public TabStyle Style { get; set; } = new ();
 
 	/// <summary>
-	/// Initializes a <see cref="TabView"/> class using <see cref="LayoutStyle.Computed"/> layout.
+	/// Event for when <see cref="SelectedTab"/> changes.
 	/// </summary>
-	public TabView () : base ()
-	{
-		CanFocus = true;
-		_tabsBar = new TabRowView (this);
-		_contentView = new View ();
+	public event EventHandler<TabChangedEventArgs> SelectedTabChanged;
 
-		ApplyStyleChanges ();
-
-		base.Add (_tabsBar);
-		base.Add (_contentView);
-
-		// Things this view knows how to do
-		AddCommand (Command.Left, () => { SwitchTabBy (-1); return true; });
-		AddCommand (Command.Right, () => { SwitchTabBy (1); return true; });
-		AddCommand (Command.LeftHome, () => { TabScrollOffset = 0; SelectedTab = Tabs.FirstOrDefault (); return true; });
-		AddCommand (Command.RightEnd, () => { TabScrollOffset = Tabs.Count - 1; SelectedTab = Tabs.LastOrDefault (); return true; });
-		AddCommand (Command.NextView, () => { _contentView.SetFocus (); return true; });
-		AddCommand (Command.PreviousView, () => { SuperView?.FocusPrev (); return true; });
-		AddCommand (Command.PageDown, () => { TabScrollOffset += _tabLocations.Length; SelectedTab = Tabs.ElementAt (TabScrollOffset); return true; });
-		AddCommand (Command.PageUp, () => { TabScrollOffset -= _tabLocations.Length; SelectedTab = Tabs.ElementAt (TabScrollOffset); return true; });
-
-		// Default keybindings for this view
-		KeyBindings.Add (KeyCode.CursorLeft, Command.Left);
-		KeyBindings.Add (KeyCode.CursorRight, Command.Right);
-		KeyBindings.Add (KeyCode.Home, Command.LeftHome);
-		KeyBindings.Add (KeyCode.End, Command.RightEnd);
-		KeyBindings.Add (KeyCode.CursorDown, Command.NextView);
-		KeyBindings.Add (KeyCode.CursorUp, Command.PreviousView);
-		KeyBindings.Add (KeyCode.PageDown, Command.PageDown);
-		KeyBindings.Add (KeyCode.PageUp, Command.PageUp);
-	}
+	/// <summary>
+	/// Event fired when a <see cref="Tab"/> is clicked.  Can be used to cancel navigation,
+	/// show context menu (e.g. on right click) etc.
+	/// </summary>
+	public event EventHandler<TabMouseEventArgs> TabClicked;
 
 	/// <summary>
 	/// Updates the control to use the latest state settings in <see cref="Style"/>.
-	/// This can change the size of the client area of the tab (for rendering the 
-	/// selected tab's content).  This method includes a call 
+	/// This can change the size of the client area of the tab (for rendering the
+	/// selected tab's content).  This method includes a call
 	/// to <see cref="View.SetNeedsDisplay()"/>.
 	/// </summary>
 	public void ApplyStyleChanges ()
@@ -213,10 +244,7 @@ public class TabView : View {
 	}
 
 	///<inheritdoc/>
-	public override void OnDrawContentComplete (Rect contentArea)
-	{
-		_tabsBar.OnDrawContentComplete (contentArea);
-	}
+	public override void OnDrawContentComplete (Rect contentArea) => _tabsBar.OnDrawContentComplete (contentArea);
 
 	/// <summary>
 	/// Disposes the control and all <see cref="Tabs"/>.
@@ -239,14 +267,10 @@ public class TabView : View {
 	/// <summary>
 	/// Raises the <see cref="SelectedTabChanged"/> event.
 	/// </summary>
-	protected virtual void OnSelectedTabChanged (Tab oldTab, Tab newTab)
-	{
-
-		SelectedTabChanged?.Invoke (this, new TabChangedEventArgs (oldTab, newTab));
-	}
+	protected virtual void OnSelectedTabChanged (Tab oldTab, Tab newTab) => SelectedTabChanged?.Invoke (this, new TabChangedEventArgs (oldTab, newTab));
 
 	/// <summary>
-	/// Changes the <see cref="SelectedTab"/> by the given <paramref name="amount"/>. 
+	/// Changes the <see cref="SelectedTab"/> by the given <paramref name="amount"/>.
 	/// Positive for right, negative for left.  If no tab is currently selected then
 	/// the first tab will become selected.
 	/// </summary>
@@ -287,10 +311,7 @@ public class TabView : View {
 	/// <param name="value">The value to validate.</param>
 	/// <remarks>Changes will not be immediately visible in the display until you call <see cref="View.SetNeedsDisplay()"/>.</remarks>
 	/// <returns>The valid <see cref="TabScrollOffset"/> for the given value.</returns>
-	public int EnsureValidScrollOffsets (int value)
-	{
-		return Math.Max (Math.Min (value, Tabs.Count - 1), 0);
-	}
+	public int EnsureValidScrollOffsets (int value) => Math.Max (Math.Min (value, Tabs.Count - 1), 0);
 
 	/// <summary>
 	/// Updates <see cref="TabScrollOffset"/> to ensure that <see cref="SelectedTab"/> is visible.
@@ -310,14 +331,17 @@ public class TabView : View {
 	}
 
 	/// <summary>
-	/// Returns the number of rows occupied by rendering the tabs, this depends 
-	/// on <see cref="TabStyle.ShowTopLine"/> and can be 0 (e.g. if 
+	/// Returns the number of rows occupied by rendering the tabs, this depends
+	/// on <see cref="TabStyle.ShowTopLine"/> and can be 0 (e.g. if
 	/// <see cref="TabStyle.TabsOnBottom"/> and you ask for <paramref name="top"/>).
 	/// </summary>
-	/// <param name="top">True to measure the space required at the top of the control,
-	/// false to measure space at the bottom.</param>.
+	/// <param name="top">
+	/// True to measure the space required at the top of the control,
+	/// false to measure space at the bottom.
+	/// </param>
+	/// .
 	/// <returns></returns>
-	private int GetTabHeight (bool top)
+	int GetTabHeight (bool top)
 	{
 		if (top && Style.TabsOnBottom) {
 			return 0;
@@ -330,18 +354,15 @@ public class TabView : View {
 		return Style.ShowTopLine ? 3 : 2;
 	}
 
-	private TabToRender [] _tabLocations;
-	private int _tabScrollOffset;
-
 	/// <summary>
 	/// Returns which tabs to render at each x location.
 	/// </summary>
 	/// <returns></returns>
-	private IEnumerable<TabToRender> CalculateViewport (Rect bounds)
+	IEnumerable<TabToRender> CalculateViewport (Rect bounds)
 	{
 		UnSetCurrentTabs ();
 
-		int i = 1;
+		var i = 1;
 		View prevTab = null;
 
 		// Starting at the first or scrolled to tab
@@ -357,7 +378,7 @@ public class TabView : View {
 			// while there is space for the tab
 			var tabTextWidth = tab.DisplayText.EnumerateRunes ().Sum (c => c.GetColumns ());
 
-			string text = tab.DisplayText;
+			var text = tab.DisplayText;
 
 			// The maximum number of characters to use for the tab name as specified
 			// by the user (MaxTabTextWidth).  But not more than the width of the view
@@ -399,7 +420,7 @@ public class TabView : View {
 		}
 	}
 
-	private void UnSetCurrentTabs ()
+	void UnSetCurrentTabs ()
 	{
 		if (_tabLocations != null) {
 			foreach (var tabToRender in _tabLocations) {
@@ -410,10 +431,7 @@ public class TabView : View {
 		}
 	}
 
-	private void Tab_MouseClick (object sender, MouseEventEventArgs e)
-	{
-		e.Handled = _tabsBar.MouseEvent (e.MouseEvent);
-	}
+	void Tab_MouseClick (object sender, MouseEventEventArgs e) => e.Handled = _tabsBar.MouseEvent (e.MouseEvent);
 
 	/// <summary>
 	/// Adds the given <paramref name="tab"/> to <see cref="Tabs"/>.
@@ -474,17 +492,13 @@ public class TabView : View {
 		SetNeedsDisplay ();
 	}
 
-	private class TabToRender {
-		public int X { get; set; }
-		public Tab Tab { get; set; }
+	/// <summary>
+	/// Raises the <see cref="TabClicked"/> event.
+	/// </summary>
+	/// <param name="tabMouseEventArgs"></param>
+	protected private virtual void OnTabClicked (TabMouseEventArgs tabMouseEventArgs) => TabClicked?.Invoke (this, tabMouseEventArgs);
 
-		/// <summary>
-		/// True if the tab that is being rendered is the selected one.
-		/// </summary>
-		/// <value></value>
-		public bool IsSelected { get; set; }
-		public int Width { get; }
-		public string TextToRender { get; }
+	class TabToRender {
 
 		public TabToRender (int x, Tab tab, string textToRender, bool isSelected, int width)
 		{
@@ -494,24 +508,38 @@ public class TabView : View {
 			Width = width;
 			TextToRender = textToRender;
 		}
+
+		public int X { get; set; }
+
+		public Tab Tab { get; }
+
+		/// <summary>
+		/// True if the tab that is being rendered is the selected one.
+		/// </summary>
+		/// <value></value>
+		public bool IsSelected { get; }
+
+		public int Width { get; }
+
+		public string TextToRender { get; }
 	}
 
-	private class TabRowView : View {
+	class TabRowView : View {
 		readonly TabView _host;
-		View _rightScrollIndicator;
-		View _leftScrollIndicator;
+		readonly View _leftScrollIndicator;
+		readonly View _rightScrollIndicator;
 
 		public TabRowView (TabView host)
 		{
-			this._host = host;
+			_host = host;
 
 			CanFocus = true;
 			Height = 1;
 			Width = Dim.Fill ();
 
-			_rightScrollIndicator = new View () { Id = "rightScrollIndicator", Width = 1, Height = 1, Visible = false, Text = CM.Glyphs.RightArrow.ToString () };
+			_rightScrollIndicator = new View { Id = "rightScrollIndicator", Width = 1, Height = 1, Visible = false, Text = Glyphs.RightArrow.ToString () };
 			_rightScrollIndicator.MouseClick += _host.Tab_MouseClick;
-			_leftScrollIndicator = new View () { Id = "leftScrollIndicator", Width = 1, Height = 1, Visible = false, Text = CM.Glyphs.LeftArrow.ToString () };
+			_leftScrollIndicator = new View { Id = "leftScrollIndicator", Width = 1, Height = 1, Visible = false, Text = Glyphs.LeftArrow.ToString () };
 			_leftScrollIndicator.MouseClick += _host.Tab_MouseClick;
 
 			Add (_rightScrollIndicator, _leftScrollIndicator);
@@ -545,10 +573,10 @@ public class TabView : View {
 			var tabLocations = _host._tabLocations;
 			var selectedTab = -1;
 
-			for (int i = 0; i < tabLocations.Length; i++) {
+			for (var i = 0; i < tabLocations.Length; i++) {
 				View tab = tabLocations [i].Tab;
 				var vts = tab.BoundsToScreen (tab.Bounds);
-				LineCanvas lc = new LineCanvas ();
+				var lc = new LineCanvas ();
 				var selectedOffset = _host.Style.ShowTopLine && tabLocations [i].IsSelected ? 0 : 1;
 
 				if (tabLocations [i].IsSelected) {
@@ -725,7 +753,7 @@ public class TabView : View {
 		/// <summary>
 		/// Renders the line with the tab names in it.
 		/// </summary>
-		private void RenderTabLine ()
+		void RenderTabLine ()
 		{
 			var tabLocations = _host._tabLocations;
 			int y;
@@ -805,9 +833,9 @@ public class TabView : View {
 		/// <summary>
 		/// Renders the line of the tab that adjoins the content of the tab.
 		/// </summary>
-		private void RenderUnderline ()
+		void RenderUnderline ()
 		{
-			int y = GetUnderlineYPosition ();
+			var y = GetUnderlineYPosition ();
 
 			var selected = _host._tabLocations.FirstOrDefault (t => t.IsSelected);
 
@@ -846,29 +874,24 @@ public class TabView : View {
 			}
 		}
 
-		private bool ShouldDrawRightScrollIndicator ()
-		{
-			return _host._tabLocations.LastOrDefault ()?.Tab != _host.Tabs.LastOrDefault ();
-		}
+		bool ShouldDrawRightScrollIndicator () => _host._tabLocations.LastOrDefault ()?.Tab != _host.Tabs.LastOrDefault ();
 
-		private int GetUnderlineYPosition ()
+		int GetUnderlineYPosition ()
 		{
 			if (_host.Style.TabsOnBottom) {
 
 				return 0;
-			} else {
-
-				return _host.Style.ShowTopLine ? 2 : 1;
 			}
+			return _host.Style.ShowTopLine ? 2 : 1;
 		}
 
 		public override bool MouseEvent (MouseEvent me)
 		{
 			var hit = me.View is Tab ? (Tab)me.View : null;
 
-			bool isClick = me.Flags.HasFlag (MouseFlags.Button1Clicked) ||
-				me.Flags.HasFlag (MouseFlags.Button2Clicked) ||
-				me.Flags.HasFlag (MouseFlags.Button3Clicked);
+			var isClick = me.Flags.HasFlag (MouseFlags.Button1Clicked) ||
+			              me.Flags.HasFlag (MouseFlags.Button2Clicked) ||
+			              me.Flags.HasFlag (MouseFlags.Button3Clicked);
 
 			if (isClick) {
 				_host.OnTabClicked (new TabMouseEventArgs (hit, me));
@@ -880,19 +903,20 @@ public class TabView : View {
 			}
 
 			if (!me.Flags.HasFlag (MouseFlags.Button1Clicked) &&
-			!me.Flags.HasFlag (MouseFlags.Button1DoubleClicked) &&
-			!me.Flags.HasFlag (MouseFlags.Button1TripleClicked))
+			    !me.Flags.HasFlag (MouseFlags.Button1DoubleClicked) &&
+			    !me.Flags.HasFlag (MouseFlags.Button1TripleClicked)) {
 				return false;
+			}
 
 			if (!HasFocus && CanFocus) {
 				SetFocus ();
 			}
 
 			if (me.Flags.HasFlag (MouseFlags.Button1Clicked) ||
-			me.Flags.HasFlag (MouseFlags.Button1DoubleClicked) ||
-			me.Flags.HasFlag (MouseFlags.Button1TripleClicked)) {
+			    me.Flags.HasFlag (MouseFlags.Button1DoubleClicked) ||
+			    me.Flags.HasFlag (MouseFlags.Button1TripleClicked)) {
 
-				int scrollIndicatorHit = 0;
+				var scrollIndicatorHit = 0;
 				if (me.View != null && me.View.Id == "rightScrollIndicator") {
 					scrollIndicatorHit = 1;
 				} else if (me.View != null && me.View.Id == "leftScrollIndicator") {
@@ -916,14 +940,5 @@ public class TabView : View {
 
 			return false;
 		}
-	}
-
-	/// <summary>
-	/// Raises the <see cref="TabClicked"/> event.
-	/// </summary>
-	/// <param name="tabMouseEventArgs"></param>
-	protected virtual private void OnTabClicked (TabMouseEventArgs tabMouseEventArgs)
-	{
-		TabClicked?.Invoke (this, tabMouseEventArgs);
 	}
 }

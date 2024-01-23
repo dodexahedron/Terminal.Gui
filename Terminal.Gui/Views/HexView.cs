@@ -16,45 +16,47 @@ namespace Terminal.Gui;
 /// An hex viewer and editor <see cref="View"/> over a <see cref="System.IO.Stream"/>
 /// </summary>
 /// <remarks>
-/// <para>
-/// <see cref="HexView"/> provides a hex editor on top of a seekable <see cref="Stream"/> with the left side showing an hex
-/// dump of the values in the <see cref="Stream"/> and the right side showing the contents (filtered to 
-/// non-control sequence ASCII characters).    
-/// </para>
-/// <para>
-/// Users can switch from one side to the other by using the tab key.  
-/// </para>
-/// <para>
-/// To enable editing, set <see cref="AllowEdits"/> to true. When <see cref="AllowEdits"/> is true 
-/// the user can make changes to the hexadecimal values of the <see cref="Stream"/>. Any changes are tracked
-/// in the <see cref="Edits"/> property (a <see cref="SortedDictionary{TKey, TValue}"/>) indicating 
-/// the position where the changes were made and the new values. A convenience method, <see cref="ApplyEdits"/>
-/// will apply the edits to the <see cref="Stream"/>.
-/// </para>
-/// <para>
-/// Control the first byte shown by setting the <see cref="DisplayStart"/> property 
-/// to an offset in the stream.
-/// </para>
+///         <para>
+///         <see cref="HexView"/> provides a hex editor on top of a seekable <see cref="Stream"/> with the left side
+///         showing an hex
+///         dump of the values in the <see cref="Stream"/> and the right side showing the contents (filtered to
+///         non-control sequence ASCII characters).
+///         </para>
+///         <para>
+///         Users can switch from one side to the other by using the tab key.
+///         </para>
+///         <para>
+///         To enable editing, set <see cref="AllowEdits"/> to true. When <see cref="AllowEdits"/> is true
+///         the user can make changes to the hexadecimal values of the <see cref="Stream"/>. Any changes are tracked
+///         in the <see cref="Edits"/> property (a <see cref="SortedDictionary{TKey,TValue}"/>) indicating
+///         the position where the changes were made and the new values. A convenience method, <see cref="ApplyEdits"/>
+///         will apply the edits to the <see cref="Stream"/>.
+///         </para>
+///         <para>
+///         Control the first byte shown by setting the <see cref="DisplayStart"/> property
+///         to an offset in the stream.
+///         </para>
 /// </remarks>
-public partial class HexView : View {
-	SortedDictionary<long, byte> edits = new SortedDictionary<long, byte> ();
-	Stream source;
-	long displayStart, pos;
-	bool firstNibble, leftSide;
+public class HexView : View {
 
-	long position {
-		get => pos;
-		set {
-			pos = value;
-			OnPositionChanged ();
-		}
-	}
+	const int displayWidth = 9;
+	const int bsize = 4;
+	int bpl;
+
+	CursorVisibility desiredCursorVisibility = CursorVisibility.Default;
+	long displayStart, pos;
+	SortedDictionary<long, byte> edits = new ();
+	bool firstNibble, leftSide;
+	Stream source;
 
 	/// <summary>
 	/// Initializes a <see cref="HexView"/> class using <see cref="LayoutStyle.Computed"/> layout.
 	/// </summary>
-	/// <param name="source">The <see cref="Stream"/> to view and edit as hex, this <see cref="Stream"/> must support seeking, or an exception will be thrown.</param>
-	public HexView (Stream source) : base ()
+	/// <param name="source">
+	/// The <see cref="Stream"/> to view and edit as hex, this <see cref="Stream"/> must support seeking, or an exception will
+	/// be thrown.
+	/// </param>
+	public HexView (Stream source)
 	{
 		Source = source;
 		CanFocus = true;
@@ -99,32 +101,22 @@ public partial class HexView : View {
 		LayoutComplete += HexView_LayoutComplete;
 	}
 
-	private void HexView_LayoutComplete (object sender, LayoutEventArgs e)
-	{
-		// Small buffers will just show the position, with the bsize field value (4 bytes)
-		bytesPerLine = bsize;
-		if (Bounds.Width - displayWidth > 17) {
-			bytesPerLine = bsize * ((Bounds.Width - displayWidth) / 18);
-		}
-	}
-
 	/// <summary>
 	/// Initializes a <see cref="HexView"/> class using <see cref="LayoutStyle.Computed"/> layout.
 	/// </summary>
 	public HexView () : this (source: new MemoryStream ()) { }
 
-	/// <summary>
-	/// Event to be invoked when an edit is made on the <see cref="Stream"/>.
-	/// </summary>
-	public event EventHandler<HexViewEditEventArgs> Edited;
+	long position {
+		get => pos;
+		set {
+			pos = value;
+			OnPositionChanged ();
+		}
+	}
 
 	/// <summary>
-	/// Event to be invoked when the position and cursor position changes.
-	/// </summary>
-	public event EventHandler<HexViewEventArgs> PositionChanged;
-
-	/// <summary>
-	/// Sets or gets the <see cref="Stream"/> the <see cref="HexView"/> is operating on; the stream must support seeking (<see cref="Stream.CanSeek"/> == true).
+	/// Sets or gets the <see cref="Stream"/> the <see cref="HexView"/> is operating on; the stream must support seeking (
+	/// <see cref="Stream.CanSeek"/> == true).
 	/// </summary>
 	/// <value>The source.</value>
 	public Stream Source {
@@ -148,18 +140,6 @@ public partial class HexView : View {
 		}
 	}
 
-	internal void SetDisplayStart (long value)
-	{
-		if (value > 0 && value >= source.Length) {
-			displayStart = source.Length - 1;
-		} else if (value < 0) {
-			displayStart = 0;
-		} else {
-			displayStart = value;
-		}
-		SetNeedsDisplay ();
-	}
-
 	/// <summary>
 	/// Sets or gets the offset into the <see cref="Stream"/> that will displayed at the top of the <see cref="HexView"/>
 	/// </summary>
@@ -173,16 +153,97 @@ public partial class HexView : View {
 		}
 	}
 
-	const int displayWidth = 9;
-	const int bsize = 4;
-	int bpl;
-
 	int bytesPerLine {
 		get => bpl;
 		set {
 			bpl = value;
 			OnPositionChanged ();
 		}
+	}
+
+	/// <summary>
+	/// Gets or sets whether this <see cref="HexView"/> allow editing of the <see cref="Stream"/>
+	/// of the underlying <see cref="Stream"/>.
+	/// </summary>
+	/// <value><c>true</c> if allow edits; otherwise, <c>false</c>.</value>
+	public bool AllowEdits { get; set; } = true;
+
+	/// <summary>
+	/// Gets a <see cref="SortedDictionary{TKey, TValue}"/> describing the edits done to the <see cref="HexView"/>.
+	/// Each Key indicates an offset where an edit was made and the Value is the changed byte.
+	/// </summary>
+	/// <value>The edits.</value>
+	public IReadOnlyDictionary<long, byte> Edits => edits;
+
+	/// <summary>
+	/// Gets the current character position starting at one, related to the <see cref="Stream"/>.
+	/// </summary>
+	public long Position => position + 1;
+
+	/// <summary>
+	/// Gets the current cursor position starting at one for both, line and column.
+	/// </summary>
+	public Point CursorPosition {
+		get {
+			if (!IsInitialized) {
+				return new Point (0, 0);
+			}
+			var delta = (int)position;
+			var line = delta / bytesPerLine + 1;
+			var item = delta % bytesPerLine + 1;
+
+			return new Point (item, line);
+		}
+	}
+
+	/// <summary>
+	/// The bytes length per line.
+	/// </summary>
+	public int BytesPerLine => bytesPerLine;
+
+	/// <summary>
+	/// Get / Set the wished cursor when the field is focused
+	/// </summary>
+	public CursorVisibility DesiredCursorVisibility {
+		get => desiredCursorVisibility;
+		set {
+			if (desiredCursorVisibility != value && HasFocus) {
+				Application.Driver.SetCursorVisibility (value);
+			}
+
+			desiredCursorVisibility = value;
+		}
+	}
+
+	void HexView_LayoutComplete (object sender, LayoutEventArgs e)
+	{
+		// Small buffers will just show the position, with the bsize field value (4 bytes)
+		bytesPerLine = bsize;
+		if (Bounds.Width - displayWidth > 17) {
+			bytesPerLine = bsize * ((Bounds.Width - displayWidth) / 18);
+		}
+	}
+
+	/// <summary>
+	/// Event to be invoked when an edit is made on the <see cref="Stream"/>.
+	/// </summary>
+	public event EventHandler<HexViewEditEventArgs> Edited;
+
+	/// <summary>
+	/// Event to be invoked when the position and cursor position changes.
+	/// </summary>
+	public event EventHandler<HexViewEventArgs> PositionChanged;
+
+	internal void SetDisplayStart (long value)
+	{
+		if (value > 0 && value >= source.Length) {
+			displayStart = source.Length - 1;
+		} else if (value < 0) {
+			displayStart = 0;
+		} else {
+			displayStart = value;
+		}
+		SetNeedsDisplay ();
 	}
 
 	//
@@ -194,8 +255,8 @@ public partial class HexView : View {
 	// 
 	byte GetData (byte [] buffer, int offset, out bool edited)
 	{
-		long pos = DisplayStart + offset;
-		if (edits.TryGetValue (pos, out byte v)) {
+		var pos = DisplayStart + offset;
+		if (edits.TryGetValue (pos, out var v)) {
 			edited = true;
 			return v;
 		}
@@ -214,15 +275,15 @@ public partial class HexView : View {
 		// BUGBUG: Bounds!!!!
 		var frame = Frame;
 
-		int nblocks = bytesPerLine / bsize;
-		byte [] data = new byte [nblocks * bsize * frame.Height];
+		var nblocks = bytesPerLine / bsize;
+		var data = new byte [nblocks * bsize * frame.Height];
 		Source.Position = displayStart;
-		int n = source.Read (data, 0, data.Length);
+		var n = source.Read (data, 0, data.Length);
 
 		var activeColor = ColorScheme.HotNormal;
 		var trackingColor = ColorScheme.HotFocus;
 
-		for (int line = 0; line < frame.Height; line++) {
+		for (var line = 0; line < frame.Height; line++) {
 			var lineRect = new Rect (0, line, frame.Width, 1);
 			if (!Bounds.Contains (lineRect)) {
 				continue;
@@ -235,10 +296,10 @@ public partial class HexView : View {
 			currentAttribute = ColorScheme.HotNormal;
 			SetAttribute (GetNormalColor ());
 
-			for (int block = 0; block < nblocks; block++) {
-				for (int b = 0; b < bsize; b++) {
-					int offset = line * nblocks * bsize + block * bsize + b;
-					byte value = GetData (data, offset, out bool edited);
+			for (var block = 0; block < nblocks; block++) {
+				for (var b = 0; b < bsize; b++) {
+					var offset = line * nblocks * bsize + block * bsize + b;
+					var value = GetData (data, offset, out var edited);
 					if (offset + displayStart == position || edited) {
 						SetAttribute (leftSide ? activeColor : trackingColor);
 					} else {
@@ -252,9 +313,9 @@ public partial class HexView : View {
 				Driver.AddStr (block + 1 == nblocks ? " " : "| ");
 			}
 
-			for (int bitem = 0; bitem < nblocks * bsize; bitem++) {
-				int offset = line * nblocks * bsize + bitem;
-				byte b = GetData (data, offset, out bool edited);
+			for (var bitem = 0; bitem < nblocks * bsize; bitem++) {
+				var offset = line * nblocks * bsize + bitem;
+				var b = GetData (data, offset, out var edited);
 				Rune c;
 				if (offset >= n && !edited) {
 					c = (Rune)' ';
@@ -289,11 +350,11 @@ public partial class HexView : View {
 	///<inheritdoc/>
 	public override void PositionCursor ()
 	{
-		int delta = (int)(position - displayStart);
-		int line = delta / bytesPerLine;
-		int item = delta % bytesPerLine;
-		int block = item / bsize;
-		int column = item % bsize * 3;
+		var delta = (int)(position - displayStart);
+		var line = delta / bytesPerLine;
+		var item = delta % bytesPerLine;
+		var block = item / bsize;
+		var column = item % bsize * 3;
 
 		if (leftSide) {
 			Move (displayWidth + block * 14 + column + (firstNibble ? 0 : 1), line);
@@ -304,8 +365,8 @@ public partial class HexView : View {
 
 	void RedisplayLine (long pos)
 	{
-		int delta = (int)(pos - DisplayStart);
-		int line = delta / bytesPerLine;
+		var delta = (int)(pos - DisplayStart);
+		var line = delta / bytesPerLine;
 
 		// BUGBUG: Bounds!
 		SetNeedsDisplay (new Rect (0, line, Frame.Width, 1));
@@ -389,9 +450,8 @@ public partial class HexView : View {
 			if (firstNibble) {
 				firstNibble = false;
 				return true;
-			} else {
-				firstNibble = true;
 			}
+			firstNibble = true;
 		}
 		if (position < source.Length) {
 			position++;
@@ -430,8 +490,8 @@ public partial class HexView : View {
 		if (position + bytes < source.Length) {
 			position += bytes;
 		} else if (bytes == bytesPerLine * Frame.Height && source.Length >= DisplayStart + bytesPerLine * Frame.Height
-			|| bytes <= bytesPerLine * Frame.Height - bytesPerLine && source.Length <= DisplayStart + bytesPerLine * Frame.Height) {
-			long p = position;
+		           || bytes <= bytesPerLine * Frame.Height - bytesPerLine && source.Length <= DisplayStart + bytesPerLine * Frame.Height) {
+			var p = position;
 			while (p + bytesPerLine < source.Length) {
 				p += bytesPerLine;
 			}
@@ -461,7 +521,7 @@ public partial class HexView : View {
 
 		if (leftSide) {
 			int value;
-			char k = (char)keyEvent.KeyCode;
+			var k = (char)keyEvent.KeyCode;
 			if (k >= 'A' && k <= 'F') {
 				value = k - 'A' + 10;
 			} else if (k >= 'a' && k <= 'f') {
@@ -490,27 +550,20 @@ public partial class HexView : View {
 				MoveRight ();
 			}
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	/// <summary>
 	/// Method used to invoke the <see cref="Edited"/> event passing the <see cref="KeyValuePair{TKey, TValue}"/>.
 	/// </summary>
 	/// <param name="e">The key value pair.</param>
-	public virtual void OnEdited (HexViewEditEventArgs e)
-	{
-		Edited?.Invoke (this, e);
-	}
+	public virtual void OnEdited (HexViewEditEventArgs e) => Edited?.Invoke (this, e);
 
 	/// <summary>
 	/// Method used to invoke the <see cref="PositionChanged"/> event passing the <see cref="HexViewEventArgs"/> arguments.
 	/// </summary>
-	public virtual void OnPositionChanged ()
-	{
-		PositionChanged?.Invoke (this, new HexViewEventArgs (Position, CursorPosition, BytesPerLine));
-	}
+	public virtual void OnPositionChanged () => PositionChanged?.Invoke (this, new HexViewEventArgs (Position, CursorPosition, BytesPerLine));
 
 	/// <inheritdoc/>
 	public override bool MouseEvent (MouseEvent me)
@@ -518,7 +571,7 @@ public partial class HexView : View {
 		// BUGBUG: Test this with a border! Assumes Frame == Bounds!
 
 		if (!me.Flags.HasFlag (MouseFlags.Button1Clicked) && !me.Flags.HasFlag (MouseFlags.Button1DoubleClicked)
-								&& !me.Flags.HasFlag (MouseFlags.WheeledDown) && !me.Flags.HasFlag (MouseFlags.WheeledUp)) {
+		                                                  && !me.Flags.HasFlag (MouseFlags.WheeledDown) && !me.Flags.HasFlag (MouseFlags.WheeledUp)) {
 			return false;
 		}
 
@@ -539,19 +592,19 @@ public partial class HexView : View {
 		if (me.X < displayWidth) {
 			return true;
 		}
-		int nblocks = bytesPerLine / bsize;
-		int blocksSize = nblocks * 14;
-		int blocksRightOffset = displayWidth + blocksSize - 1;
+		var nblocks = bytesPerLine / bsize;
+		var blocksSize = nblocks * 14;
+		var blocksRightOffset = displayWidth + blocksSize - 1;
 		if (me.X > blocksRightOffset + bytesPerLine - 1) {
 			return true;
 		}
 		leftSide = me.X >= blocksRightOffset;
-		long lineStart = me.Y * bytesPerLine + displayStart;
-		int x = me.X - displayWidth + 1;
-		int block = x / 14;
+		var lineStart = me.Y * bytesPerLine + displayStart;
+		var x = me.X - displayWidth + 1;
+		var block = x / 14;
 		x -= block * 2;
-		int empty = x % 3;
-		int item = x / 3;
+		var empty = x % 3;
+		var item = x / 3;
 		if (!leftSide && item > 0 && (empty == 0 || x == block * 14 + 14 - 1 - block * 2)) {
 			return true;
 		}
@@ -576,50 +629,11 @@ public partial class HexView : View {
 	}
 
 	/// <summary>
-	/// Gets or sets whether this <see cref="HexView"/> allow editing of the <see cref="Stream"/> 
-	/// of the underlying <see cref="Stream"/>.
-	/// </summary>
-	/// <value><c>true</c> if allow edits; otherwise, <c>false</c>.</value>
-	public bool AllowEdits { get; set; } = true;
-
-	/// <summary>
-	/// Gets a <see cref="SortedDictionary{TKey, TValue}"/> describing the edits done to the <see cref="HexView"/>. 
-	/// Each Key indicates an offset where an edit was made and the Value is the changed byte.
-	/// </summary>
-	/// <value>The edits.</value>
-	public IReadOnlyDictionary<long, byte> Edits => edits;
-
-	/// <summary>
-	/// Gets the current character position starting at one, related to the <see cref="Stream"/>.
-	/// </summary>
-	public long Position => position + 1;
-
-	/// <summary>
-	/// Gets the current cursor position starting at one for both, line and column.
-	/// </summary>
-	public Point CursorPosition {
-		get {
-			if (!IsInitialized) {
-				return new Point (0, 0);
-			}
-			int delta = (int)position;
-			int line = delta / bytesPerLine + 1;
-			int item = delta % bytesPerLine + 1;
-
-			return new Point (item, line);
-		}
-	}
-
-	/// <summary>
-	/// The bytes length per line.
-	/// </summary>
-	public int BytesPerLine => bytesPerLine;
-
-	/// <summary>
-	/// This method applies and edits made to the <see cref="Stream"/> and resets the 
+	/// This method applies and edits made to the <see cref="Stream"/> and resets the
 	/// contents of the <see cref="Edits"/> property.
 	/// </summary>
-	/// <param name="stream">If provided also applies the changes to the passed <see cref="Stream"/></param>.
+	/// <param name="stream">If provided also applies the changes to the passed <see cref="Stream"/></param>
+	/// .
 	public void ApplyEdits (Stream stream = null)
 	{
 		foreach (var kv in edits) {
@@ -637,29 +651,10 @@ public partial class HexView : View {
 	}
 
 	/// <summary>
-	/// This method discards the edits made to the <see cref="Stream"/> by resetting the 
+	/// This method discards the edits made to the <see cref="Stream"/> by resetting the
 	/// contents of the <see cref="Edits"/> property.
 	/// </summary>
-	public void DiscardEdits ()
-	{
-		edits = new SortedDictionary<long, byte> ();
-	}
-
-	CursorVisibility desiredCursorVisibility = CursorVisibility.Default;
-
-	/// <summary>
-	/// Get / Set the wished cursor when the field is focused
-	/// </summary>
-	public CursorVisibility DesiredCursorVisibility {
-		get => desiredCursorVisibility;
-		set {
-			if (desiredCursorVisibility != value && HasFocus) {
-				Application.Driver.SetCursorVisibility (value);
-			}
-
-			desiredCursorVisibility = value;
-		}
-	}
+	public void DiscardEdits () => edits = new SortedDictionary<long, byte> ();
 
 	///<inheritdoc/>
 	public override bool OnEnter (View view)

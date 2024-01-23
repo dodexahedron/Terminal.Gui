@@ -1,10 +1,9 @@
 ﻿using System;
 using Xunit;
-
 // Alias Console to MockConsole so we don't accidentally use Console
 using Console = Terminal.Gui.FakeConsole;
 
-namespace Terminal.Gui.DriverTests; 
+namespace Terminal.Gui.DriverTests;
 
 public class DriverColorTests {
 	public DriverColorTests () => ConsoleDriver.RunningUnitTests = true;

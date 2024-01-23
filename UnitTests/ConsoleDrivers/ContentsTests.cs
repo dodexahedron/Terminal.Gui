@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Xunit;
 using Xunit.Abstractions;
-
 // Alias Console to MockConsole so we don't accidentally use Console
 using Console = Terminal.Gui.FakeConsole;
 
@@ -31,7 +27,7 @@ public class ContentsTests {
 	{
 		var driver = (ConsoleDriver)Activator.CreateInstance (driverType);
 		driver.Init ();
-		string expected = "\u0301!";
+		var expected = "\u0301!";
 		driver.AddStr ("\u0301!"); // acute accent + exclamation mark
 		TestHelpers.AssertDriverContentsAre (expected, output, driver);
 
@@ -50,8 +46,8 @@ public class ContentsTests {
 		driver.Init ();
 
 		var acuteaccent = new Rune (0x0301); // Combining acute accent (é)
-		string combined = "e" + acuteaccent;
-		string expected = "é";
+		var combined = "e" + acuteaccent;
+		var expected = "é";
 
 		driver.AddStr (combined);
 		TestHelpers.AssertDriverContentsAre (expected, output, driver);

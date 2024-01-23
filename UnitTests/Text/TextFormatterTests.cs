@@ -299,7 +299,7 @@ public class TextFormatterTests {
 	[InlineData ("Last _K", true, 5, (KeyCode)'K')]
 	[InlineData ("After K_", false, -1, KeyCode.Null)]
 	[InlineData ("Multiple _K and _R", true, 9, (KeyCode)'K')]
-	[InlineData ("Non-english: _Кдать", true, 13, (KeyCode)'К')]       // Cryllic K (К)
+	[InlineData ("Non-english: _Кдать", true, 13, (KeyCode)'К')] // Cryllic K (К)
 	[InlineData ("_K Before", true, 0, (KeyCode)'K', true)] // Turn on FirstUpperCase and verify same results
 	[InlineData ("a_K Second", true, 1, (KeyCode)'K', true)]
 	[InlineData ("Last _K", true, 5, (KeyCode)'K', true)]
@@ -327,7 +327,7 @@ public class TextFormatterTests {
 	[InlineData ("Last _k", true, 5, (KeyCode)'K')]
 	[InlineData ("After k_", false, -1, KeyCode.Null)]
 	[InlineData ("Multiple _k and _R", true, 9, (KeyCode)'K')]
-	[InlineData ("Non-english: _кдать", true, 13, (KeyCode)'к')]       // Lower case Cryllic K (к)
+	[InlineData ("Non-english: _кдать", true, 13, (KeyCode)'к')] // Lower case Cryllic K (к)
 	[InlineData ("_k Before", true, 0, (KeyCode)'K', true)] // Turn on FirstUpperCase and verify same results
 	[InlineData ("a_k Second", true, 1, (KeyCode)'K', true)]
 	[InlineData ("Last _k", true, 5, (KeyCode)'K', true)]
@@ -411,7 +411,7 @@ public class TextFormatterTests {
 	{
 		var hotKeySpecifier = (Rune)'_';
 
-		var result = TextFormatter.FindHotKey (text, hotKeySpecifier, out var _, out var hotKey, false);
+		var result = TextFormatter.FindHotKey (text, hotKeySpecifier, out var _, out var hotKey);
 		Assert.Equal (found, result);
 		Assert.Equal (expected, hotKey);
 	}
@@ -423,8 +423,8 @@ public class TextFormatterTests {
 	[InlineData ("multiple k and r")]
 	[InlineData ("12345")]
 	[InlineData ("`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?")] // punctuation
-	[InlineData (" ~  s  gui.cs   master ↑10")]    // ~IsLetterOrDigit + Unicode
-	[InlineData ("non-english: кдать")]                 // Lower case Cryllic K (к)
+	[InlineData (" ~  s  gui.cs   master ↑10")] // ~IsLetterOrDigit + Unicode
+	[InlineData ("non-english: кдать")] // Lower case Cryllic K (к)
 	public void FindHotKey_Legacy_FirstUpperCase_NotFound_Returns_False (string text)
 	{
 		var supportFirstUpperCase = true;
@@ -547,19 +547,19 @@ public class TextFormatterTests {
 	[InlineData ("test", "", 0)]
 	[InlineData ("test", "te", 2)]
 	[InlineData ("test", "test", int.MaxValue)]
-	[InlineData ("A sentence has words.", "A sentence has words.", 22)]           // should fit
-	[InlineData ("A sentence has words.", "A sentence has words.", 21)]           // should fit
+	[InlineData ("A sentence has words.", "A sentence has words.", 22)] // should fit
+	[InlineData ("A sentence has words.", "A sentence has words.", 21)] // should fit
 	[InlineData ("A sentence has words.", "A sentence has words.", int.MaxValue)] // should fit
-	[InlineData ("A sentence has words.", "A sentence has words", 20)]           // Should not fit
-	[InlineData ("A sentence has words.", "A sentence", 10)]           // Should not fit
+	[InlineData ("A sentence has words.", "A sentence has words", 20)] // Should not fit
+	[InlineData ("A sentence has words.", "A sentence", 10)] // Should not fit
 	[InlineData ("A\tsentence\thas\twords.", "A sentence has words.", int.MaxValue)]
 	[InlineData ("A\tsentence\thas\twords.", "A sentence", 10)]
 	[InlineData ("line1\nline2\nline3long!", "line1\nline2\nline3long!", int.MaxValue)]
 	[InlineData ("line1\nline2\nline3long!", "line1\nline", 10)]
 	[InlineData (" ~  s  gui.cs   master ↑10", " ~  s  ", 10)] // Unicode
-	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 5)]  // should fit
-	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 4)]  // should fit
-	[InlineData ("Ð ÑÐ", "Ð Ñ", 3)]  // Should not fit
+	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 5)] // should fit
+	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 4)] // should fit
+	[InlineData ("Ð ÑÐ", "Ð Ñ", 3)] // Should not fit
 	public void ClipAndJustify_Valid_Left (string text, string justifiedText, int maxWidth)
 	{
 		var align = TextAlignment.Left;
@@ -581,19 +581,19 @@ public class TextFormatterTests {
 	[InlineData ("test", "", 0)]
 	[InlineData ("test", "te", 2)]
 	[InlineData ("test", "test", int.MaxValue)]
-	[InlineData ("A sentence has words.", "A sentence has words.", 22)]           // should fit
-	[InlineData ("A sentence has words.", "A sentence has words.", 21)]           // should fit
+	[InlineData ("A sentence has words.", "A sentence has words.", 22)] // should fit
+	[InlineData ("A sentence has words.", "A sentence has words.", 21)] // should fit
 	[InlineData ("A sentence has words.", "A sentence has words.", int.MaxValue)] // should fit
-	[InlineData ("A sentence has words.", "A sentence has words", 20)]           // Should not fit
-	[InlineData ("A sentence has words.", "A sentence", 10)]           // Should not fit
+	[InlineData ("A sentence has words.", "A sentence has words", 20)] // Should not fit
+	[InlineData ("A sentence has words.", "A sentence", 10)] // Should not fit
 	[InlineData ("A\tsentence\thas\twords.", "A sentence has words.", int.MaxValue)]
 	[InlineData ("A\tsentence\thas\twords.", "A sentence", 10)]
 	[InlineData ("line1\nline2\nline3long!", "line1\nline2\nline3long!", int.MaxValue)]
 	[InlineData ("line1\nline2\nline3long!", "line1\nline", 10)]
 	[InlineData (" ~  s  gui.cs   master ↑10", " ~  s  ", 10)] // Unicode
-	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 5)]  // should fit
-	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 4)]  // should fit
-	[InlineData ("Ð ÑÐ", "Ð Ñ", 3)]  // Should not fit
+	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 5)] // should fit
+	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 4)] // should fit
+	[InlineData ("Ð ÑÐ", "Ð Ñ", 3)] // Should not fit
 	public void ClipAndJustify_Valid_Right (string text, string justifiedText, int maxWidth)
 	{
 		var align = TextAlignment.Right;
@@ -615,19 +615,19 @@ public class TextFormatterTests {
 	[InlineData ("test", "", 0)]
 	[InlineData ("test", "te", 2)]
 	[InlineData ("test", "test", int.MaxValue)]
-	[InlineData ("A sentence has words.", "A sentence has words.", 22)]           // should fit
-	[InlineData ("A sentence has words.", "A sentence has words.", 21)]           // should fit
+	[InlineData ("A sentence has words.", "A sentence has words.", 22)] // should fit
+	[InlineData ("A sentence has words.", "A sentence has words.", 21)] // should fit
 	[InlineData ("A sentence has words.", "A sentence has words.", int.MaxValue)] // should fit
-	[InlineData ("A sentence has words.", "A sentence has words", 20)]           // Should not fit
-	[InlineData ("A sentence has words.", "A sentence", 10)]           // Should not fit
+	[InlineData ("A sentence has words.", "A sentence has words", 20)] // Should not fit
+	[InlineData ("A sentence has words.", "A sentence", 10)] // Should not fit
 	[InlineData ("A\tsentence\thas\twords.", "A sentence has words.", int.MaxValue)]
 	[InlineData ("A\tsentence\thas\twords.", "A sentence", 10)]
 	[InlineData ("line1\nline2\nline3long!", "line1\nline2\nline3long!", int.MaxValue)]
 	[InlineData ("line1\nline2\nline3long!", "line1\nline", 10)]
 	[InlineData (" ~  s  gui.cs   master ↑10", " ~  s  ", 10)] // Unicode
-	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 5)]  // should fit
-	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 4)]  // should fit
-	[InlineData ("Ð ÑÐ", "Ð Ñ", 3)]  // Should not fit
+	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 5)] // should fit
+	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 4)] // should fit
+	[InlineData ("Ð ÑÐ", "Ð Ñ", 3)] // Should not fit
 	public void ClipAndJustify_Valid_Centered (string text, string justifiedText, int maxWidth)
 	{
 		var align = TextAlignment.Centered;
@@ -649,22 +649,22 @@ public class TextFormatterTests {
 	[InlineData ("test", "", 0)]
 	[InlineData ("test", "te", 2)]
 	[InlineData ("test", "test", int.MaxValue)] // This doesn't throw because it only create a word with length 1
-	[InlineData ("A sentence has words.", "A  sentence has words.", 22)]           // should fit
-	[InlineData ("A sentence has words.", "A sentence has words.", 21)]           // should fit
+	[InlineData ("A sentence has words.", "A  sentence has words.", 22)] // should fit
+	[InlineData ("A sentence has words.", "A sentence has words.", 21)] // should fit
 	[InlineData ("A sentence has words.",
 		"A                                                                                                                                                                 sentence                                                                                                                                                                 has                                                                                                                                                                words.",
-		500)]                                                      // should fit
+		500)] // should fit
 	[InlineData ("A sentence has words.", "A sentence has words", 20)] // Should not fit
 	[InlineData ("A sentence has words.", "A sentence", 10)] // Should not fit
-								 // Now throw System.OutOfMemoryException. See https://stackoverflow.com/questions/20672920/maxcapacity-of-stringbuilder
-								 //[InlineData ("A\tsentence\thas\twords.", "A sentence has words.", int.MaxValue)]
+	// Now throw System.OutOfMemoryException. See https://stackoverflow.com/questions/20672920/maxcapacity-of-stringbuilder
+	//[InlineData ("A\tsentence\thas\twords.", "A sentence has words.", int.MaxValue)]
 	[InlineData ("A\tsentence\thas\twords.", "A sentence", 10)]
 	[InlineData ("line1\nline2\nline3long!", "line1\nline2\nline3long!", int.MaxValue)] // This doesn't throw because it only create a line with length 1
 	[InlineData ("line1\nline2\nline3long!", "line1\nline", 10)]
 	[InlineData (" ~  s  gui.cs   master ↑10", " ~  s  ", 10)] // Unicode
-	[InlineData ("Ð ÑÐ", "Ð  ÑÐ", 5)]  // should fit
-	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 4)]  // should fit
-	[InlineData ("Ð ÑÐ", "Ð Ñ", 3)]  // Should not fit
+	[InlineData ("Ð ÑÐ", "Ð  ÑÐ", 5)] // should fit
+	[InlineData ("Ð ÑÐ", "Ð ÑÐ", 4)] // should fit
+	[InlineData ("Ð ÑÐ", "Ð Ñ", 3)] // Should not fit
 	public void ClipAndJustify_Valid_Justified (string text, string justifiedText, int maxWidth)
 	{
 		var align = TextAlignment.Justified;
@@ -696,9 +696,9 @@ public class TextFormatterTests {
 	}
 
 	[Theory]
-	[InlineData ("word")]        // Even # of chars
-	[InlineData ("word.")]       // Odd # of chars
-	[InlineData ("Ð¿ÑÐ¸Ð²ÐµÑ")]  // Unicode (even #)
+	[InlineData ("word")] // Even # of chars
+	[InlineData ("word.")] // Odd # of chars
+	[InlineData ("Ð¿ÑÐ¸Ð²ÐµÑ")] // Unicode (even #)
 	[InlineData ("Ð¿ÑÐ¸Ð²ÐµÑ.")] // Unicode (odd # of chars)
 	public void Justify_SingleWord (string text)
 	{
@@ -1098,12 +1098,12 @@ public class TextFormatterTests {
 	[Theory]
 	[InlineData (null, 3, new string [] { })] // null input
 	[InlineData ("", 3, new string [] { })] // Empty input
-	[InlineData ("1", 3, new [] { "1" })]    // Short input
+	[InlineData ("1", 3, new [] { "1" })] // Short input
 	[InlineData ("12", 3, new [] { "12" })]
 	[InlineData ("123", 3, new [] { "123" })]
-	[InlineData ("123456", 3, new [] { "123", "456" })]      // No spaces
+	[InlineData ("123456", 3, new [] { "123", "456" })] // No spaces
 	[InlineData ("1234567", 3, new [] { "123", "456", "7" })] // No spaces
-	[InlineData (" ", 3, new [] { " " })]               // Just Spaces; should result in a single space
+	[InlineData (" ", 3, new [] { " " })] // Just Spaces; should result in a single space
 	[InlineData ("  ", 3, new [] { "  " })]
 	[InlineData ("   ", 3, new [] { "   " })]
 	[InlineData ("    ", 3, new [] { "   " })]
@@ -1111,8 +1111,8 @@ public class TextFormatterTests {
 	[InlineData (" 2 456", 3, new [] { " 2", "456" })] // Leading spaces should be preserved.
 	[InlineData (" 2 456 8", 3, new [] { " 2", "456", "8" })]
 	[InlineData ("A sentence has words. ", 3, new [] { "A", "sen", "ten", "ce", "has", "wor", "ds." })] // Complex example
-	[InlineData ("12  567", 3, new [] { "12 ", "567" })]                                 // Double Spaces
-	[InlineData ("  3 567", 3, new [] { "  3", "567" })]                                 // Double Leading spaces should be preserved.
+	[InlineData ("12  567", 3, new [] { "12 ", "567" })] // Double Spaces
+	[InlineData ("  3 567", 3, new [] { "  3", "567" })] // Double Leading spaces should be preserved.
 	[InlineData ("  3  678  1", 3, new [] { "  3", " 67", "8 ", "1" })]
 	[InlineData ("1  456", 3, new [] { "1 ", "456" })]
 	[InlineData ("A  sentence      has words.  ", 3, new [] { "A ", "sen", "ten", "ce ", "   ", "has", "wor", "ds.", " " })] // Double space Complex example
@@ -1135,20 +1135,20 @@ public class TextFormatterTests {
 	[Theory]
 	[InlineData (null, 50, new string [] { })] // null input
 	[InlineData ("", 50, new string [] { })] // Empty input
-	[InlineData ("1", 50, new [] { "1" })]    // Short input
+	[InlineData ("1", 50, new [] { "1" })] // Short input
 	[InlineData ("12", 50, new [] { "12" })]
 	[InlineData ("123", 50, new [] { "123" })]
-	[InlineData ("123456", 50, new [] { "123456" })]  // No spaces
+	[InlineData ("123456", 50, new [] { "123456" })] // No spaces
 	[InlineData ("1234567", 50, new [] { "1234567" })] // No spaces
-	[InlineData (" ", 50, new [] { " " })]       // Just Spaces; should result in a single space
+	[InlineData (" ", 50, new [] { " " })] // Just Spaces; should result in a single space
 	[InlineData ("  ", 50, new [] { "  " })]
 	[InlineData ("   ", 50, new [] { "   " })]
 	[InlineData ("12 456", 50, new [] { "12 456" })] // Single Spaces
 	[InlineData (" 2 456", 50, new [] { " 2 456" })] // Leading spaces should be preserved.
 	[InlineData (" 2 456 8", 50, new [] { " 2 456 8" })]
 	[InlineData ("A sentence has words. ", 50, new [] { "A sentence has words. " })] // Complex example
-	[InlineData ("12  567", 50, new [] { "12  567" })]                // Double Spaces
-	[InlineData ("  3 567", 50, new [] { "  3 567" })]                // Double Leading spaces should be preserved.
+	[InlineData ("12  567", 50, new [] { "12  567" })] // Double Spaces
+	[InlineData ("  3 567", 50, new [] { "  3 567" })] // Double Leading spaces should be preserved.
 	[InlineData ("  3  678  1", 50, new [] { "  3  678  1" })]
 	[InlineData ("1  456", 50, new [] { "1  456" })]
 	[InlineData ("A  sentence      has words.  ", 50, new [] { "A  sentence      has words.  " })] // Double space Complex example
@@ -1282,13 +1282,13 @@ public class TextFormatterTests {
 	[InlineData ("A sentence has words.\r\nLine 2.", 30, 0, TextAlignment.Left, false, 1, false)]
 	[InlineData ("A sentence has words.\r\nLine 2.", 31, 1, TextAlignment.Left, false, 1, false)]
 	public void Reformat_NoWordrap_NewLines_MultiLine_False (string text,
-								 int maxWidth,
-								 int widthOffset,
-								 TextAlignment textAlignment,
-								 bool wrap,
-								 int linesCount,
-								 bool stringEmpty,
-								 int clipWidthOffset = 0)
+		int maxWidth,
+		int widthOffset,
+		TextAlignment textAlignment,
+		bool wrap,
+		int linesCount,
+		bool stringEmpty,
+		int clipWidthOffset = 0)
 	{
 		Assert.Equal (maxWidth, text.GetRuneCount () + widthOffset);
 		var expectedClippedWidth = Math.Min (text.GetRuneCount (), maxWidth) + clipWidthOffset;
@@ -1324,13 +1324,13 @@ public class TextFormatterTests {
 	[InlineData ("A sentence has words.\r\nLine 2.", 30, 0, TextAlignment.Left, false, 2, false, new [] { "A sentence has words.", "Line 2." })]
 	[InlineData ("A sentence has words.\r\nLine 2.", 31, 1, TextAlignment.Left, false, 2, false, new [] { "A sentence has words.", "Line 2." })]
 	public void Reformat_NoWordrap_NewLines_MultiLine_True (string text,
-								int maxWidth,
-								int widthOffset,
-								TextAlignment textAlignment,
-								bool wrap,
-								int linesCount,
-								bool stringEmpty,
-								IEnumerable<string> resultLines)
+		int maxWidth,
+		int widthOffset,
+		TextAlignment textAlignment,
+		bool wrap,
+		int linesCount,
+		bool stringEmpty,
+		IEnumerable<string> resultLines)
 	{
 		Assert.Equal (maxWidth, text.GetRuneCount () + widthOffset);
 		var list = TextFormatter.Format (text, maxWidth, textAlignment, wrap, false, 0, TextDirection.LeftRight_TopBottom, true);
@@ -1360,13 +1360,13 @@ public class TextFormatterTests {
 	[InlineData ("A sentence has words.\r\nLine 2.", 30, 0, TextAlignment.Left, false, 2, false, new [] { "A sentence has words.", "Line 2." })]
 	[InlineData ("A sentence has words.\r\nLine 2.", 31, 1, TextAlignment.Left, false, 2, false, new [] { "A sentence has words.", "Line 2." })]
 	public void Reformat_NoWordrap_NewLines_MultiLine_True_Vertical (string text,
-									 int maxWidth,
-									 int widthOffset,
-									 TextAlignment textAlignment,
-									 bool wrap,
-									 int linesCount,
-									 bool stringEmpty,
-									 IEnumerable<string> resultLines)
+		int maxWidth,
+		int widthOffset,
+		TextAlignment textAlignment,
+		bool wrap,
+		int linesCount,
+		bool stringEmpty,
+		IEnumerable<string> resultLines)
 	{
 		Assert.Equal (maxWidth, text.GetRuneCount () + widthOffset);
 		var list = TextFormatter.Format (text, maxWidth, textAlignment, wrap, false, 0, TextDirection.TopBottom_LeftRight, true);
@@ -1398,14 +1398,14 @@ public class TextFormatterTests {
 	[InlineData ("012 456 89 end", 14, 0, TextAlignment.Left, true, true, false, new [] { "012 456 89 end" })]
 	[InlineData ("012 456 89 end", 15, 1, TextAlignment.Left, true, true, false, new [] { "012 456 89 end" })]
 	public void Reformat_Wrap_Spaces_No_NewLines (string text,
-						      int maxWidth,
-						      int widthOffset,
-						      TextAlignment textAlignment,
-						      bool wrap,
-						      bool preserveTrailingSpaces,
-						      bool stringEmpty,
-						      IEnumerable<string> resultLines,
-						      string noSpaceText = "")
+		int maxWidth,
+		int widthOffset,
+		TextAlignment textAlignment,
+		bool wrap,
+		bool preserveTrailingSpaces,
+		bool stringEmpty,
+		IEnumerable<string> resultLines,
+		string noSpaceText = "")
 	{
 		Assert.Equal (maxWidth, text.GetRuneCount () + widthOffset);
 		var expectedClippedWidth = Math.Min (text.GetRuneCount (), maxWidth);
@@ -1453,12 +1453,12 @@ public class TextFormatterTests {
 	[InlineData ("\u2660 ÑÐ Ð²Ð Ñ", 10, 0, TextAlignment.Left, true, false, new [] { "\u2660 ÑÐ Ð²Ð Ñ" })]
 	[InlineData ("\u2660 ÑÐ Ð²Ð Ñ", 11, 1, TextAlignment.Left, true, false, new [] { "\u2660 ÑÐ Ð²Ð Ñ" })]
 	public void Reformat_Unicode_Wrap_Spaces_No_NewLines (string text,
-							      int maxWidth,
-							      int widthOffset,
-							      TextAlignment textAlignment,
-							      bool wrap,
-							      bool preserveTrailingSpaces,
-							      IEnumerable<string> resultLines)
+		int maxWidth,
+		int widthOffset,
+		TextAlignment textAlignment,
+		bool wrap,
+		bool preserveTrailingSpaces,
+		IEnumerable<string> resultLines)
 	{
 		Assert.Equal (maxWidth, text.GetRuneCount () + widthOffset);
 		var list = TextFormatter.Format (text, maxWidth, textAlignment, wrap, preserveTrailingSpaces);
@@ -1473,12 +1473,12 @@ public class TextFormatterTests {
 	[InlineData ("\u2460\u2461\u2462\n\u2460\u2461\u2462\u2463\u2464", 9, 0, TextAlignment.Left, true, false, new [] { "\u2460\u2461\u2462", "\u2460\u2461\u2462\u2463\u2464" })]
 	[InlineData ("\u2460\u2461\u2462\n\u2460\u2461\u2462\u2463\u2464", 10, 1, TextAlignment.Left, true, false, new [] { "\u2460\u2461\u2462", "\u2460\u2461\u2462\u2463\u2464" })]
 	public void Reformat_Unicode_Wrap_Spaces_NewLines (string text,
-							   int maxWidth,
-							   int widthOffset,
-							   TextAlignment textAlignment,
-							   bool wrap,
-							   bool preserveTrailingSpaces,
-							   IEnumerable<string> resultLines)
+		int maxWidth,
+		int widthOffset,
+		TextAlignment textAlignment,
+		bool wrap,
+		bool preserveTrailingSpaces,
+		IEnumerable<string> resultLines)
 	{
 		Assert.Equal (maxWidth, text.GetRuneCount () + widthOffset);
 		var list = TextFormatter.Format (text, maxWidth, textAlignment, wrap, preserveTrailingSpaces);
@@ -1493,13 +1493,13 @@ public class TextFormatterTests {
 		new [] { " A ", "sent", "ence", " ", "has ", "word", "s. ", " ", "This", " is ", "the ", "seco", "nd ", "Line", " - ", "2. " },
 		" A sentence has words.  This is the second Line - 2. ")]
 	public void Format_WordWrap_PreserveTrailingSpaces (string text,
-							    int maxWidth,
-							    int widthOffset,
-							    TextAlignment textAlignment,
-							    bool wrap,
-							    bool preserveTrailingSpaces,
-							    IEnumerable<string> resultLines,
-							    string expectedWrappedText)
+		int maxWidth,
+		int widthOffset,
+		TextAlignment textAlignment,
+		bool wrap,
+		bool preserveTrailingSpaces,
+		IEnumerable<string> resultLines,
+		string expectedWrappedText)
 	{
 		Assert.Equal (maxWidth, text.GetRuneCount () + widthOffset);
 		var list = TextFormatter.Format (text, maxWidth, textAlignment, wrap, preserveTrailingSpaces);

@@ -6,29 +6,27 @@
 //
 
 using System;
-using System.Text;
 
-namespace Terminal.Gui {
+namespace Terminal.Gui; 
+
+/// <summary>
+/// An <see cref="EventArgs"/> which allows passing a cancelable new text value event.
+/// </summary>
+public class TextChangingEventArgs : EventArgs {
+
 	/// <summary>
-	/// An <see cref="EventArgs"/> which allows passing a cancelable new text value event.
+	/// Initializes a new instance of <see cref="TextChangingEventArgs"/>
 	/// </summary>
-	public class TextChangingEventArgs : EventArgs {
-		/// <summary>
-		/// The new text to be replaced.
-		/// </summary>
-		public string NewText { get; set; }
-		/// <summary>
-		/// Flag which allows to cancel the new text value.
-		/// </summary>
-		public bool Cancel { get; set; }
+	/// <param name="newText">The new <see cref="TextField.Text"/> to be replaced.</param>
+	public TextChangingEventArgs (string newText) => NewText = newText;
 
-		/// <summary>
-		/// Initializes a new instance of <see cref="TextChangingEventArgs"/>
-		/// </summary>
-		/// <param name="newText">The new <see cref="TextField.Text"/> to be replaced.</param>
-		public TextChangingEventArgs (string newText)
-		{
-			NewText = newText;
-		}
-	}
+	/// <summary>
+	/// The new text to be replaced.
+	/// </summary>
+	public string NewText { get; set; }
+
+	/// <summary>
+	/// Flag which allows to cancel the new text value.
+	/// </summary>
+	public bool Cancel { get; set; }
 }

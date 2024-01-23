@@ -8,12 +8,13 @@ using System.Linq;
 namespace Terminal.Gui;
 
 /// <summary>
-/// Defines the scope of a <see cref="Command"/> that has been bound to a key with <see cref="KeyBindings.Add(Key, Terminal.Gui.Command[])"/>.
+/// Defines the scope of a <see cref="Command"/> that has been bound to a key with
+/// <see cref="KeyBindings.Add(Key, Terminal.Gui.Command[])"/>.
 /// </summary>
 /// <remarks>
-/// <para>
-/// Key bindings are scoped to the most-focused view (<see cref="Focused"/>) by default.
-/// </para>
+///         <para>
+///         Key bindings are scoped to the most-focused view (<see cref="Focused"/>) by default.
+///         </para>
 /// </remarks>
 public enum KeyBindingScope {
 	/// <summary>
@@ -22,15 +23,18 @@ public enum KeyBindingScope {
 	Focused = 0,
 
 	/// <summary>
-	/// The key binding is scoped to the View's SuperView and will be triggered even when the View does not have focus, as long as the
+	/// The key binding is scoped to the View's SuperView and will be triggered even when the View does not have focus, as long
+	/// as the
 	/// SuperView does have focus. This is typically used for <see cref="View.HotKey"/>s.
 	/// <remarks>
-	/// <para>
-	/// Use for Views such as MenuBar and StatusBar which provide commands (shortcuts etc...) that trigger even when not focused.
-	/// </para>
-	/// <para>
-	/// HotKey-scoped key bindings are only invoked if the key down event was not handled by the focused view or any of its subviews.
-	/// </para>
+	///         <para>
+	///         Use for Views such as MenuBar and StatusBar which provide commands (shortcuts etc...) that trigger even when
+	///         not focused.
+	///         </para>
+	///         <para>
+	///         HotKey-scoped key bindings are only invoked if the key down event was not handled by the focused view or any of
+	///         its subviews.
+	///         </para>
 	/// </remarks>
 	/// </summary>
 	HotKey,
@@ -39,7 +43,8 @@ public enum KeyBindingScope {
 	/// The key binding will be triggered regardless of which view has focus. This is typically used for global commands.
 	/// </summary>
 	/// <remarks>
-	/// Application-scoped key bindings are only invoked if the key down event was not handled by the focused view or any of its subviews,
+	/// Application-scoped key bindings are only invoked if the key down event was not handled by the focused view or any of
+	/// its subviews,
 	/// and if the key down event was not bound to a <see cref="View.HotKey"/>.
 	/// </remarks>
 	Application
@@ -99,12 +104,13 @@ public class KeyBindings {
 	public void Clear () => Bindings.Clear ();
 
 	/// <summary>
-	/// <para>
-	/// Adds a new key combination that will trigger the commands in <paramref name="commands"/>.
-	/// </para>
-	/// <para>
-	/// If the key is already bound to a different array of <see cref="Command"/>s it will be
-	/// rebound <paramref name="commands"/>.</para>
+	///         <para>
+	///         Adds a new key combination that will trigger the commands in <paramref name="commands"/>.
+	///         </para>
+	///         <para>
+	///         If the key is already bound to a different array of <see cref="Command"/>s it will be
+	///         rebound <paramref name="commands"/>.
+	///         </para>
 	/// </summary>
 	/// <remarks>
 	/// Commands are only ever applied to the current <see cref="View"/> (i.e. this feature
@@ -114,9 +120,11 @@ public class KeyBindings {
 	/// The key to check.
 	/// </param>
 	/// <param name="scope">The scope for the command.</param>
-	/// <param name="commands">The command to invoked on the <see cref="View"/> when <paramref name="key"/> is pressed.
+	/// <param name="commands">
+	/// The command to invoked on the <see cref="View"/> when <paramref name="key"/> is pressed.
 	/// When multiple commands are provided,they will be applied in sequence. The bound <paramref name="key"/> strike
-	/// will be consumed if any took effect.</param>
+	/// will be consumed if any took effect.
+	/// </param>
 	public void Add (Key key, KeyBindingScope scope, params Command [] commands)
 	{
 		if (commands.Length == 0) {
@@ -136,17 +144,18 @@ public class KeyBindings {
 	}
 
 	/// <summary>
-	/// <para>
-	/// Adds a new key combination that will trigger the commands in <paramref name="commands"/>
-	/// (if supported by the View - see <see cref="View.GetSupportedCommands"/>).
-	/// </para>
-	/// <para>
-	/// This is a helper function for <see cref="Add(Key,KeyBindingScope,Terminal.Gui.Command[])"/>
-	/// for <see cref="KeyBindingScope.Focused"/> scoped commands.
-	/// </para>
-	/// <para>
-	/// If the key is already bound to a different array of <see cref="Command"/>s it will be
-	/// rebound <paramref name="commands"/>.</para>
+	///         <para>
+	///         Adds a new key combination that will trigger the commands in <paramref name="commands"/>
+	///         (if supported by the View - see <see cref="View.GetSupportedCommands"/>).
+	///         </para>
+	///         <para>
+	///         This is a helper function for <see cref="Add(Key,KeyBindingScope,Terminal.Gui.Command[])"/>
+	///         for <see cref="KeyBindingScope.Focused"/> scoped commands.
+	///         </para>
+	///         <para>
+	///         If the key is already bound to a different array of <see cref="Command"/>s it will be
+	///         rebound <paramref name="commands"/>.
+	///         </para>
 	/// </summary>
 	/// <remarks>
 	/// Commands are only ever applied to the current <see cref="View"/> (i.e. this feature
@@ -155,9 +164,11 @@ public class KeyBindings {
 	/// <param name="key">
 	/// The key to check.
 	/// </param>
-	/// <param name="commands">The command to invoked on the <see cref="View"/> when <paramref name="key"/> is pressed.
+	/// <param name="commands">
+	/// The command to invoked on the <see cref="View"/> when <paramref name="key"/> is pressed.
 	/// When multiple commands are provided,they will be applied in sequence. The bound <paramref name="key"/> strike
-	/// will be consumed if any took effect.</param>
+	/// will be consumed if any took effect.
+	/// </param>
 	public void Add (Key key, params Command [] commands) => Add (key, KeyBindingScope.Focused, commands);
 
 	/// <summary>
@@ -249,7 +260,10 @@ public class KeyBindings {
 	/// <param name="key">
 	/// The key to check.
 	/// </param>
-	/// <returns>The array of <see cref="Command"/>s if <paramref name="key"/> is bound. An empty <see cref="Command"/> array if not.</returns>
+	/// <returns>
+	/// The array of <see cref="Command"/>s if <paramref name="key"/> is bound. An empty <see cref="Command"/> array
+	/// if not.
+	/// </returns>
 	public Command [] GetCommands (Key key)
 	{
 		if (TryGet (key, out var bindings)) {
@@ -278,9 +292,5 @@ public class KeyBindings {
 	/// <param name="commands">The set of commands to search.</param>
 	/// <returns>The <see cref="Key"/> used by a <see cref="Command"/></returns>
 	/// <exception cref="InvalidOperationException">If no matching set of commands was found.</exception>
-	public Key GetKeyFromCommands (params Command [] commands)
-	{
-		return Bindings.First (a => a.Value.Commands.SequenceEqual (commands)).Key;
-	}
+	public Key GetKeyFromCommands (params Command [] commands) => Bindings.First (a => a.Value.Commands.SequenceEqual (commands)).Key;
 }
-

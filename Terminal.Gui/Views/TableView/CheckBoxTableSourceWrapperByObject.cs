@@ -2,14 +2,15 @@
 using System.Linq;
 
 namespace Terminal.Gui;
+
 /// <summary>
 /// Implementation of <see cref="CheckBoxTableSourceWrapperBase"/> which records toggled rows
 /// by a property on row objects.
 /// </summary>
 public class CheckBoxTableSourceWrapperByObject<T> : CheckBoxTableSourceWrapperBase {
-	private readonly IEnumerableTableSource<T> _toWrap;
 	readonly Func<T, bool> _getter;
 	readonly Action<T, bool> _setter;
+	readonly IEnumerableTableSource<T> _toWrap;
 
 	/// <summary>
 	/// Creates a new instance of the class wrapping the collection <paramref name="toWrap"/>.
@@ -24,22 +25,16 @@ public class CheckBoxTableSourceWrapperByObject<T> : CheckBoxTableSourceWrapperB
 		Func<T, bool> getter,
 		Action<T, bool> setter) : base (tableView, toWrap)
 	{
-		this._toWrap = toWrap;
-		this._getter = getter;
-		this._setter = setter;
+		_toWrap = toWrap;
+		_getter = getter;
+		_setter = setter;
 	}
 
 	/// <inheritdoc/>
-	protected override bool IsChecked (int row)
-	{
-		return _getter (_toWrap.GetObjectOnRow (row));
-	}
+	protected override bool IsChecked (int row) => _getter (_toWrap.GetObjectOnRow (row));
 
 	/// <inheritdoc/>
-	protected override void ToggleAllRows ()
-	{
-		ToggleRows (Enumerable.Range (0, _toWrap.Rows).ToArray ());
-	}
+	protected override void ToggleAllRows () => ToggleRows (Enumerable.Range (0, _toWrap.Rows).ToArray ());
 
 	/// <inheritdoc/>
 	protected override void ToggleRow (int row)

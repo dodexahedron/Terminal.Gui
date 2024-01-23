@@ -662,7 +662,7 @@ public class Slider<T> : View {
 	{
 		switch (_config._sliderOrientation) {
 		case Orientation.Horizontal:
-			Style.SpaceChar = new Cell { Rune = Glyphs.HLine };        // '─'
+			Style.SpaceChar = new Cell { Rune = Glyphs.HLine }; // '─'
 			Style.OptionChar = new Cell { Rune = Glyphs.BlackCircle }; // '┼●🗹□⏹'
 			break;
 		case Orientation.Vertical:
@@ -693,7 +693,7 @@ public class Slider<T> : View {
 		_config._legendsOrientation = _config._sliderOrientation;
 		Style.EmptyChar = new Cell { Rune = new Rune (' ') };
 		Style.SetChar = new Cell { Rune = Glyphs.ContinuousMeterSegment }; // ■
-		Style.RangeChar = new Cell { Rune = Glyphs.Stipple };              // ░ ▒ ▓   // Medium shade not blinking on curses.
+		Style.RangeChar = new Cell { Rune = Glyphs.Stipple }; // ░ ▒ ▓   // Medium shade not blinking on curses.
 		Style.StartRangeChar = new Cell { Rune = Glyphs.ContinuousMeterSegment };
 		Style.EndRangeChar = new Cell { Rune = Glyphs.ContinuousMeterSegment };
 		Style.DragChar = new Cell { Rune = Glyphs.Diamond };
@@ -776,7 +776,7 @@ public class Slider<T> : View {
 		// Left = He
 		// Right = lo
 		var first_left = (first.Length - 1) / 2; // Chars count of the first option to the left.
-		var last_right = last.Length / 2;        // Chars count of the last option to the right.
+		var last_right = last.Length / 2; // Chars count of the last option to the right.
 
 		if (_config._sliderOrientation != _config._legendsOrientation) {
 			first_left = 0;
@@ -797,7 +797,7 @@ public class Slider<T> : View {
 	}
 
 	/// <summary>
-	///  Adjust the dimensions of the Slider to the best value if <see cref="AutoSize"/> is true.
+	/// Adjust the dimensions of the Slider to the best value if <see cref="AutoSize"/> is true.
 	/// </summary>
 	public void SetBoundsBestFit ()
 	{
@@ -1375,7 +1375,10 @@ public class Slider<T> : View {
 
 		Point ClampMovePosition (Point position)
 		{
-			int Clamp (int value, int min, int max) => Math.Max (min, Math.Min (max, value));
+			int Clamp (int value, int min, int max)
+			{
+				return Math.Max (min, Math.Min (max, value));
+			}
 
 			if (Orientation == Orientation.Horizontal) {
 				var left = _config._startSpacing;

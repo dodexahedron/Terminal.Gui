@@ -27,8 +27,6 @@ public class ColorEventArgs : EventArgs {
 /// The <see cref="ColorPicker"/> <see cref="View"/> Color picker.
 /// </summary>
 public class ColorPicker : View {
-	int _boxHeight = 2;
-	int _boxWidth = 4;
 
 
 	/// <summary>
@@ -40,6 +38,9 @@ public class ColorPicker : View {
 	/// Rows of color boxes
 	/// </summary>
 	readonly int _rows = 2;
+
+	int _boxHeight = 2;
+	int _boxWidth = 4;
 
 	int _selectColorIndex = (int)Color.Black;
 

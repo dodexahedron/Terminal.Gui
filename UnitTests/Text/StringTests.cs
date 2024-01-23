@@ -34,10 +34,7 @@ public class StringTests {
 	[InlineData ("abc", 3)]
 	[InlineData ("áéí", 3)]
 	[InlineData ("abcd", 4)]
-	public void TestGetColumns_MultiRune (string str, int expected)
-	{
-		Assert.Equal (expected, str.GetColumns ());
-	}
+	public void TestGetColumns_MultiRune (string str, int expected) => Assert.Equal (expected, str.GetColumns ());
 
 	// Test known wide codepoints
 	[Theory]
@@ -53,20 +50,12 @@ public class StringTests {
 	[InlineData ("山🙂", 4)] // The character for "mountain" in Chinese/Japanese/Korean (山), Unicode U+5C71
 	//[InlineData ("\ufe20\ufe21", 2)] // Combining Ligature Left Half ︠ - U+fe20 -https://github.com/microsoft/terminal/blob/main/src/types/unicode_width_overrides.xml
 	//				 // Combining Ligature Right Half - U+fe21 -https://github.com/microsoft/terminal/blob/main/src/types/unicode_width_overrides.xml
-	public void TestGetColumns_MultiRune_WideBMP (string str, int expected)
-	{
-		Assert.Equal (expected, str.GetColumns ());
-	}
+	public void TestGetColumns_MultiRune_WideBMP (string str, int expected) => Assert.Equal (expected, str.GetColumns ());
 
 	// Test non-BMP codepoints 
 	// Face with Tears of Joy Emoji (😂), Unicode U+1F602 is 2 columns wide
 	[Theory]
 	[InlineData ("😂", 2)]
 	[InlineData ("😂😂", 4)]
-	public void TestGetColumns_MultiRune_NonBMP (string str, int expected)
-	{
-		Assert.Equal (expected, str.GetColumns ());
-	}
-
+	public void TestGetColumns_MultiRune_NonBMP (string str, int expected) => Assert.Equal (expected, str.GetColumns ());
 }
-

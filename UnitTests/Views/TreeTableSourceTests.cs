@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Text;
 using Xunit;
@@ -8,11 +7,12 @@ using Xunit.Abstractions;
 
 namespace Terminal.Gui.ViewsTests;
 
-public class TreeTableSourceTests: IDisposable {
+public class TreeTableSourceTests : IDisposable {
+	readonly Rune _origChecked;
+	readonly Rune _origUnchecked;
 
 	readonly ITestOutputHelper _output;
-	private readonly Rune _origChecked;
-	private readonly Rune _origUnchecked;
+
 	public TreeTableSourceTests (ITestOutputHelper output)
 	{
 		_output = output;
@@ -23,7 +23,14 @@ public class TreeTableSourceTests: IDisposable {
 		ConfigurationManager.Glyphs.UnChecked = new Rune ('☐');
 	}
 
-	[Fact, AutoInitShutdown]
+	public void Dispose ()
+	{
+
+		ConfigurationManager.Glyphs.Checked = _origChecked;
+		ConfigurationManager.Glyphs.UnChecked = _origUnchecked;
+	}
+
+	[Fact] [AutoInitShutdown]
 	public void TestTreeTableSource_BasicExpanding_WithKeyboard ()
 	{
 		var tv = GetTreeTable (out _);
@@ -32,7 +39,7 @@ public class TreeTableSourceTests: IDisposable {
 
 		tv.Draw ();
 
-		string expected =
+		var expected =
 			@"
 │Name          │Description            │
 ├──────────────┼───────────────────────┤
@@ -41,15 +48,15 @@ public class TreeTableSourceTests: IDisposable {
 
 		TestHelpers.AssertDriverContentsAre (expected, _output);
 
-		Assert.Equal(2, tv.Table.Rows);
+		Assert.Equal (2, tv.Table.Rows);
 
 		// top left is selected cell
 		Assert.Equal (0, tv.SelectedRow);
-		Assert.Equal(0, tv.SelectedColumn);
+		Assert.Equal (0, tv.SelectedColumn);
 
 		// when pressing right we should expand the top route
-		tv.NewKeyDownEvent (new (KeyCode.CursorRight));
-		
+		tv.NewKeyDownEvent (new Key (KeyCode.CursorRight));
+
 		tv.Draw ();
 
 		expected =
@@ -65,7 +72,7 @@ public class TreeTableSourceTests: IDisposable {
 		TestHelpers.AssertDriverContentsAre (expected, _output);
 
 		// when pressing left we should collapse the top route again
-		tv.NewKeyDownEvent (new (KeyCode.CursorLeft));
+		tv.NewKeyDownEvent (new Key (KeyCode.CursorLeft));
 
 		tv.Draw ();
 
@@ -80,7 +87,7 @@ public class TreeTableSourceTests: IDisposable {
 		TestHelpers.AssertDriverContentsAre (expected, _output);
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void TestTreeTableSource_BasicExpanding_WithMouse ()
 	{
 		var tv = GetTreeTable (out _);
@@ -89,7 +96,7 @@ public class TreeTableSourceTests: IDisposable {
 
 		tv.Draw ();
 
-		string expected =
+		var expected =
 			@"
 │Name          │Description            │
 ├──────────────┼───────────────────────┤
@@ -104,8 +111,8 @@ public class TreeTableSourceTests: IDisposable {
 		Assert.Equal (0, tv.SelectedRow);
 		Assert.Equal (0, tv.SelectedColumn);
 
-		Assert.True(tv.OnMouseEvent (new MouseEvent () { X = 2,Y=2,Flags = MouseFlags.Button1Clicked}));
-			
+		Assert.True (tv.OnMouseEvent (new MouseEvent { X = 2, Y = 2, Flags = MouseFlags.Button1Clicked }));
+
 		tv.Draw ();
 
 		expected =
@@ -121,17 +128,17 @@ public class TreeTableSourceTests: IDisposable {
 		TestHelpers.AssertDriverContentsAre (expected, _output);
 
 		// Clicking to the right/left of the expand/collapse does nothing
-		tv.OnMouseEvent (new MouseEvent () { X = 3, Y = 2, Flags = MouseFlags.Button1Clicked });
+		tv.OnMouseEvent (new MouseEvent { X = 3, Y = 2, Flags = MouseFlags.Button1Clicked });
 		tv.Draw ();
 		TestHelpers.AssertDriverContentsAre (expected, _output);
-		tv.OnMouseEvent (new MouseEvent () { X = 1, Y = 2, Flags = MouseFlags.Button1Clicked });
+		tv.OnMouseEvent (new MouseEvent { X = 1, Y = 2, Flags = MouseFlags.Button1Clicked });
 		tv.Draw ();
 		TestHelpers.AssertDriverContentsAre (expected, _output);
 
 		// Clicking on the + again should collapse
-		tv.OnMouseEvent (new MouseEvent () { X = 2, Y = 2, Flags = MouseFlags.Button1Clicked });
+		tv.OnMouseEvent (new MouseEvent { X = 2, Y = 2, Flags = MouseFlags.Button1Clicked });
 		tv.Draw ();
-		
+
 		expected =
 			@"
 │Name          │Description            │
@@ -143,7 +150,7 @@ public class TreeTableSourceTests: IDisposable {
 
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void TestTreeTableSource_CombinedWithCheckboxes ()
 	{
 		var tv = GetTreeTable (out var treeSource);
@@ -154,7 +161,7 @@ public class TreeTableSourceTests: IDisposable {
 
 		tv.Draw ();
 
-		string expected =
+		var expected =
 			@"
     │ │Name          │Description          │
 ├─┼──────────────┼─────────────────────┤
@@ -171,13 +178,13 @@ public class TreeTableSourceTests: IDisposable {
 		Assert.Equal (0, tv.SelectedColumn);
 
 		// when pressing right we move to tree column
-		tv.NewKeyDownEvent(new (KeyCode.CursorRight));
+		tv.NewKeyDownEvent (new Key (KeyCode.CursorRight));
 
 		// now we are in tree column
 		Assert.Equal (0, tv.SelectedRow);
 		Assert.Equal (1, tv.SelectedColumn);
 
-		Application.Top.NewKeyDownEvent (new (KeyCode.CursorRight));
+		Application.Top.NewKeyDownEvent (new Key (KeyCode.CursorRight));
 
 		tv.Draw ();
 
@@ -211,33 +218,16 @@ public class TreeTableSourceTests: IDisposable {
 
 		TestHelpers.AssertDriverContentsAre (expected, _output);
 
-		var selectedObjects = checkSource.CheckedRows.Select (treeSource.GetObjectOnRow).ToArray();
-		var selected = Assert.Single(selectedObjects);
+		var selectedObjects = checkSource.CheckedRows.Select (treeSource.GetObjectOnRow).ToArray ();
+		var selected = Assert.Single (selectedObjects);
 
-		Assert.Equal ("Ford Trans-Am",selected.Name);
+		Assert.Equal ("Ford Trans-Am", selected.Name);
 		Assert.Equal ("Talking thunderbird car", selected.Description);
 
 	}
 
-	interface IDescribedThing {
-		string Name { get; }
-		string Description { get; }
-	}
 
-	class Road : IDescribedThing {
-		public string Name { get; set; }
-		public string Description { get; set; }
-
-		public List<Car> Traffic { get; set; }
-	}
-
-	class Car : IDescribedThing {
-		public string Name { get; set; }
-		public string Description { get; set; }
-	}
-
-
-	private TableView GetTreeTable (out TreeView<IDescribedThing> tree)
+	TableView GetTreeTable (out TreeView<IDescribedThing> tree)
 	{
 		var tableView = new TableView ();
 		tableView.ColorScheme = Colors.ColorSchemes ["TopLevel"];
@@ -250,18 +240,18 @@ public class TreeTableSourceTests: IDisposable {
 		tableView.Style.SmoothHorizontalScrolling = true;
 
 		tree = new TreeView<IDescribedThing> ();
-		tree.AspectGetter = (d) => d.Name;
+		tree.AspectGetter = d => d.Name;
 
 		tree.TreeBuilder = new DelegateTreeBuilder<IDescribedThing> (
-			(d) => d is Road r ? r.Traffic : Enumerable.Empty<IDescribedThing> ()
-			);
+			d => d is Road r ? r.Traffic : Enumerable.Empty<IDescribedThing> ()
+		);
 
 		tree.AddObject (new Road {
 			Name = "Lost Highway",
 			Description = "Exciting night road",
 			Traffic = new List<Car> {
-				new Car { Name = "Ford Trans-Am", Description = "Talking thunderbird car"},
-				new Car { Name = "DeLorean", Description = "Time travelling car"}
+				new() { Name = "Ford Trans-Am", Description = "Talking thunderbird car" },
+				new() { Name = "DeLorean", Description = "Time travelling car" }
 			}
 		});
 
@@ -269,14 +259,14 @@ public class TreeTableSourceTests: IDisposable {
 			Name = "Route 66",
 			Description = "Great race course",
 			Traffic = new List<Car> {
-				new Car { Name = "Pink Compact", Description = "Penelope Pitstop's car"},
-				new Car { Name = "Mean Machine", Description = "Dick Dastardly's car"}
+				new() { Name = "Pink Compact", Description = "Penelope Pitstop's car" },
+				new() { Name = "Mean Machine", Description = "Dick Dastardly's car" }
 			}
 		});
 
-		tableView.Table = new TreeTableSource<IDescribedThing> (tableView,"Name",tree,
-			new () {
-				{"Description",(d)=>d.Description }
+		tableView.Table = new TreeTableSource<IDescribedThing> (tableView, "Name", tree,
+			new Dictionary<string, Func<IDescribedThing, object>> {
+				{ "Description", d => d.Description }
 			});
 
 		tableView.BeginInit ();
@@ -290,10 +280,24 @@ public class TreeTableSourceTests: IDisposable {
 		return tableView;
 	}
 
-	public void Dispose ()
-	{
+	interface IDescribedThing {
+		string Name { get; }
 
-		ConfigurationManager.Glyphs.Checked = _origChecked;
-		ConfigurationManager.Glyphs.UnChecked = _origUnchecked;
+		string Description { get; }
+	}
+
+	class Road : IDescribedThing {
+
+		public List<Car> Traffic { get; set; }
+
+		public string Name { get; set; }
+
+		public string Description { get; set; }
+	}
+
+	class Car : IDescribedThing {
+		public string Name { get; set; }
+
+		public string Description { get; set; }
 	}
 }

@@ -9,6 +9,17 @@ namespace Terminal.Gui;
 public class KeyChangedEventArgs : EventArgs {
 
 	/// <summary>
+	/// Creates a new instance of the <see cref="KeyChangedEventArgs"/> class
+	/// </summary>
+	/// <param name="oldKey"></param>
+	/// <param name="newKey"></param>
+	public KeyChangedEventArgs (Key oldKey, Key newKey)
+	{
+		OldKey = oldKey;
+		NewKey = newKey;
+	}
+
+	/// <summary>
 	/// Gets the old <see cref="Key"/> that was set before the event.
 	/// Use <see cref="Key.Empty"/> to check for empty.
 	/// </summary>
@@ -19,15 +30,4 @@ public class KeyChangedEventArgs : EventArgs {
 	/// Use <see cref="Key.Empty"/> to check for empty.
 	/// </summary>
 	public Key NewKey { get; }
-
-	/// <summary>
-	/// Creates a new instance of the <see cref="KeyChangedEventArgs"/> class
-	/// </summary>
-	/// <param name="oldKey"></param>
-	/// <param name="newKey"></param>
-	public KeyChangedEventArgs (Key oldKey, Key newKey)
-	{
-		this.OldKey = oldKey;
-		this.NewKey = newKey;
-	}
 }

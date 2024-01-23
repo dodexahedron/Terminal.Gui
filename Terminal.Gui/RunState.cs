@@ -11,45 +11,18 @@ public class RunState : IDisposable {
 	/// Initializes a new <see cref="RunState"/> class.
 	/// </summary>
 	/// <param name="view"></param>
-	public RunState (Toplevel view)
-	{
-		Toplevel = view;
-	}
+	public RunState (Toplevel view) => Toplevel = view;
+
 	/// <summary>
 	/// The <see cref="Toplevel"/> belonging to this <see cref="RunState"/>.
 	/// </summary>
 	public Toplevel Toplevel { get; internal set; }
 
-#if DEBUG_IDISPOSABLE
-	/// <summary>
-	/// For debug (see DEBUG_IDISPOSABLE define) purposes to verify objects are being disposed properly
-	/// </summary>
-	public bool WasDisposed = false;
-
-	/// <summary>
-	/// For debug (see DEBUG_IDISPOSABLE define) purposes to verify objects are being disposed properly
-	/// </summary>
-	public int DisposedCount = 0;
-
-	/// <summary>
-	/// For debug (see DEBUG_IDISPOSABLE define) purposes; the runstate instances that have been created
-	/// </summary>
-	public static List<RunState> Instances = new List<RunState> ();
-
-	/// <summary>
-	/// Creates a new RunState object.
-	/// </summary>
-	public RunState ()
-	{
-		Instances.Add (this);
-	}
-#endif
-
 	/// <summary>
 	/// Releases all resource used by the <see cref="RunState"/> object.
 	/// </summary>
 	/// <remarks>
-	/// Call <see cref="Dispose()"/> when you are finished using the <see cref="RunState"/>. 
+	/// Call <see cref="Dispose()"/> when you are finished using the <see cref="RunState"/>.
 	/// </remarks>
 	/// <remarks>
 	/// <see cref="Dispose()"/> method leaves the <see cref="RunState"/> in an unusable state. After
@@ -76,4 +49,26 @@ public class RunState : IDisposable {
 			throw new InvalidOperationException ("You must clean up (Dispose) the Toplevel before calling Application.RunState.Dispose");
 		}
 	}
+
+#if DEBUG_IDISPOSABLE
+	/// <summary>
+	/// For debug (see DEBUG_IDISPOSABLE define) purposes to verify objects are being disposed properly
+	/// </summary>
+	public bool WasDisposed;
+
+	/// <summary>
+	/// For debug (see DEBUG_IDISPOSABLE define) purposes to verify objects are being disposed properly
+	/// </summary>
+	public int DisposedCount = 0;
+
+	/// <summary>
+	/// For debug (see DEBUG_IDISPOSABLE define) purposes; the runstate instances that have been created
+	/// </summary>
+	public static List<RunState> Instances = new ();
+
+	/// <summary>
+	/// Creates a new RunState object.
+	/// </summary>
+	public RunState () => Instances.Add (this);
+#endif
 }

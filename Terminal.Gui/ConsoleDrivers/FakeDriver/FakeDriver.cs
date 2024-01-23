@@ -1,12 +1,13 @@
 ﻿//
 // FakeDriver.cs: A fake ConsoleDriver for unit tests. 
 //
+
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Terminal.Gui.ConsoleDrivers;
-
 // Alias Console to MockConsole so we don't accidentally use Console
 using Console = Terminal.Gui.FakeConsole;
 
@@ -19,11 +20,6 @@ public class FakeDriver : ConsoleDriver {
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 
 	public class Behaviors {
-		public bool UseFakeClipboard { get; internal set; }
-
-		public bool FakeClipboardAlwaysThrowsNotSupportedException { get; internal set; }
-
-		public bool FakeClipboardIsSupportedAlwaysFalse { get; internal set; }
 
 		public Behaviors (bool useFakeClipboard = false, bool fakeClipboardAlwaysThrowsNotSupportedException = false, bool fakeClipboardIsSupportedAlwaysTrue = false)
 		{
@@ -35,9 +31,15 @@ public class FakeDriver : ConsoleDriver {
 			Debug.Assert (useFakeClipboard == false && fakeClipboardAlwaysThrowsNotSupportedException == false);
 			Debug.Assert (useFakeClipboard == false && fakeClipboardIsSupportedAlwaysTrue == false);
 		}
+
+		public bool UseFakeClipboard { get; internal set; }
+
+		public bool FakeClipboardAlwaysThrowsNotSupportedException { get; internal set; }
+
+		public bool FakeClipboardIsSupportedAlwaysFalse { get; internal set; }
 	}
 
-	public static FakeDriver.Behaviors FakeBehaviors = new Behaviors ();
+	public static Behaviors FakeBehaviors = new ();
 
 	public override bool SupportsTrueColor => false;
 
@@ -68,7 +70,7 @@ public class FakeDriver : ConsoleDriver {
 		FakeConsole.Clear ();
 	}
 
-	FakeMainLoop _mainLoopDriver = null;
+	FakeMainLoop _mainLoopDriver;
 
 	internal override MainLoop Init ()
 	{
@@ -97,8 +99,8 @@ public class FakeDriver : ConsoleDriver {
 		var left = 0;
 		var rows = Rows;
 		var cols = Cols;
-		System.Text.StringBuilder output = new System.Text.StringBuilder ();
-		Attribute redrawAttr = new Attribute ();
+		var output = new StringBuilder ();
+		var redrawAttr = new Attribute ();
 		var lastCol = -1;
 
 		for (var row = top; row < rows; row++) {
@@ -121,8 +123,9 @@ public class FakeDriver : ConsoleDriver {
 						} else if (lastCol == -1) {
 							lastCol = col;
 						}
-						if (lastCol + 1 < cols)
+						if (lastCol + 1 < cols) {
 							lastCol++;
+						}
 						continue;
 					}
 
@@ -130,7 +133,7 @@ public class FakeDriver : ConsoleDriver {
 						lastCol = col;
 					}
 
-					Attribute attr = Contents [row, col].Attribute.Value;
+					var attr = Contents [row, col].Attribute.Value;
 					// Performance: Only send the escape sequence if the attribute has changed.
 					if (attr != redrawAttr) {
 						redrawAttr = attr;
@@ -138,7 +141,7 @@ public class FakeDriver : ConsoleDriver {
 						FakeConsole.BackgroundColor = (ConsoleColor)attr.Background.ColorName;
 					}
 					outputWidth++;
-					var rune = (Rune)Contents [row, col].Rune;
+					var rune = Contents [row, col].Rune;
 					output.Append (rune.ToString ());
 					if (rune.IsSurrogatePair () && rune.GetColumns () < 2) {
 						WriteToConsole (output, ref lastCol, row, ref outputWidth);
@@ -258,7 +261,7 @@ public class FakeDriver : ConsoleDriver {
 				return KeyCode.Null;
 			}
 
-			return ConsoleKeyMapping.MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)((uint)keyInfo.KeyChar));
+			return ConsoleKeyMapping.MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)keyInfo.KeyChar);
 		}
 
 		var key = keyInfo.Key;
@@ -268,18 +271,18 @@ public class FakeDriver : ConsoleDriver {
 				return ConsoleKeyMapping.MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)keyInfo.KeyChar);
 			}
 			if (keyInfo.Modifiers.HasFlag (ConsoleModifiers.Control)
-			|| keyInfo.Modifiers.HasFlag (ConsoleModifiers.Alt)
-			|| keyInfo.Modifiers.HasFlag (ConsoleModifiers.Shift)) {
+			    || keyInfo.Modifiers.HasFlag (ConsoleModifiers.Alt)
+			    || keyInfo.Modifiers.HasFlag (ConsoleModifiers.Shift)) {
 				return ConsoleKeyMapping.MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)((uint)KeyCode.A + delta));
 			}
-			var alphaBase = ((keyInfo.Modifiers != ConsoleModifiers.Shift)) ? 'A' : 'a';
+			var alphaBase = keyInfo.Modifiers != ConsoleModifiers.Shift ? 'A' : 'a';
 			return (KeyCode)((uint)alphaBase + delta);
 		}
 
-		return ConsoleKeyMapping.MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)((uint)keyInfo.KeyChar));
+		return ConsoleKeyMapping.MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)keyInfo.KeyChar);
 	}
 
-	private CursorVisibility _savedCursorVisibility;
+	CursorVisibility _savedCursorVisibility;
 
 	void MockKeyPressedHandler (ConsoleKeyInfo consoleKeyInfo)
 	{
@@ -314,7 +317,7 @@ public class FakeDriver : ConsoleDriver {
 	public override bool EnsureCursorVisibility ()
 	{
 		if (!(Col >= 0 && Row >= 0 && Col < Cols && Row < Rows)) {
-			GetCursorVisibility (out CursorVisibility cursorVisibility);
+			GetCursorVisibility (out var cursorVisibility);
 			_savedCursorVisibility = cursorVisibility;
 			SetCursorVisibility (CursorVisibility.Invisible);
 			return false;
@@ -324,10 +327,7 @@ public class FakeDriver : ConsoleDriver {
 		return FakeConsole.CursorVisible;
 	}
 
-	public override void SendKeys (char keyChar, ConsoleKey key, bool shift, bool alt, bool control)
-	{
-		MockKeyPressedHandler (new ConsoleKeyInfo (keyChar, key, shift, alt, control));
-	}
+	public override void SendKeys (char keyChar, ConsoleKey key, bool shift, bool alt, bool control) => MockKeyPressedHandler (new ConsoleKeyInfo (keyChar, key, shift, alt, control));
 
 	public void SetBufferSize (int width, int height)
 	{
@@ -374,7 +374,7 @@ public class FakeDriver : ConsoleDriver {
 				FakeConsole.CursorLeft = 0;
 				FakeConsole.WindowTop = 0;
 				FakeConsole.WindowLeft = 0;
-			} catch (System.IO.IOException) {
+			} catch (IOException) {
 				return;
 			} catch (ArgumentOutOfRangeException) {
 				return;
@@ -396,25 +396,22 @@ public class FakeDriver : ConsoleDriver {
 			if (Col >= 0 && Col < FakeConsole.BufferWidth && Row >= 0 && Row < FakeConsole.BufferHeight) {
 				FakeConsole.SetCursorPosition (Col, Row);
 			}
-		} catch (System.IO.IOException) { } catch (ArgumentOutOfRangeException) { }
+		} catch (IOException) { } catch (ArgumentOutOfRangeException) { }
 	}
 
 	#region Not Implemented
 	public override void Suspend ()
 	{
-		return;
 		//throw new NotImplementedException ();
 	}
 	#endregion
 
 	public class FakeClipboard : ClipboardBase {
-		public Exception FakeException = null;
 
 		string _contents = string.Empty;
 
-		bool _isSupportedAlwaysFalse = false;
-
-		public override bool IsSupported => !_isSupportedAlwaysFalse;
+		readonly bool _isSupportedAlwaysFalse;
+		public Exception FakeException;
 
 		public FakeClipboard (bool fakeClipboardThrowsNotSupportedException = false, bool isSupportedAlwaysFalse = false)
 		{
@@ -423,6 +420,8 @@ public class FakeDriver : ConsoleDriver {
 				FakeException = new NotSupportedException ("Fake clipboard exception");
 			}
 		}
+
+		public override bool IsSupported => !_isSupportedAlwaysFalse;
 
 		protected override string GetClipboardDataImpl ()
 		{

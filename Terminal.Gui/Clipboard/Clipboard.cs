@@ -1,5 +1,4 @@
-﻿using System.Text;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -9,67 +8,67 @@ namespace Terminal.Gui;
 /// Provides cut, copy, and paste support for the OS clipboard.
 /// </summary>
 /// <remarks>
-/// <para>
-/// On Windows, the <see cref="Clipboard"/> class uses the Windows Clipboard APIs via P/Invoke.
-/// </para>
-/// <para>
-/// On Linux, when not running under Windows Subsystem for Linux (WSL),
-/// the <see cref="Clipboard"/> class uses the xclip command line tool. If xclip is not installed,
-/// the clipboard will not work.
-/// </para>
-/// <para>
-/// On Linux, when running under Windows Subsystem for Linux (WSL),
-/// the <see cref="Clipboard"/> class launches Windows' powershell.exe via WSL interop and uses the
-/// "Set-Clipboard" and "Get-Clipboard" Powershell CmdLets. 
-/// </para>
-/// <para>
-/// On the Mac, the <see cref="Clipboard"/> class uses the MacO OS X pbcopy and pbpaste command line tools
-/// and the Mac clipboard APIs vai P/Invoke.
-/// </para>
+///         <para>
+///         On Windows, the <see cref="Clipboard"/> class uses the Windows Clipboard APIs via P/Invoke.
+///         </para>
+///         <para>
+///         On Linux, when not running under Windows Subsystem for Linux (WSL),
+///         the <see cref="Clipboard"/> class uses the xclip command line tool. If xclip is not installed,
+///         the clipboard will not work.
+///         </para>
+///         <para>
+///         On Linux, when running under Windows Subsystem for Linux (WSL),
+///         the <see cref="Clipboard"/> class launches Windows' powershell.exe via WSL interop and uses the
+///         "Set-Clipboard" and "Get-Clipboard" Powershell CmdLets.
+///         </para>
+///         <para>
+///         On the Mac, the <see cref="Clipboard"/> class uses the MacO OS X pbcopy and pbpaste command line tools
+///         and the Mac clipboard APIs vai P/Invoke.
+///         </para>
 /// </remarks>
 public static class Clipboard {
 	static string _contents = string.Empty;
 
-		/// <summary>
-		/// Gets (copies from) or sets (pastes to) the contents of the OS clipboard.
-		/// </summary>
-		public static string Contents {
-			get {
-				try {
-					if (IsSupported) {
-						var clipData = Application.Driver.Clipboard.GetClipboardData ();
-						if (clipData == null) {
-							// throw new InvalidOperationException ($"{Application.Driver.GetType ().Name}.GetClipboardData returned null instead of string.Empty");
-							clipData = string.Empty;
-						}
-						_contents = clipData;
+	/// <summary>
+	/// Gets (copies from) or sets (pastes to) the contents of the OS clipboard.
+	/// </summary>
+	public static string Contents {
+		get {
+			try {
+				if (IsSupported) {
+					var clipData = Application.Driver.Clipboard.GetClipboardData ();
+					if (clipData == null) {
+						// throw new InvalidOperationException ($"{Application.Driver.GetType ().Name}.GetClipboardData returned null instead of string.Empty");
+						clipData = string.Empty;
 					}
-				} catch (Exception) {
-					_contents = string.Empty;
+					_contents = clipData;
 				}
-				return _contents;
+			} catch (Exception) {
+				_contents = string.Empty;
 			}
-			set {
-				try {
-					if (IsSupported) {
-						if (value == null) {
-							value = string.Empty;
-						}
-						Application.Driver.Clipboard.SetClipboardData (value);
+			return _contents;
+		}
+		set {
+			try {
+				if (IsSupported) {
+					if (value == null) {
+						value = string.Empty;
 					}
-					_contents = value;
-				} catch (Exception) {
-					_contents = value;
+					Application.Driver.Clipboard.SetClipboardData (value);
 				}
+				_contents = value;
+			} catch (Exception) {
+				_contents = value;
 			}
 		}
+	}
 
 	/// <summary>
 	/// Returns true if the environmental dependencies are in place to interact with the OS clipboard.
 	/// </summary>
 	/// <remarks>
 	/// </remarks>
-	public static bool IsSupported { get => Application.Driver.Clipboard.IsSupported; }
+	public static bool IsSupported => Application.Driver.Clipboard.IsSupported;
 
 	/// <summary>
 	/// Copies the _contents of the OS clipboard to <paramref name="result"/> if possible.
@@ -108,11 +107,11 @@ public static class Clipboard {
 /// Used primarily by CursesDriver, but also used in Unit tests which is why it is in
 /// ConsoleDriver.cs.
 /// </summary>
-internal static class ClipboardProcessRunner {
+static class ClipboardProcessRunner {
 	public static (int exitCode, string result) Bash (string commandLine, string inputText = "", bool waitForOutput = false)
 	{
 		var arguments = $"-c \"{commandLine}\"";
-		var (exitCode, result) = Process ("bash", arguments, inputText, waitForOutput);
+		(var exitCode, var result) = Process ("bash", arguments, inputText, waitForOutput);
 
 		return (exitCode, result.TrimEnd ());
 	}
@@ -121,7 +120,7 @@ internal static class ClipboardProcessRunner {
 	{
 		var output = string.Empty;
 
-		using (Process process = new Process {
+		using (var process = new Process {
 			StartInfo = new ProcessStartInfo {
 				FileName = cmd,
 				Arguments = arguments,
@@ -129,7 +128,7 @@ internal static class ClipboardProcessRunner {
 				RedirectStandardError = true,
 				RedirectStandardInput = true,
 				UseShellExecute = false,
-				CreateNoWindow = true,
+				CreateNoWindow = true
 			}
 		}) {
 			var eventHandled = new TaskCompletionSource<bool> ();
@@ -158,7 +157,7 @@ internal static class ClipboardProcessRunner {
 		}
 	}
 
-	public static bool DoubleWaitForExit (this System.Diagnostics.Process process)
+	public static bool DoubleWaitForExit (this Process process)
 	{
 		var result = process.WaitForExit (500);
 		if (result) {
@@ -167,8 +166,5 @@ internal static class ClipboardProcessRunner {
 		return result;
 	}
 
-	public static bool FileExists (this string value)
-	{
-		return !string.IsNullOrEmpty (value) && !value.Contains ("not found");
-	}
+	public static bool FileExists (this string value) => !string.IsNullOrEmpty (value) && !value.Contains ("not found");
 }

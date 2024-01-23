@@ -5,11 +5,10 @@
 //	José Miguel Perricone (jmperricone@hotmail.com)
 //
 
-using System.Text;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using Terminal.Gui.TextValidateProviders;
 
@@ -26,6 +25,21 @@ namespace Terminal.Gui {
 			/// e.g. Masked ones are fixed.
 			/// </summary>
 			bool Fixed { get; }
+
+			/// <summary>
+			/// True if the input is valid, otherwise false.
+			/// </summary>
+			bool IsValid { get; }
+
+			/// <summary>
+			/// Set the input text and get the current value.
+			/// </summary>
+			string Text { get; set; }
+
+			/// <summary>
+			/// Gets the formatted string for display.
+			/// </summary>
+			string DisplayText { get; }
 
 			/// <summary>
 			/// Set Cursor position to <paramref name="pos"/>.
@@ -74,21 +88,6 @@ namespace Terminal.Gui {
 			/// <param name="pos"></param>
 			/// <returns>true if the character was successfully inserted, otherwise false.</returns>
 			bool InsertAt (char ch, int pos);
-
-			/// <summary>
-			/// True if the input is valid, otherwise false.
-			/// </summary>
-			bool IsValid { get; }
-
-			/// <summary>
-			/// Set the input text and get the current value.
-			/// </summary>
-			string Text { get; set; }
-
-			/// <summary>
-			/// Gets the formatted string for display.
-			/// </summary>
-			string DisplayText { get; }
 		}
 
 		//////////////////////////////////////////////////////////////////////////////
@@ -96,12 +95,21 @@ namespace Terminal.Gui {
 		//////////////////////////////////////////////////////////////////////////////
 
 		#region NetMaskedTextProvider
-
 		/// <summary>
 		/// .Net MaskedTextProvider Provider for TextValidateField.
 		/// <para></para>
-		/// <para><a href="https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.maskedtextprovider?view=net-5.0">Wrapper around MaskedTextProvider</a></para>
-		/// <para><a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.maskedtextbox.mask?view=net-5.0">Masking elements</a></para>
+		/// <para>
+		///         <a href="https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.maskedtextprovider?view=net-5.0">
+		///         Wrapper
+		///         around MaskedTextProvider
+		///         </a>
+		/// </para>
+		/// <para>
+		///         <a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.maskedtextbox.mask?view=net-5.0">
+		///         Masking
+		///         elements
+		///         </a>
+		/// </para>
 		/// </summary>
 		public class NetMaskedTextProvider : ITextValidateProvider {
 			MaskedTextProvider provider;
@@ -109,18 +117,13 @@ namespace Terminal.Gui {
 			/// <summary>
 			/// Empty Constructor
 			/// </summary>
-			public NetMaskedTextProvider (string mask)
-			{
-				Mask = mask;
-			}
+			public NetMaskedTextProvider (string mask) => Mask = mask;
 
 			/// <summary>
 			/// Mask property
 			/// </summary>
 			public string Mask {
-				get {
-					return provider?.Mask;
-				}
+				get => provider?.Mask;
 				set {
 					var current = provider != null ? provider.ToString (false, false) : string.Empty;
 					provider = new MaskedTextProvider (value == string.Empty ? "&&&&&&" : value);
@@ -132,12 +135,8 @@ namespace Terminal.Gui {
 
 			///<inheritdoc/>
 			public string Text {
-				get {
-					return provider.ToString ();
-				}
-				set {
-					provider.Set (value);
-				}
+				get => provider.ToString ();
+				set => provider.Set (value);
 			}
 
 			///<inheritdoc/>
@@ -154,32 +153,26 @@ namespace Terminal.Gui {
 			{
 				if (pos < 0) {
 					return CursorStart ();
-				} else if (pos > provider.Length) {
-					return CursorEnd ();
-				} else {
-					var p = provider.FindEditPositionFrom (pos, false);
-					if (p == -1) p = provider.FindEditPositionFrom (pos, true);
-					return p;
 				}
+				if (pos > provider.Length) {
+					return CursorEnd ();
+				}
+				var p = provider.FindEditPositionFrom (pos, false);
+				if (p == -1) {
+					p = provider.FindEditPositionFrom (pos, true);
+				}
+				return p;
 			}
 
 			///<inheritdoc/>
-			public int CursorStart ()
-			{
-				return
-					provider.IsEditPosition (0)
-					? 0
-					: provider.FindEditPositionFrom (0, true);
-			}
+			public int CursorStart () => provider.IsEditPosition (0)
+				? 0
+				: provider.FindEditPositionFrom (0, true);
 
 			///<inheritdoc/>
-			public int CursorEnd ()
-			{
-				return
-					provider.IsEditPosition (provider.Length - 1)
-					? provider.Length - 1
-					: provider.FindEditPositionFrom (provider.Length, false);
-			}
+			public int CursorEnd () => provider.IsEditPosition (provider.Length - 1)
+				? provider.Length - 1
+				: provider.FindEditPositionFrom (provider.Length, false);
 
 			///<inheritdoc/>
 			public int CursorLeft (int pos)
@@ -196,44 +189,32 @@ namespace Terminal.Gui {
 			}
 
 			///<inheritdoc/>
-			public bool Delete (int pos)
-			{
-				return provider.Replace (' ', pos);// .RemoveAt (pos);
-			}
+			public bool Delete (int pos) => provider.Replace (' ', pos); // .RemoveAt (pos);
 
 			///<inheritdoc/>
-			public bool InsertAt (char ch, int pos)
-			{
-				return provider.Replace (ch, pos);
-			}
+			public bool InsertAt (char ch, int pos) => provider.Replace (ch, pos);
 		}
 		#endregion
 
 		#region TextRegexProvider
-
 		/// <summary>
 		/// Regex Provider for TextValidateField.
 		/// </summary>
 		public class TextRegexProvider : ITextValidateProvider {
+			List<Rune> pattern;
 			Regex regex;
 			List<Rune> text;
-			List<Rune> pattern;
 
 			/// <summary>
 			/// Empty Constructor.
 			/// </summary>
-			public TextRegexProvider (string pattern)
-			{
-				Pattern = pattern;
-			}
+			public TextRegexProvider (string pattern) => Pattern = pattern;
 
 			/// <summary>
 			/// Regex pattern property.
 			/// </summary>
 			public string Pattern {
-				get {
-					return StringExtensions.ToString (pattern);
-				}
+				get => StringExtensions.ToString (pattern);
 				set {
 					pattern = value.ToRuneList ();
 					CompileMask ();
@@ -241,11 +222,14 @@ namespace Terminal.Gui {
 				}
 			}
 
+			/// <summary>
+			/// When true, validates with the regex pattern on each input, preventing the input if it's not valid.
+			/// </summary>
+			public bool ValidateOnInput { get; set; } = true;
+
 			///<inheritdoc/>
 			public string Text {
-				get {
-					return StringExtensions.ToString (text);
-				}
+				get => StringExtensions.ToString (text);
 				set {
 					text = value != string.Empty ? value.ToRuneList () : null;
 					SetupText ();
@@ -256,49 +240,28 @@ namespace Terminal.Gui {
 			public string DisplayText => Text;
 
 			///<inheritdoc/>
-			public bool IsValid {
-				get {
-					return Validate (text);
-				}
-			}
+			public bool IsValid => Validate (text);
 
 			///<inheritdoc/>
 			public bool Fixed => false;
-
-			/// <summary>
-			/// When true, validates with the regex pattern on each input, preventing the input if it's not valid.
-			/// </summary>
-			public bool ValidateOnInput { get; set; } = true;
-
-			bool Validate (List<Rune> text)
-			{
-				var match = regex.Match (StringExtensions.ToString (text));
-				return match.Success;
-			}
 
 			///<inheritdoc/>
 			public int Cursor (int pos)
 			{
 				if (pos < 0) {
 					return CursorStart ();
-				} else if (pos >= text.Count) {
-					return CursorEnd ();
-				} else {
-					return pos;
 				}
+				if (pos >= text.Count) {
+					return CursorEnd ();
+				}
+				return pos;
 			}
 
 			///<inheritdoc/>
-			public int CursorStart ()
-			{
-				return 0;
-			}
+			public int CursorStart () => 0;
 
 			///<inheritdoc/>
-			public int CursorEnd ()
-			{
-				return text.Count;
-			}
+			public int CursorEnd () => text.Count;
 
 			///<inheritdoc/>
 			public int CursorLeft (int pos)
@@ -339,6 +302,12 @@ namespace Terminal.Gui {
 				return false;
 			}
 
+			bool Validate (List<Rune> text)
+			{
+				var match = regex.Match (StringExtensions.ToString (text));
+				return match.Success;
+			}
+
 			void SetupText ()
 			{
 				if (text != null && IsValid) {
@@ -351,10 +320,7 @@ namespace Terminal.Gui {
 			/// <summary>
 			/// Compiles the regex pattern for validation./>
 			/// </summary>
-			private void CompileMask ()
-			{
-				regex = new Regex (StringExtensions.ToString (pattern), RegexOptions.Compiled);
-			}
+			void CompileMask () => regex = new Regex (StringExtensions.ToString (pattern), RegexOptions.Compiled);
 		}
 		#endregion
 	}
@@ -363,19 +329,19 @@ namespace Terminal.Gui {
 	/// Text field that validates input through a  <see cref="ITextValidateProvider"/>
 	/// </summary>
 	public class TextValidateField : View {
+		int cursorPosition;
 
 		ITextValidateProvider provider;
-		int cursorPosition = 0;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TextValidateField"/> class using <see cref="LayoutStyle.Computed"/> positioning.
+		/// Initializes a new instance of the <see cref="TextValidateField"/> class using <see cref="LayoutStyle.Computed"/>
+		/// positioning.
 		/// </summary>
-		public TextValidateField () : this (null)
-		{
-		}
+		public TextValidateField () : this (null) { }
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="TextValidateField"/> class using <see cref="LayoutStyle.Computed"/> positioning.
+		/// Initializes a new instance of the <see cref="TextValidateField"/> class using <see cref="LayoutStyle.Computed"/>
+		/// positioning.
 		/// </summary>
 		public TextValidateField (ITextValidateProvider provider)
 		{
@@ -386,31 +352,6 @@ namespace Terminal.Gui {
 			Initialize ();
 		}
 
-		void Initialize ()
-		{
-			Height = 1;
-			CanFocus = true;
-
-			// Things this view knows how to do
-			AddCommand (Command.LeftHome, () => { HomeKeyHandler (); return true; });
-			AddCommand (Command.RightEnd, () => { EndKeyHandler (); return true; });
-			AddCommand (Command.DeleteCharRight, () => { DeleteKeyHandler (); return true; });
-			AddCommand (Command.DeleteCharLeft, () => { BackspaceKeyHandler (); return true; });
-			AddCommand (Command.Left, () => { CursorLeft (); return true; });
-			AddCommand (Command.Right, () => { CursorRight (); return true; });
-
-			// Default keybindings for this view
-			KeyBindings.Add (KeyCode.Home, Command.LeftHome);
-			KeyBindings.Add (KeyCode.End, Command.RightEnd);
-
-			KeyBindings.Add (KeyCode.Delete, Command.DeleteCharRight);
-			KeyBindings.Add (KeyCode.Delete, Command.DeleteCharRight);
-
-			KeyBindings.Add (KeyCode.Backspace, Command.DeleteCharLeft);
-			KeyBindings.Add (KeyCode.CursorLeft, Command.Left);
-			KeyBindings.Add (KeyCode.CursorRight, Command.Right);
-		}
-
 		/// <summary>
 		/// Provider
 		/// </summary>
@@ -418,29 +359,12 @@ namespace Terminal.Gui {
 			get => provider;
 			set {
 				provider = value;
-				if (provider.Fixed == true) {
-					this.Width = provider.DisplayText == string.Empty ? 10 : Text.Length;
+				if (provider.Fixed) {
+					Width = provider.DisplayText == string.Empty ? 10 : Text.Length;
 				}
 				HomeKeyHandler ();
 				SetNeedsDisplay ();
 			}
-		}
-
-		///<inheritdoc/>
-		public override bool MouseEvent (MouseEvent mouseEvent)
-		{
-			if (mouseEvent.Flags.HasFlag (MouseFlags.Button1Pressed)) {
-
-				var c = provider.Cursor (mouseEvent.X - GetMargins (Frame.Width).left);
-				if (provider.Fixed == false && TextAlignment == TextAlignment.Right && Text.Length > 0) {
-					c += 1;
-				}
-				cursorPosition = c;
-				SetFocus ();
-				SetNeedsDisplay ();
-				return true;
-			}
-			return false;
 		}
 
 		/// <summary>
@@ -464,10 +388,83 @@ namespace Terminal.Gui {
 			}
 		}
 
+		/// <summary>
+		/// This property returns true if the input is valid.
+		/// </summary>
+		public virtual bool IsValid {
+			get {
+				if (provider == null) {
+					return false;
+				}
+
+				return provider.IsValid;
+			}
+		}
+
+		void Initialize ()
+		{
+			Height = 1;
+			CanFocus = true;
+
+			// Things this view knows how to do
+			AddCommand (Command.LeftHome, () => {
+				HomeKeyHandler ();
+				return true;
+			});
+			AddCommand (Command.RightEnd, () => {
+				EndKeyHandler ();
+				return true;
+			});
+			AddCommand (Command.DeleteCharRight, () => {
+				DeleteKeyHandler ();
+				return true;
+			});
+			AddCommand (Command.DeleteCharLeft, () => {
+				BackspaceKeyHandler ();
+				return true;
+			});
+			AddCommand (Command.Left, () => {
+				CursorLeft ();
+				return true;
+			});
+			AddCommand (Command.Right, () => {
+				CursorRight ();
+				return true;
+			});
+
+			// Default keybindings for this view
+			KeyBindings.Add (KeyCode.Home, Command.LeftHome);
+			KeyBindings.Add (KeyCode.End, Command.RightEnd);
+
+			KeyBindings.Add (KeyCode.Delete, Command.DeleteCharRight);
+			KeyBindings.Add (KeyCode.Delete, Command.DeleteCharRight);
+
+			KeyBindings.Add (KeyCode.Backspace, Command.DeleteCharLeft);
+			KeyBindings.Add (KeyCode.CursorLeft, Command.Left);
+			KeyBindings.Add (KeyCode.CursorRight, Command.Right);
+		}
+
+		///<inheritdoc/>
+		public override bool MouseEvent (MouseEvent mouseEvent)
+		{
+			if (mouseEvent.Flags.HasFlag (MouseFlags.Button1Pressed)) {
+
+				var c = provider.Cursor (mouseEvent.X - GetMargins (Frame.Width).left);
+				if (provider.Fixed == false && TextAlignment == TextAlignment.Right && Text.Length > 0) {
+					c += 1;
+				}
+				cursorPosition = c;
+				SetFocus ();
+				SetNeedsDisplay ();
+				return true;
+			}
+			return false;
+		}
+
 		///<inheritdoc/>
 		public override void PositionCursor ()
 		{
-			var (left, _) = GetMargins (Frame.Width);
+			(var left, var _) = GetMargins (Frame.Width);
 
 			// Fixed = true, is for inputs thar have fixed width, like masked ones.
 			// Fixed = false, is for normal input.
@@ -492,7 +489,7 @@ namespace Terminal.Gui {
 			case TextAlignment.Left:
 				return (0, total);
 			case TextAlignment.Centered:
-				return (total / 2, (total / 2) + (total % 2));
+				return (total / 2, total / 2 + total % 2);
 			case TextAlignment.Right:
 				return (total, 0);
 			default:
@@ -512,26 +509,26 @@ namespace Terminal.Gui {
 			var bgcolor = !IsValid ? new Color (Color.BrightRed) : ColorScheme.Focus.Background;
 			var textColor = new Attribute (ColorScheme.Focus.Foreground, bgcolor);
 
-			var (margin_left, margin_right) = GetMargins (Bounds.Width);
+			(var margin_left, var margin_right) = GetMargins (Bounds.Width);
 
 			Move (0, 0);
 
 			// Left Margin
 			Driver.SetAttribute (textColor);
-			for (int i = 0; i < margin_left; i++) {
+			for (var i = 0; i < margin_left; i++) {
 				Driver.AddRune ((Rune)' ');
 			}
 
 			// Content
 			Driver.SetAttribute (textColor);
 			// Content
-			for (int i = 0; i < provider.DisplayText.Length; i++) {
+			for (var i = 0; i < provider.DisplayText.Length; i++) {
 				Driver.AddRune ((Rune)provider.DisplayText [i]);
 			}
 
 			// Right Margin
 			Driver.SetAttribute (textColor);
-			for (int i = 0; i < margin_right; i++) {
+			for (var i = 0; i < margin_right; i++) {
 				Driver.AddRune ((Rune)' ');
 			}
 		}
@@ -621,7 +618,7 @@ namespace Terminal.Gui {
 			if (a.AsRune == default) {
 				return false;
 			}
-			
+
 			var key = a.AsRune;
 
 			var inserted = provider.InsertAt ((char)key.Value, cursorPosition);
@@ -631,19 +628,6 @@ namespace Terminal.Gui {
 			}
 
 			return false;
-		}
-
-		/// <summary>
-		/// This property returns true if the input is valid.
-		/// </summary>
-		public virtual bool IsValid {
-			get {
-				if (provider == null) {
-					return false;
-				}
-
-				return provider.IsValid;
-			}
 		}
 	}
 }

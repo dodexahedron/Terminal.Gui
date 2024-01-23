@@ -308,8 +308,8 @@ public partial class View {
 			y = Bounds.Y;
 		}
 		var rect = TextFormatter.CalcRect (x, y, TextFormatter.Text, TextFormatter.Direction);
-		int newWidth = rect.Size.Width - GetHotKeySpecifierLength () + (Margin == null ? 0 : Margin.Thickness.Horizontal + Border.Thickness.Horizontal + Padding.Thickness.Horizontal);
-		int newHeight = rect.Size.Height - GetHotKeySpecifierLength (false) + (Margin == null ? 0 : Margin.Thickness.Vertical + Border.Thickness.Vertical + Padding.Thickness.Vertical);
+		var newWidth = rect.Size.Width - GetHotKeySpecifierLength () + (Margin == null ? 0 : Margin.Thickness.Horizontal + Border.Thickness.Horizontal + Padding.Thickness.Horizontal);
+		var newHeight = rect.Size.Height - GetHotKeySpecifierLength (false) + (Margin == null ? 0 : Margin.Thickness.Vertical + Border.Thickness.Vertical + Padding.Thickness.Vertical);
 		return new Size (newWidth, newHeight);
 	}
 
@@ -319,8 +319,8 @@ public partial class View {
 		autoSize = new Size (rect.Size.Width - GetHotKeySpecifierLength (),
 			rect.Size.Height - GetHotKeySpecifierLength (false));
 		return !(ValidatePosDim && (!(Width is Dim.DimAbsolute) || !(Height is Dim.DimAbsolute)) ||
-			 _frame.Size.Width != rect.Size.Width - GetHotKeySpecifierLength () ||
-			 _frame.Size.Height != rect.Size.Height - GetHotKeySpecifierLength (false));
+		         _frame.Size.Width != rect.Size.Width - GetHotKeySpecifierLength () ||
+		         _frame.Size.Height != rect.Size.Height - GetHotKeySpecifierLength (false));
 	}
 
 	bool IsValidAutoSizeWidth (Dim width)

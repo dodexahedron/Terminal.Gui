@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 
-
 namespace Terminal.Gui;
 
 /// <summary>
@@ -10,6 +9,7 @@ namespace Terminal.Gui;
 /// </summary>
 public class Cell {
 	Rune _rune;
+
 	/// <summary>
 	/// The character to display. If <see cref="Rune"/> is <see langword="null"/>, then <see cref="Rune"/> is ignored.
 	/// </summary>
@@ -26,9 +26,10 @@ public class Cell {
 	/// If <see cref="CombiningMarks"/> empty, then <see cref="CombiningMarks"/> is ignored.
 	/// </summary>
 	/// <remarks>
-	/// Only valid in the rare case where <see cref="Rune"/> is a combining sequence that could not be normalized to a single Rune.
+	/// Only valid in the rare case where <see cref="Rune"/> is a combining sequence that could not be normalized to a single
+	/// Rune.
 	/// </remarks>
-	internal List<Rune> CombiningMarks { get; } = new List<Rune> ();
+	internal List<Rune> CombiningMarks { get; } = new ();
 
 	/// <summary>
 	/// The attributes to use when drawing the Glyph.
@@ -41,6 +42,6 @@ public class Cell {
 	/// </summary>
 	public bool IsDirty { get; set; }
 
-	/// <inheritdoc />
+	/// <inheritdoc/>
 	public override string ToString () => $"[{Rune}, {Attribute}]";
 }

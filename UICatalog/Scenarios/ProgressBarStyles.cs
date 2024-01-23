@@ -33,7 +33,7 @@ public class ProgressBarStyles : Scenario {
 
 		const float fractionStep = 0.01F;
 
-		var pbList = new ListView () {
+		var pbList = new ListView {
 			Title = "Focused ProgressBar",
 			Y = 0,
 			X = Pos.Center (),
@@ -85,7 +85,7 @@ public class ProgressBarStyles : Scenario {
 		var fgColorPickerBtn = new Button {
 			Text = "Foreground HotNormal Color",
 			X = Pos.Center (),
-			Y = Pos.Bottom (pbList),
+			Y = Pos.Bottom (pbList)
 		};
 		editor.Add (fgColorPickerBtn);
 		fgColorPickerBtn.Clicked += (s, e) => {
@@ -116,7 +116,7 @@ public class ProgressBarStyles : Scenario {
 			BorderStyle = LineStyle.Single,
 			Title = "ProgressBarFormat",
 			X = Pos.Left (pbList),
-			Y = Pos.Bottom (bgColorPickerBtn) + 1,
+			Y = Pos.Bottom (bgColorPickerBtn) + 1
 		};
 		editor.Add (rbPBFormat);
 
@@ -236,7 +236,5 @@ public class ProgressBarStyles : Scenario {
 		Application.Shutdown ();
 	}
 
-	public override void Run ()
-	{
-	}
+	public override void Run () { }
 }

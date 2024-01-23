@@ -1,9 +1,8 @@
 ﻿using System;
-using static Terminal.Gui.NetEvents;
 
 namespace Terminal.Gui;
 
-internal class FakeMainLoop : IMainLoopDriver {
+class FakeMainLoop : IMainLoopDriver {
 
 	public Action<ConsoleKeyInfo> MockKeyPressed;
 
@@ -22,11 +21,9 @@ internal class FakeMainLoop : IMainLoopDriver {
 		// No implementation needed for FakeMainLoop
 	}
 
-	public bool EventsPending ()
-	{
+	public bool EventsPending () =>
 		// Always return true for FakeMainLoop
-		return true;
-	}
+		true;
 
 	public void Iteration ()
 	{
@@ -35,8 +32,5 @@ internal class FakeMainLoop : IMainLoopDriver {
 		}
 	}
 
-	public void TearDown ()
-	{
-	}
+	public void TearDown () { }
 }
-

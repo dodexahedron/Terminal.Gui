@@ -47,8 +47,8 @@ public class RuneCell : IEquatable<RuneCell> {
 	/// otherwise, <see langword="false"/>.
 	/// </returns>
 	public bool Equals (RuneCell? other) => other != null &&
-						Rune.Equals (other.Rune) &&
-						ColorScheme == other.ColorScheme;
+	                                        Rune.Equals (other.Rune) &&
+	                                        ColorScheme == other.ColorScheme;
 
 	/// <summary>Returns a string that represents the current object.</summary>
 	/// <returns>A string that represents the current object.</returns>
@@ -63,10 +63,10 @@ public class RuneCell : IEquatable<RuneCell> {
 		var colorSchemeStr = "null";
 		if (ColorScheme != null) {
 			colorSchemeStr = $"Normal: {ColorScheme.Normal.Foreground},{ColorScheme.Normal.Background}; " +
-					 $"Focus: {ColorScheme.Focus.Foreground},{ColorScheme.Focus.Background}; " +
-					 $"HotNormal: {ColorScheme.HotNormal.Foreground},{ColorScheme.HotNormal.Background}; " +
-					 $"HotFocus: {ColorScheme.HotFocus.Foreground},{ColorScheme.HotFocus.Background}; " +
-					 $"Disabled: {ColorScheme.Disabled.Foreground},{ColorScheme.Disabled.Background}";
+			                 $"Focus: {ColorScheme.Focus.Foreground},{ColorScheme.Focus.Background}; " +
+			                 $"HotNormal: {ColorScheme.HotNormal.Foreground},{ColorScheme.HotNormal.Background}; " +
+			                 $"HotFocus: {ColorScheme.HotFocus.Foreground},{ColorScheme.HotFocus.Background}; " +
+			                 $"Disabled: {ColorScheme.Disabled.Foreground},{ColorScheme.Disabled.Background}";
 		}
 
 		return colorSchemeStr;
@@ -361,10 +361,10 @@ class TextModel {
 	}
 
 	internal static (int size, int length) DisplaySize (List<RuneCell> t,
-							    int start = -1,
-							    int end = -1,
-							    bool checkNextRune = true,
-							    int tabWidth = 0)
+		int start = -1,
+		int end = -1,
+		bool checkNextRune = true,
+		int tabWidth = 0)
 	{
 		var runes = new List<Rune> ();
 		foreach (var cell in t) {
@@ -375,10 +375,10 @@ class TextModel {
 
 	// Returns the size and length in a range of the string.
 	internal static (int size, int length) DisplaySize (List<Rune> t,
-							    int start = -1,
-							    int end = -1,
-							    bool checkNextRune = true,
-							    int tabWidth = 0)
+		int start = -1,
+		int end = -1,
+		bool checkNextRune = true,
+		int tabWidth = 0)
 	{
 		if (t == null || t.Count == 0) {
 			return (0, 0);
@@ -1125,16 +1125,16 @@ class WordWrapManager {
 	public TextModel Model { get; private set; }
 
 	public TextModel WrapModel (int width,
-				    out int nRow,
-				    out int nCol,
-				    out int nStartRow,
-				    out int nStartCol,
-				    int row = 0,
-				    int col = 0,
-				    int startRow = 0,
-				    int startCol = 0,
-				    int tabWidth = 0,
-				    bool preserveTrailingSpaces = true)
+		out int nRow,
+		out int nCol,
+		out int nStartRow,
+		out int nStartCol,
+		int row = 0,
+		int col = 0,
+		int startRow = 0,
+		int startCol = 0,
+		int tabWidth = 0,
+		bool preserveTrailingSpaces = true)
 	{
 		_frameWidth = width;
 
@@ -1365,15 +1365,15 @@ class WordWrapManager {
 	}
 
 	public void UpdateModel (TextModel model,
-				 out int nRow,
-				 out int nCol,
-				 out int nStartRow,
-				 out int nStartCol,
-				 int row,
-				 int col,
-				 int startRow,
-				 int startCol,
-				 bool preserveTrailingSpaces)
+		out int nRow,
+		out int nCol,
+		out int nStartRow,
+		out int nStartCol,
+		int row,
+		int col,
+		int startRow,
+		int startCol,
+		bool preserveTrailingSpaces)
 	{
 		_isWrapModelRefreshing = true;
 		Model = model;
@@ -1537,6 +1537,7 @@ class WordWrapManager {
 ///         </list>
 /// </remarks>
 public class TextView : View {
+	readonly HistoryText _historyText = new ();
 	bool _allowsReturn = true;
 	bool _allowsTab = true;
 	int _bottomOffset, _rightOffset;
@@ -1552,7 +1553,6 @@ public class TextView : View {
 	CultureInfo? _currentCulture;
 
 	CursorVisibility _desiredCursorVisibility = CursorVisibility.Default;
-	readonly HistoryText _historyText = new ();
 
 	bool _isButtonShift;
 	bool _isDrawing;
@@ -2251,7 +2251,7 @@ public class TextView : View {
 		KeyBindings.Add ('F' + KeyCode.AltMask, Command.WordRight);
 
 		KeyBindings.Add (KeyCode.CursorRight | KeyCode.CtrlMask | KeyCode.ShiftMask, Command.WordRightExtend);
-		KeyBindings.Add (KeyCode.Delete | KeyCode.CtrlMask, Command.KillWordForwards);  // kill-word-forwards
+		KeyBindings.Add (KeyCode.Delete | KeyCode.CtrlMask, Command.KillWordForwards); // kill-word-forwards
 		KeyBindings.Add (KeyCode.Backspace | KeyCode.CtrlMask, Command.KillWordBackwards); // kill-word-backwards
 
 		// BUGBUG: If AllowsReturn is false, Key.Enter should not be bound (so that Toplevel can cause Command.Accept).
@@ -2695,11 +2695,11 @@ public class TextView : View {
 
 	// Returns an encoded region start..end (top 32 bits are the row, low32 the column)
 	void GetEncodedRegionBounds (out long start,
-				     out long end,
-				     int? startRow = null,
-				     int? startCol = null,
-				     int? cRow = null,
-				     int? cCol = null)
+		out long end,
+		int? startRow = null,
+		int? startCol = null,
+		int? cRow = null,
+		int? cCol = null)
 	{
 		long selection;
 		long point;
@@ -2853,11 +2853,11 @@ public class TextView : View {
 	/// <param name="replace"><c>true</c>If is replacing.<c>false</c>otherwise.</param>
 	/// <returns><c>true</c>If the text was found.<c>false</c>otherwise.</returns>
 	public bool FindNextText (string textToFind,
-				  out bool gaveFullTurn,
-				  bool matchCase = false,
-				  bool matchWholeWord = false,
-				  string? textToReplace = null,
-				  bool replace = false)
+		out bool gaveFullTurn,
+		bool matchCase = false,
+		bool matchWholeWord = false,
+		string? textToReplace = null,
+		bool replace = false)
 	{
 		if (_model.Count == 0) {
 			gaveFullTurn = false;
@@ -2882,11 +2882,11 @@ public class TextView : View {
 	/// <param name="replace"><c>true</c>If the text was found.<c>false</c>otherwise.</param>
 	/// <returns><c>true</c>If the text was found.<c>false</c>otherwise.</returns>
 	public bool FindPreviousText (string textToFind,
-				      out bool gaveFullTurn,
-				      bool matchCase = false,
-				      bool matchWholeWord = false,
-				      string? textToReplace = null,
-				      bool replace = false)
+		out bool gaveFullTurn,
+		bool matchCase = false,
+		bool matchWholeWord = false,
+		string? textToReplace = null,
+		bool replace = false)
 	{
 		if (_model.Count == 0) {
 			gaveFullTurn = false;
@@ -2914,9 +2914,9 @@ public class TextView : View {
 	/// <param name="textToReplace">The text to replace.</param>
 	/// <returns><c>true</c>If the text was found.<c>false</c>otherwise.</returns>
 	public bool ReplaceAllText (string textToFind,
-				    bool matchCase = false,
-				    bool matchWholeWord = false,
-				    string? textToReplace = null)
+		bool matchCase = false,
+		bool matchWholeWord = false,
+		string? textToReplace = null)
 	{
 		if (_isReadOnly || _model.Count == 0) {
 			return false;
@@ -2930,10 +2930,10 @@ public class TextView : View {
 	}
 
 	bool SetFoundText (string text,
-			   (Point current, bool found) foundPos,
-			   string? textToReplace = null,
-			   bool replace = false,
-			   bool replaceAll = false)
+		(Point current, bool found) foundPos,
+		string? textToReplace = null,
+		bool replace = false,
+		bool replaceAll = false)
 	{
 		if (foundPos.found) {
 			StartSelecting ();
@@ -3180,7 +3180,7 @@ public class TextView : View {
 	/// <param name="toAdd">Text to add</param>
 	public void InsertText (string toAdd)
 	{
-		foreach (char ch in toAdd) {
+		foreach (var ch in toAdd) {
 			Key key;
 			try {
 				key = new Key (ch);

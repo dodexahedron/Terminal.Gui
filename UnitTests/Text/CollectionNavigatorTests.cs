@@ -1,24 +1,22 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Terminal.Gui.TextTests;
+
 public class CollectionNavigatorTests {
+
+	static readonly string [] simpleStrings = {
+		"appricot", // 0
+		"arm", // 1
+		"bat", // 2
+		"batman", // 3
+		"candle" // 4
+	};
+
 	readonly ITestOutputHelper _output;
 
-	public CollectionNavigatorTests (ITestOutputHelper output)
-	{
-		_output = output;
-	}
-
-	static string [] simpleStrings = new string []{
-		    "appricot", // 0
-		    "arm",      // 1
-		    "bat",      // 2
-		    "batman",   // 3
-		    "candle"    // 4
-		  };
+	public CollectionNavigatorTests (ITestOutputHelper output) => _output = output;
 
 	[Fact]
 	public void ShouldAcceptNegativeOne ()
@@ -29,6 +27,7 @@ public class CollectionNavigatorTests {
 		// and select the first entry of the letter 'b'
 		Assert.Equal (2, n.GetNextMatchingItem (-1, 'b'));
 	}
+
 	[Fact]
 	public void OutOfBoundsShouldBeIgnored ()
 	{
@@ -62,18 +61,18 @@ public class CollectionNavigatorTests {
 	[Fact]
 	public void FullText ()
 	{
-		var strings = new string []{
-			    "appricot",
-			    "arm",
-			    "ta",
-			    "target",
-			    "text",
-			    "egg",
-			    "candle"
-			  };
+		var strings = new [] {
+			"appricot",
+			"arm",
+			"ta",
+			"target",
+			"text",
+			"egg",
+			"candle"
+		};
 
 		var n = new CollectionNavigator (strings);
-		int current = 0;
+		var current = 0;
 		Assert.Equal (strings.IndexOf ("ta"), current = n.GetNextMatchingItem (current, 't'));
 
 		// should match "te" in "text"
@@ -93,19 +92,19 @@ public class CollectionNavigatorTests {
 	[Fact]
 	public void Unicode ()
 	{
-		var strings = new string []{
-			    "appricot",
-			    "arm",
-			    "ta",
-			    "丗丙业丞",
-			    "丗丙丛",
-			    "text",
-			    "egg",
-			    "candle"
-			  };
+		var strings = new [] {
+			"appricot",
+			"arm",
+			"ta",
+			"丗丙业丞",
+			"丗丙丛",
+			"text",
+			"egg",
+			"candle"
+		};
 
 		var n = new CollectionNavigator (strings);
-		int current = 0;
+		var current = 0;
 		Assert.Equal (strings.IndexOf ("丗丙业丞"), current = n.GetNextMatchingItem (current, '丗'));
 
 		// 丗丙业丞 is as good a match as 丗丙丛
@@ -129,16 +128,16 @@ public class CollectionNavigatorTests {
 	[Fact]
 	public void AtSymbol ()
 	{
-		var strings = new string []{
-			    "appricot",
-			    "arm",
-			    "ta",
-			    "@bob",
-			    "@bb",
-			    "text",
-			    "egg",
-			    "candle"
-			  };
+		var strings = new [] {
+			"appricot",
+			"arm",
+			"ta",
+			"@bob",
+			"@bb",
+			"text",
+			"egg",
+			"candle"
+		};
 
 		var n = new CollectionNavigator (strings);
 		Assert.Equal (3, n.GetNextMatchingItem (0, '@'));
@@ -149,15 +148,15 @@ public class CollectionNavigatorTests {
 	[Fact]
 	public void Word ()
 	{
-		var strings = new string []{
-			    "appricot",
-			    "arm",
-			    "bat",
-			    "batman",
-			    "bates hotel",
-			    "candle"
-			  };
-		int current = 0;
+		var strings = new [] {
+			"appricot",
+			"arm",
+			"bat",
+			"batman",
+			"bates hotel",
+			"candle"
+		};
+		var current = 0;
 		var n = new CollectionNavigator (strings);
 		Assert.Equal (strings.IndexOf ("bat"), current = n.GetNextMatchingItem (current, 'b')); // match bat
 		Assert.Equal (strings.IndexOf ("bat"), current = n.GetNextMatchingItem (current, 'a')); // match bat
@@ -170,15 +169,15 @@ public class CollectionNavigatorTests {
 	[Fact]
 	public void Symbols ()
 	{
-		var strings = new string []{
-			    "$$",
-			    "$100.00",
-			    "$101.00",
-			    "$101.10",
-			    "$200.00",
-			    "appricot"
-			  };
-		int current = 0;
+		var strings = new [] {
+			"$$",
+			"$100.00",
+			"$101.00",
+			"$101.10",
+			"$200.00",
+			"appricot"
+		};
+		var current = 0;
 		var n = new CollectionNavigator (strings);
 		Assert.Equal (strings.IndexOf ("appricot"), current = n.GetNextMatchingItem (current, 'a'));
 		Assert.Equal ("a", n.SearchString);
@@ -215,15 +214,15 @@ public class CollectionNavigatorTests {
 	[Fact]
 	public void Delay ()
 	{
-		var strings = new string []{
-			    "$$",
-			    "$100.00",
-			    "$101.00",
-			    "$101.10",
-			    "$200.00",
-			    "appricot"
-			  };
-		int current = 0;
+		var strings = new [] {
+			"$$",
+			"$100.00",
+			"$101.00",
+			"$101.10",
+			"$200.00",
+			"appricot"
+		};
+		var current = 0;
 		var n = new CollectionNavigator (strings);
 
 		// No delay
@@ -263,16 +262,16 @@ public class CollectionNavigatorTests {
 	[Fact]
 	public void MutliKeySearchPlusWrongKeyStays ()
 	{
-		var strings = new string []{
-				"a",
-			    "c",
-			    "can",
-			    "candle",
-			    "candy",
-			    "yellow",
-				"zebra"
-			  };
-		int current = 0;
+		var strings = new [] {
+			"a",
+			"c",
+			"can",
+			"candle",
+			"candy",
+			"yellow",
+			"zebra"
+		};
+		var current = 0;
 		var n = new CollectionNavigator (strings);
 
 		// https://github.com/gui-cs/Terminal.Gui/pull/2132#issuecomment-1298425573
@@ -312,64 +311,64 @@ public class CollectionNavigatorTests {
 	[Fact]
 	public void MinimizeMovement_False_ShouldMoveIfMultipleMatches ()
 	{
-		var strings = new string [] {
-				"$$",
-				"$100.00",
-				"$101.00",
-				"$101.10",
-				"$200.00",
-				"appricot",
-				"c",
-				"car",
-				"cart",
-			};
-		int current = 0;
+		var strings = new [] {
+			"$$",
+			"$100.00",
+			"$101.00",
+			"$101.10",
+			"$200.00",
+			"appricot",
+			"c",
+			"car",
+			"cart"
+		};
+		var current = 0;
 		var n = new CollectionNavigator (strings);
-		Assert.Equal (strings.IndexOf ("$$"), current = n.GetNextMatchingItem (current, "$$", false));
-		Assert.Equal (strings.IndexOf ("$100.00"), current = n.GetNextMatchingItem (current, "$", false));
-		Assert.Equal (strings.IndexOf ("$$"), current = n.GetNextMatchingItem (current, "$$", false)); // back to top
-		Assert.Equal (strings.IndexOf ("$100.00"), current = n.GetNextMatchingItem (current, "$", false));
-		Assert.Equal (strings.IndexOf ("$101.00"), current = n.GetNextMatchingItem (current, "$", false));
-		Assert.Equal (strings.IndexOf ("$101.10"), current = n.GetNextMatchingItem (current, "$", false));
-		Assert.Equal (strings.IndexOf ("$200.00"), current = n.GetNextMatchingItem (current, "$", false));
+		Assert.Equal (strings.IndexOf ("$$"), current = n.GetNextMatchingItem (current, "$$"));
+		Assert.Equal (strings.IndexOf ("$100.00"), current = n.GetNextMatchingItem (current, "$"));
+		Assert.Equal (strings.IndexOf ("$$"), current = n.GetNextMatchingItem (current, "$$")); // back to top
+		Assert.Equal (strings.IndexOf ("$100.00"), current = n.GetNextMatchingItem (current, "$"));
+		Assert.Equal (strings.IndexOf ("$101.00"), current = n.GetNextMatchingItem (current, "$"));
+		Assert.Equal (strings.IndexOf ("$101.10"), current = n.GetNextMatchingItem (current, "$"));
+		Assert.Equal (strings.IndexOf ("$200.00"), current = n.GetNextMatchingItem (current, "$"));
 
-		Assert.Equal (strings.IndexOf ("$$"), current = n.GetNextMatchingItem (current, "$", false)); // back to top
-		Assert.Equal (strings.IndexOf ("appricot"), current = n.GetNextMatchingItem (current, "a", false));
-		Assert.Equal (strings.IndexOf ("$$"), current = n.GetNextMatchingItem (current, "$", false)); // back to top
+		Assert.Equal (strings.IndexOf ("$$"), current = n.GetNextMatchingItem (current, "$")); // back to top
+		Assert.Equal (strings.IndexOf ("appricot"), current = n.GetNextMatchingItem (current, "a"));
+		Assert.Equal (strings.IndexOf ("$$"), current = n.GetNextMatchingItem (current, "$")); // back to top
 
-		Assert.Equal (strings.IndexOf ("$100.00"), current = n.GetNextMatchingItem (current, "$100.00", false));
-		Assert.Equal (strings.IndexOf ("$101.00"), current = n.GetNextMatchingItem (current, "$", false));
-		Assert.Equal (strings.IndexOf ("$101.00"), current = n.GetNextMatchingItem (current, "$101.00", false));
-		Assert.Equal (strings.IndexOf ("$200.00"), current = n.GetNextMatchingItem (current, "$2", false));
+		Assert.Equal (strings.IndexOf ("$100.00"), current = n.GetNextMatchingItem (current, "$100.00"));
+		Assert.Equal (strings.IndexOf ("$101.00"), current = n.GetNextMatchingItem (current, "$"));
+		Assert.Equal (strings.IndexOf ("$101.00"), current = n.GetNextMatchingItem (current, "$101.00"));
+		Assert.Equal (strings.IndexOf ("$200.00"), current = n.GetNextMatchingItem (current, "$2"));
 
-		Assert.Equal (strings.IndexOf ("$200.00"), current = n.GetNextMatchingItem (current, "$200.00", false));
-		Assert.Equal (strings.IndexOf ("$101.00"), current = n.GetNextMatchingItem (current, "$101.00", false));
-		Assert.Equal (strings.IndexOf ("$200.00"), current = n.GetNextMatchingItem (current, "$2", false));
+		Assert.Equal (strings.IndexOf ("$200.00"), current = n.GetNextMatchingItem (current, "$200.00"));
+		Assert.Equal (strings.IndexOf ("$101.00"), current = n.GetNextMatchingItem (current, "$101.00"));
+		Assert.Equal (strings.IndexOf ("$200.00"), current = n.GetNextMatchingItem (current, "$2"));
 
-		Assert.Equal (strings.IndexOf ("$101.00"), current = n.GetNextMatchingItem (current, "$101.00", false));
-		Assert.Equal (strings.IndexOf ("$200.00"), current = n.GetNextMatchingItem (current, "$2", false));
+		Assert.Equal (strings.IndexOf ("$101.00"), current = n.GetNextMatchingItem (current, "$101.00"));
+		Assert.Equal (strings.IndexOf ("$200.00"), current = n.GetNextMatchingItem (current, "$2"));
 
-		Assert.Equal (strings.IndexOf ("car"), current = n.GetNextMatchingItem (current, "car", false));
-		Assert.Equal (strings.IndexOf ("cart"), current = n.GetNextMatchingItem (current, "car", false));
+		Assert.Equal (strings.IndexOf ("car"), current = n.GetNextMatchingItem (current, "car"));
+		Assert.Equal (strings.IndexOf ("cart"), current = n.GetNextMatchingItem (current, "car"));
 
-		Assert.Equal (-1, current = n.GetNextMatchingItem (current, "x", false));
+		Assert.Equal (-1, current = n.GetNextMatchingItem (current, "x"));
 	}
 
 	[Fact]
 	public void MinimizeMovement_True_ShouldStayOnCurrentIfMultipleMatches ()
 	{
-		var strings = new string [] {
-				"$$",
-				"$100.00",
-				"$101.00",
-				"$101.10",
-				"$200.00",
-				"appricot",
-				"c",
-				"car",
-				"cart",
-			};
-		int current = 0;
+		var strings = new [] {
+			"$$",
+			"$100.00",
+			"$101.00",
+			"$101.10",
+			"$200.00",
+			"appricot",
+			"c",
+			"car",
+			"cart"
+		};
+		var current = 0;
 		var n = new CollectionNavigator (strings);
 		Assert.Equal (strings.IndexOf ("$$"), current = n.GetNextMatchingItem (current, "$$", true));
 		Assert.Equal (strings.IndexOf ("$$"), current = n.GetNextMatchingItem (current, "$", true));
@@ -383,7 +382,7 @@ public class CollectionNavigatorTests {
 
 		Assert.Equal (-1, current = n.GetNextMatchingItem (current, "x", true));
 	}
-	
+
 	[Theory]
 	[InlineData (KeyCode.A, true)]
 	[InlineData (KeyCode.Z, true)]
@@ -391,7 +390,6 @@ public class CollectionNavigatorTests {
 	[InlineData (KeyCode.A | KeyCode.ShiftMask, true)]
 	[InlineData (KeyCode.Z | KeyCode.ShiftMask, true)]
 	[InlineData (KeyCode.Space, true)]
-
 	[InlineData (KeyCode.Z | KeyCode.CtrlMask, false)]
 	[InlineData (KeyCode.Z | KeyCode.AltMask, false)]
 	[InlineData (KeyCode.F1, false)]

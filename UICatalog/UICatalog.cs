@@ -11,59 +11,81 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 using Terminal.Gui;
 using static Terminal.Gui.ConfigurationManager;
+using Command = Terminal.Gui.Command;
+using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
 
 #nullable enable
 
 namespace UICatalog;
 
 /// <summary>
-/// UI Catalog is a comprehensive sample library for Terminal.Gui. It provides a simple UI for adding to the catalog of scenarios.
+/// UI Catalog is a comprehensive sample library for Terminal.Gui. It provides a simple UI for adding to the catalog of
+/// scenarios.
 /// </summary>
 /// <remarks>
-/// <para>
-///	UI Catalog attempts to satisfy the following goals:
-/// </para>
-/// <para>
-/// <list type="number">
-///	<item>
-///		<description>
-///		Be an easy to use showcase for Terminal.Gui concepts and features.
-///		</description>
-///	</item>
-///	<item>
-///		<description>
-///		Provide sample code that illustrates how to properly implement said concepts & features.
-///		</description>
-///	</item>
-///	<item>
-///		<description>
-///		Make it easy for contributors to add additional samples in a structured way.
-///		</description>
-///	</item>
-/// </list>
-/// </para>	
-/// <para>
-///	See the project README for more details (https://github.com/gui-cs/Terminal.Gui/tree/master/UICatalog/README.md).
-/// </para>	
+///         <para>
+///         UI Catalog attempts to satisfy the following goals:
+///         </para>
+///         <para>
+///                 <list type="number">
+///                         <item>
+///                                 <description>
+///                                 Be an easy to use showcase for Terminal.Gui concepts and features.
+///                                 </description>
+///                         </item>
+///                         <item>
+///                                 <description>
+///                                 Provide sample code that illustrates how to properly implement said concepts &
+///                                 features.
+///                                 </description>
+///                         </item>
+///                         <item>
+///                                 <description>
+///                                 Make it easy for contributors to add additional samples in a structured way.
+///                                 </description>
+///                         </item>
+///                 </list>
+///         </para>
+///         <para>
+///         See the project README for more details
+///         (https://github.com/gui-cs/Terminal.Gui/tree/master/UICatalog/README.md).
+///         </para>
 /// </remarks>
 class UICatalogApp {
+
+	static readonly FileSystemWatcher _currentDirWatcher = new ();
+	static readonly FileSystemWatcher _homeDirWatcher = new ();
+
+	static Options _options;
+
+	static List<Scenario>? _scenarios;
+	static List<string>? _categories;
+
+	// When a scenario is run, the main app is killed. These items
+	// are therefore cached so that when the scenario exits the
+	// main app UI can be restored to previous state
+	static int _cachedScenarioIndex;
+	static int _cachedCategoryIndex;
+	static string? _cachedTheme = string.Empty;
+
+	static StringBuilder? _aboutMessage;
+
+	// If set, holds the scenario the user selected
+	static Scenario? _selectedScenario;
+
+	static string _forceDriver = string.Empty;
+	static ConsoleDriver.DiagnosticFlags _diagnosticFlags;
+	static bool _isFirstRunning = true;
+	static string _topLevelColorScheme = string.Empty;
+
+	static MenuItem []? _themeMenuItems;
+	static MenuBarItem? _themeMenuBarItem;
+
 	[SerializableConfigurationProperty (Scope = typeof (AppScope), OmitClassName = true)]
 	[JsonPropertyName ("UICatalog.StatusBar")]
 	public static bool ShowStatusBar { get; set; } = true;
-
-	static readonly FileSystemWatcher _currentDirWatcher = new FileSystemWatcher ();
-	static readonly FileSystemWatcher _homeDirWatcher = new FileSystemWatcher ();
-
-	struct Options {
-		public string Driver;
-		public string Scenario;
-		/* etc. */
-	}
-
-	static Options _options;
 
 	static int Main (string [] args)
 	{
@@ -97,14 +119,15 @@ class UICatalogApp {
 			driverOption
 		};
 
-		rootCommand.SetHandler ((context) => {
-			Options options = new Options () {
+		rootCommand.SetHandler (context => {
+			var options = new Options {
 				Driver = context.ParseResult.GetValueForOption (driverOption),
-				Scenario = context.ParseResult.GetValueForArgument (scenarioArgument),
+				Scenario = context.ParseResult.GetValueForArgument (scenarioArgument)
 				/* etc. */
 			};
 			// See https://github.com/dotnet/command-line-api/issues/796 for the rationale behind this hackery
-			_options = options; ;
+			_options = options;
+			;
 		});
 
 		rootCommand.Invoke (args);
@@ -126,7 +149,7 @@ class UICatalogApp {
 		if (options.Scenario != "none") {
 			_topLevelColorScheme = "Base";
 
-			int item = _scenarios!.FindIndex (s => s.GetName ().Equals (options.Scenario, StringComparison.OrdinalIgnoreCase));
+			var item = _scenarios!.FindIndex (s => s.GetName ().Equals (options.Scenario, StringComparison.OrdinalIgnoreCase));
 			_selectedScenario = (Scenario)Activator.CreateInstance (_scenarios [item].GetType ())!;
 
 			Application.Init (driverName: _forceDriver);
@@ -194,7 +217,7 @@ class UICatalogApp {
 		// Setup a file system watcher for `./.tui/`
 		_currentDirWatcher.NotifyFilter = NotifyFilters.LastWrite;
 
-		string assemblyLocation = Assembly.GetExecutingAssembly ().Location;
+		var assemblyLocation = Assembly.GetExecutingAssembly ().Location;
 		string tuiDir;
 
 		if (!string.IsNullOrEmpty (assemblyLocation)) {
@@ -246,7 +269,7 @@ class UICatalogApp {
 
 	/// <summary>
 	/// Shows the UI Catalog selection UI. When the user selects a Scenario to run, the
-	/// UI Catalog main app UI is killed and the Scenario is run as though it were Application.Top. 
+	/// UI Catalog main app UI is killed and the Scenario is run as though it were Application.Top.
 	/// When the Scenario exits, this function exits.
 	/// </summary>
 	/// <returns></returns>
@@ -274,76 +297,104 @@ class UICatalogApp {
 		return _selectedScenario!;
 	}
 
-	static List<Scenario>? _scenarios;
-	static List<string>? _categories;
+	static void VerifyObjectsWereDisposed ()
+	{
+#if DEBUG_IDISPOSABLE
+		// Validate there are no outstanding Responder-based instances 
+		// after a scenario was selected to run. This proves the main UI Catalog
+		// 'app' closed cleanly.
+		foreach (var inst in Responder.Instances) {
 
-	// When a scenario is run, the main app is killed. These items
-	// are therefore cached so that when the scenario exits the
-	// main app UI can be restored to previous state
-	static int _cachedScenarioIndex = 0;
-	static int _cachedCategoryIndex = 0;
-	static string? _cachedTheme = string.Empty;
+			Debug.Assert (inst.WasDisposed);
+		}
+		Responder.Instances.Clear ();
 
-	static StringBuilder? _aboutMessage = null;
+		// Validate there are no outstanding Application.RunState-based instances 
+		// after a scenario was selected to run. This proves the main UI Catalog
+		// 'app' closed cleanly.
+		foreach (var inst in RunState.Instances) {
+			Debug.Assert (inst.WasDisposed);
+		}
+		RunState.Instances.Clear ();
+#endif
+	}
 
-	// If set, holds the scenario the user selected
-	static Scenario? _selectedScenario = null;
+	static void OpenUrl (string url)
+	{
+		if (RuntimeInformation.IsOSPlatform (OSPlatform.Windows)) {
+			url = url.Replace ("&", "^&");
+			Process.Start (new ProcessStartInfo ("cmd", $"/c start {url}") { CreateNoWindow = true });
+		} else if (RuntimeInformation.IsOSPlatform (OSPlatform.Linux)) {
+			using var process = new Process {
+				StartInfo = new ProcessStartInfo {
+					FileName = "xdg-open",
+					Arguments = url,
+					RedirectStandardError = true,
+					RedirectStandardOutput = true,
+					CreateNoWindow = true,
+					UseShellExecute = false
+				}
+			};
+			process.Start ();
+		} else if (RuntimeInformation.IsOSPlatform (OSPlatform.OSX)) {
+			Process.Start ("open", url);
+		}
+	}
 
-	static string _forceDriver = string.Empty;
-	static ConsoleDriver.DiagnosticFlags _diagnosticFlags;
-	static bool _isFirstRunning = true;
-	static string _topLevelColorScheme = string.Empty;
+	struct Options {
+		public string Driver;
 
-	static MenuItem []? _themeMenuItems;
-	static MenuBarItem? _themeMenuBarItem;
+		public string Scenario;
+		/* etc. */
+	}
 
 	/// <summary>
-	/// This is the main UI Catalog app view. It is run fresh when the app loads (if a Scenario has not been passed on 
+	/// This is the main UI Catalog app view. It is run fresh when the app loads (if a Scenario has not been passed on
 	/// the command line) and each time a Scenario ends.
 	/// </summary>
 	public class UICatalogTopLevel : Toplevel {
-		public MenuItem? miUseSubMenusSingleFrame;
-		public MenuItem? miIsMenuBorderDisabled;
-		public MenuItem? miForce16Colors;
-		public MenuItem? miIsMouseDisabled;
+		readonly CollectionNavigator _scenarioCollectionNav = new ();
 
 		public ListView CategoryList;
+
+		public StatusItem DriverName;
+		public MenuItem? miForce16Colors;
+		public MenuItem? miIsMenuBorderDisabled;
+		public MenuItem? miIsMouseDisabled;
+		public MenuItem? miUseSubMenusSingleFrame;
+		public StatusItem OS;
 
 		// UI Catalog uses TableView for the scenario list instead of a ListView to demonstate how
 		// TableView works. There's no real reason not to use ListView. Because we use TableView, and TableView
 		// doesn't (currently) have CollectionNavigator support built in, we implement it here, within the app.
 		public TableView ScenarioList;
-		CollectionNavigator _scenarioCollectionNav = new CollectionNavigator ();
-
-		public StatusItem DriverName;
-		public StatusItem OS;
 
 		public UICatalogTopLevel ()
 		{
 			_themeMenuItems = CreateThemeMenuItems ();
 			_themeMenuBarItem = new MenuBarItem ("_Themes", _themeMenuItems);
-			MenuBar = new MenuBar (new MenuBarItem [] {
-				new MenuBarItem ("_File", new MenuItem [] {
-					new MenuItem ("_Quit", "Quit UI Catalog", RequestStop, null, null)
+			MenuBar = new MenuBar (new [] {
+				new ("_File", new MenuItem [] {
+					new ("_Quit", "Quit UI Catalog", RequestStop)
 				}),
 				_themeMenuBarItem,
-				new MenuBarItem ("Diag_nostics", CreateDiagnosticMenuItems ()),
-				new MenuBarItem ("_Help", new MenuItem [] {
-					new MenuItem ("_Documentation", "", () => OpenUrl ("https://gui-cs.github.io/Terminal.GuiV2Docs"), null, null, (KeyCode)Key.F1),
-					new MenuItem ("_README", "", () => OpenUrl ("https://github.com/gui-cs/Terminal.Gui"), null, null, (KeyCode)Key.F2),
-					new MenuItem ("_About...", "About UI Catalog", () => MessageBox.Query ("About UI Catalog", _aboutMessage!.ToString (), 0, false, "_Ok"), null, null, (KeyCode)Key.A.WithCtrl)
+				new ("Diag_nostics", CreateDiagnosticMenuItems ()),
+				new ("_Help", new MenuItem [] {
+					new ("_Documentation", "", () => OpenUrl ("https://gui-cs.github.io/Terminal.GuiV2Docs"), null, null, (KeyCode)Key.F1),
+					new ("_README", "", () => OpenUrl ("https://github.com/gui-cs/Terminal.Gui"), null, null, (KeyCode)Key.F2),
+					new ("_About...", "About UI Catalog", () => MessageBox.Query ("About UI Catalog", _aboutMessage!.ToString (), 0, false, "_Ok"), null, null, (KeyCode)Key.A.WithCtrl)
 				})
 			});
 
 			DriverName = new StatusItem (Key.Empty, "Driver:", null);
 			OS = new StatusItem (Key.Empty, "OS:", null);
 
-			StatusBar = new StatusBar () {
+			StatusBar = new StatusBar {
 				Visible = ShowStatusBar
 			};
 
-			StatusBar.Items = new StatusItem [] {
-				new StatusItem (Application.QuitKey, $"~{Application.QuitKey} to quit", () => {
+			StatusBar.Items = new [] {
+				new (Application.QuitKey, $"~{Application.QuitKey} to quit", () => {
 					if (_selectedScenario is null) {
 						// This causes GetScenarioToRun to return null
 						_selectedScenario = null;
@@ -352,7 +403,7 @@ class UICatalogApp {
 						_selectedScenario.RequestStop ();
 					}
 				}),
-				new StatusItem (Key.F10, "~F10~ Status Bar", () => {
+				new (Key.F10, "~F10~ Status Bar", () => {
 					StatusBar.Visible = !StatusBar.Visible;
 					//ContentPane!.Height = Dim.Fill(StatusBar.Visible ? 1 : 0);
 					LayoutSubviews ();
@@ -382,10 +433,10 @@ class UICatalogApp {
 			// Create the scenario list. The contents of the scenario list changes whenever the
 			// Category list selection changes (to show just the scenarios that belong to the selected
 			// category).
-			ScenarioList = new TableView () {
+			ScenarioList = new TableView {
 				X = Pos.Right (CategoryList) - 1,
 				Y = 1,
-				Width = Dim.Fill (0),
+				Width = Dim.Fill (),
 				Height = Dim.Fill (1),
 				//AllowsMarking = false,
 				CanFocus = true,
@@ -417,16 +468,16 @@ class UICatalogApp {
 			* we just measure all the data ourselves and set the appropriate
 			* max widths as ColumnStyles 
 			*/
-			int longestName = _scenarios!.Max (s => s.GetName ().Length);
-			ScenarioList.Style.ColumnStyles.Add (0, new ColumnStyle () { MaxWidth = longestName, MinWidth = longestName, MinAcceptableWidth = longestName });
-			ScenarioList.Style.ColumnStyles.Add (1, new ColumnStyle () { MaxWidth = 1 });
+			var longestName = _scenarios!.Max (s => s.GetName ().Length);
+			ScenarioList.Style.ColumnStyles.Add (0, new ColumnStyle { MaxWidth = longestName, MinWidth = longestName, MinAcceptableWidth = longestName });
+			ScenarioList.Style.ColumnStyles.Add (1, new ColumnStyle { MaxWidth = 1 });
 
 			// Enable user to find & select a scenario by typing text
 			// TableView does not (currently) have built-in CollectionNavigator support (the ability for the 
 			// user to type and the items that match get selected). We implement it in the app instead. 
 			ScenarioList.KeyDown += (s, a) => {
 				if (CollectionNavigatorBase.IsCompatibleKey (a)) {
-					int? newItem = _scenarioCollectionNav?.GetNextMatchingItem (ScenarioList.SelectedRow, (char)a);
+					var newItem = _scenarioCollectionNav?.GetNextMatchingItem (ScenarioList.SelectedRow, (char)a);
 					if (newItem is int v && newItem != -1) {
 						ScenarioList.SelectedRow = v;
 						ScenarioList.EnsureSelectedCellIsVisible ();
@@ -438,8 +489,8 @@ class UICatalogApp {
 			ScenarioList.CellActivated += ScenarioView_OpenSelectedItem;
 
 			// TableView typically is a grid where nav keys are biased for moving left/right.
-			ScenarioList.KeyBindings.Add (Key.Home, Terminal.Gui.Command.TopHome);
-			ScenarioList.KeyBindings.Add (Key.End, Terminal.Gui.Command.BottomEnd);
+			ScenarioList.KeyBindings.Add (Key.Home, Command.TopHome);
+			ScenarioList.KeyBindings.Add (Key.End, Command.BottomEnd);
 
 			// Ideally, TableView.MultiSelect = false would turn off any keybindings for
 			// multi-select options. But it currently does not. UI Catalog uses Ctrl-A for
@@ -469,7 +520,7 @@ class UICatalogApp {
 
 			miIsMouseDisabled!.Checked = Application.IsMouseDisabled;
 			DriverName.Title = $"Driver: {Driver.GetVersionInfo ()}";
-			OS.Title = $"OS: {Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystem} {Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion}";
+			OS.Title = $"OS: {RuntimeEnvironment.OperatingSystem} {RuntimeEnvironment.OperatingSystemVersion}";
 
 			if (_selectedScenario != null) {
 				_selectedScenario = null;
@@ -482,7 +533,7 @@ class UICatalogApp {
 			StatusBar.VisibleChanged += (s, e) => {
 				ShowStatusBar = StatusBar.Visible;
 
-				int height = StatusBar.Visible ? 1 : 0;
+				var height = StatusBar.Visible ? 1 : 0;
 				CategoryList.Height = Dim.Fill (height);
 				ScenarioList.Height = Dim.Fill (height);
 				// ContentPane.Height = Dim.Fill (height);
@@ -515,7 +566,7 @@ class UICatalogApp {
 				_cachedScenarioIndex = ScenarioList.SelectedRow;
 
 				// Create new instance of scenario (even though Scenarios contains instances)
-				string selectedScenarioName = (string)ScenarioList.Table [ScenarioList.SelectedRow, 0];
+				var selectedScenarioName = (string)ScenarioList.Table [ScenarioList.SelectedRow, 0];
 				_selectedScenario = (Scenario)Activator.CreateInstance (_scenarios!.FirstOrDefault (s => s.GetName () == selectedScenarioName)!.GetType ())!;
 
 				// Tell the main app to stop
@@ -580,7 +631,7 @@ class UICatalogApp {
 				Title = "Force _16 Colors",
 				Shortcut = (KeyCode)Key.F6,
 				Checked = Application.Force16Colors,
-				CanExecute = () => (bool)Application.Driver.SupportsTrueColor
+				CanExecute = () => Application.Driver.SupportsTrueColor
 			};
 			miForce16Colors.CheckType |= MenuItemCheckStyle.Checked;
 			miForce16Colors.Action += () => {
@@ -631,7 +682,7 @@ class UICatalogApp {
 			const string OFF = "Diagnostics: _Off";
 			const string FRAME_RULER = "Diagnostics: Frame _Ruler";
 			const string FRAME_PADDING = "Diagnostics: _Frame Padding";
-			int index = 0;
+			var index = 0;
 
 			var menuItems = new List<MenuItem> ();
 			foreach (Enum diag in Enum.GetValues (_diagnosticFlags.GetType ())) {
@@ -643,12 +694,12 @@ class UICatalogApp {
 				item.CheckType |= MenuItemCheckStyle.Checked;
 				if (GetDiagnosticsTitle (ConsoleDriver.DiagnosticFlags.Off) == item.Title) {
 					item.Checked = (_diagnosticFlags & (ConsoleDriver.DiagnosticFlags.FramePadding
-									| ConsoleDriver.DiagnosticFlags.FrameRuler)) == 0;
+					                                    | ConsoleDriver.DiagnosticFlags.FrameRuler)) == 0;
 				} else {
 					item.Checked = _diagnosticFlags.HasFlag (diag);
 				}
 				item.Action += () => {
-					string t = GetDiagnosticsTitle (ConsoleDriver.DiagnosticFlags.Off);
+					var t = GetDiagnosticsTitle (ConsoleDriver.DiagnosticFlags.Off);
 					if (item.Title == t && item.Checked == false) {
 						_diagnosticFlags &= ~(ConsoleDriver.DiagnosticFlags.FramePadding | ConsoleDriver.DiagnosticFlags.FrameRuler);
 						item.Checked = true;
@@ -666,7 +717,7 @@ class UICatalogApp {
 					foreach (var menuItem in menuItems) {
 						if (menuItem.Title == t) {
 							menuItem.Checked = !_diagnosticFlags.HasFlag (ConsoleDriver.DiagnosticFlags.FrameRuler)
-									&& !_diagnosticFlags.HasFlag (ConsoleDriver.DiagnosticFlags.FramePadding);
+							                   && !_diagnosticFlags.HasFlag (ConsoleDriver.DiagnosticFlags.FramePadding);
 						} else if (menuItem.Title != t) {
 							menuItem.Checked = _diagnosticFlags.HasFlag (GetDiagnosticsEnumValue (menuItem.Title));
 						}
@@ -678,18 +729,24 @@ class UICatalogApp {
 			}
 			return menuItems.ToArray ();
 
-			string GetDiagnosticsTitle (Enum diag) => Enum.GetName (_diagnosticFlags.GetType (), diag) switch {
-				"Off" => OFF,
-				"FrameRuler" => FRAME_RULER,
-				"FramePadding" => FRAME_PADDING,
-				_ => ""
-			};
+			string GetDiagnosticsTitle (Enum diag)
+			{
+				return Enum.GetName (_diagnosticFlags.GetType (), diag) switch {
+					"Off" => OFF,
+					"FrameRuler" => FRAME_RULER,
+					"FramePadding" => FRAME_PADDING,
+					_ => ""
+				};
+			}
 
-			Enum GetDiagnosticsEnumValue (string title) => title switch {
-				FRAME_RULER => ConsoleDriver.DiagnosticFlags.FrameRuler,
-				FRAME_PADDING => ConsoleDriver.DiagnosticFlags.FramePadding,
-				_ => null!
-			};
+			Enum GetDiagnosticsEnumValue (string title)
+			{
+				return title switch {
+					FRAME_RULER => ConsoleDriver.DiagnosticFlags.FrameRuler,
+					FRAME_PADDING => ConsoleDriver.DiagnosticFlags.FramePadding,
+					_ => null!
+				};
+			}
 
 			void SetDiagnosticsFlag (Enum diag, bool add)
 			{
@@ -720,7 +777,7 @@ class UICatalogApp {
 			var menuItems = CreateForce16ColorItems ().ToList ();
 			menuItems.Add (null!);
 
-			int schemeCount = 0;
+			var schemeCount = 0;
 			foreach (var theme in Themes!) {
 				var item = new MenuItem {
 					Title = $"_{theme.Key}",
@@ -784,8 +841,8 @@ class UICatalogApp {
 
 			miIsMouseDisabled!.Checked = Application.IsMouseDisabled;
 
-			int height = ShowStatusBar ? 1 : 0; // + (MenuBar.Visible ? 1 : 0);
-							    //ContentPane.Height = Dim.Fill (height);
+			var height = ShowStatusBar ? 1 : 0; // + (MenuBar.Visible ? 1 : 0);
+			//ContentPane.Height = Dim.Fill (height);
 
 			StatusBar.Visible = ShowStatusBar;
 
@@ -794,7 +851,7 @@ class UICatalogApp {
 
 		void CategoryView_SelectedChanged (object? sender, ListViewItemEventArgs? e)
 		{
-			string item = _categories! [e!.Item];
+			var item = _categories! [e!.Item];
 			List<Scenario> newlist;
 			if (e.Item == 0) {
 				// First category is "All"
@@ -804,67 +861,19 @@ class UICatalogApp {
 			} else {
 				newlist = _scenarios!.Where (s => s.GetCategories ().Contains (item)).ToList ();
 			}
-			ScenarioList.Table = new EnumerableTableSource<Scenario> (newlist, new Dictionary<string, Func<Scenario, object>> () {
-				{ "Name", (s) => s.GetName () },
-				{ "Description", (s) => s.GetDescription () }
+			ScenarioList.Table = new EnumerableTableSource<Scenario> (newlist, new Dictionary<string, Func<Scenario, object>> {
+				{ "Name", s => s.GetName () },
+				{ "Description", s => s.GetDescription () }
 			});
 
 			// Create a collection of just the scenario names (the 1st column in our TableView)
 			// for CollectionNavigator. 
 			var firstColumnList = new List<object> ();
-			for (int i = 0; i < ScenarioList.Table.Rows; i++) {
+			for (var i = 0; i < ScenarioList.Table.Rows; i++) {
 				firstColumnList.Add (ScenarioList.Table [i, 0]);
 			}
 			_scenarioCollectionNav.Collection = firstColumnList;
 
-		}
-	}
-
-	static void VerifyObjectsWereDisposed ()
-	{
-#if DEBUG_IDISPOSABLE
-		// Validate there are no outstanding Responder-based instances 
-		// after a scenario was selected to run. This proves the main UI Catalog
-		// 'app' closed cleanly.
-		foreach (var inst in Responder.Instances) {
-
-			Debug.Assert (inst.WasDisposed);
-		}
-		Responder.Instances.Clear ();
-
-		// Validate there are no outstanding Application.RunState-based instances 
-		// after a scenario was selected to run. This proves the main UI Catalog
-		// 'app' closed cleanly.
-		foreach (var inst in RunState.Instances) {
-			Debug.Assert (inst.WasDisposed);
-		}
-		RunState.Instances.Clear ();
-#endif
-	}
-
-	static void OpenUrl (string url)
-	{
-		try {
-			if (RuntimeInformation.IsOSPlatform (OSPlatform.Windows)) {
-				url = url.Replace ("&", "^&");
-				Process.Start (new ProcessStartInfo ("cmd", $"/c start {url}") { CreateNoWindow = true });
-			} else if (RuntimeInformation.IsOSPlatform (OSPlatform.Linux)) {
-				using var process = new Process {
-					StartInfo = new ProcessStartInfo {
-						FileName = "xdg-open",
-						Arguments = url,
-						RedirectStandardError = true,
-						RedirectStandardOutput = true,
-						CreateNoWindow = true,
-						UseShellExecute = false
-					}
-				};
-				process.Start ();
-			} else if (RuntimeInformation.IsOSPlatform (OSPlatform.OSX)) {
-				Process.Start ("open", url);
-			}
-		} catch {
-			throw;
 		}
 	}
 }

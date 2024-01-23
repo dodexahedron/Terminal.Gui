@@ -22,13 +22,10 @@ public static class RuneExtensions {
 	/// <param name="rune">The rune to measure.</param>
 	/// <returns>
 	/// The number of columns required to fit the rune, 0 if the argument is the null character, or
-	/// -1 if the value is not printable, 
+	/// -1 if the value is not printable,
 	/// otherwise the number of columns that the rune occupies.
 	/// </returns>
-	public static int GetColumns (this Rune rune)
-	{
-		return UnicodeCalculator.GetWidth (rune);
-	}
+	public static int GetColumns (this Rune rune) => UnicodeCalculator.GetWidth (rune);
 
 	/// <summary>
 	/// Returns <see langword="true"/> if the rune is a combining character.
@@ -38,12 +35,12 @@ public static class RuneExtensions {
 	/// </remarks>
 	/// <param name="rune"></param>
 	/// <returns></returns>
-	public static bool IsCombiningMark (this System.Text.Rune rune)
+	public static bool IsCombiningMark (this Rune rune)
 	{
-		UnicodeCategory category = Rune.GetUnicodeCategory (rune);
+		var category = Rune.GetUnicodeCategory (rune);
 		return Rune.GetUnicodeCategory (rune) == UnicodeCategory.NonSpacingMark
-			|| category == UnicodeCategory.SpacingCombiningMark
-			|| category == UnicodeCategory.EnclosingMark;
+		       || category == UnicodeCategory.SpacingCombiningMark
+		       || category == UnicodeCategory.EnclosingMark;
 	}
 
 	/// <summary>
@@ -55,7 +52,7 @@ public static class RuneExtensions {
 	/// </remarks>
 	/// <param name="rune"></param>
 	/// <returns></returns>
-	public static Rune MakePrintable (this System.Text.Rune rune) => Rune.IsControl (rune) ? new Rune (rune.Value + 0x2400) : rune;
+	public static Rune MakePrintable (this Rune rune) => Rune.IsControl (rune) ? new Rune (rune.Value + 0x2400) : rune;
 
 	/// <summary>
 	/// Get number of bytes required to encode the rune, based on the provided encoding.
@@ -146,10 +143,7 @@ public static class RuneExtensions {
 	/// </remarks>
 	/// <param name="rune">The rune to probe.</param>
 	/// <returns><see langword="true"/> if the rune is a surrogate code point; <see langword="false"/> otherwise.</returns>
-	public static bool IsSurrogatePair (this Rune rune)
-	{
-		return char.IsSurrogatePair (rune.ToString (), 0);
-	}
+	public static bool IsSurrogatePair (this Rune rune) => char.IsSurrogatePair (rune.ToString (), 0);
 
 	/// <summary>
 	/// Reports if the provided array of bytes can be encoded as UTF-8.

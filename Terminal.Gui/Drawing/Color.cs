@@ -633,7 +633,7 @@ public readonly struct Color : IEquatable<Color> {
 	public static implicit operator Color (int rgba) => new (rgba);
 
 	/// <summary>
-	/// Cast to int. 
+	/// Cast to int.
 	/// </summary>
 	/// <param name="color"></param>
 	public static implicit operator int (Color color) => color.Rgba;

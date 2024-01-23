@@ -7,23 +7,23 @@ using System.Text.Json;
 using Xunit;
 using static Terminal.Gui.ConfigurationManager;
 
-namespace Terminal.Gui.ConfigurationTests; 
+namespace Terminal.Gui.ConfigurationTests;
 
 public class ConfigurationManagerTests {
-	public static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions {
+	public static readonly JsonSerializerOptions _jsonOptions = new() {
 		Converters = {
 			new AttributeJsonConverter (),
 			new ColorJsonConverter ()
 		}
 	};
 
-	[Fact ()]
+	[Fact]
 	public void DeepMemberwiseCopyTest ()
 	{
 		// Value types
-		string stringDest = "Destination";
-		string stringSrc = "Source";
-		object stringCopy = DeepMemberwiseCopy (stringSrc, stringDest);
+		var stringDest = "Destination";
+		var stringSrc = "Source";
+		var stringCopy = DeepMemberwiseCopy (stringSrc, stringDest);
 		Assert.Equal (stringSrc, stringCopy);
 
 		stringDest = "Destination";
@@ -41,9 +41,9 @@ public class ConfigurationManagerTests {
 		stringCopy = DeepMemberwiseCopy (stringSrc, stringDest);
 		Assert.Equal (stringSrc, stringCopy);
 
-		bool boolDest = true;
-		bool boolSrc = false;
-		object boolCopy = DeepMemberwiseCopy (boolSrc, boolDest);
+		var boolDest = true;
+		var boolSrc = false;
+		var boolCopy = DeepMemberwiseCopy (boolSrc, boolDest);
 		Assert.Equal (boolSrc, boolCopy);
 
 		boolDest = false;
@@ -64,37 +64,37 @@ public class ConfigurationManagerTests {
 		// Structs
 		var attrDest = new Attribute (Color.Black);
 		var attrSrc = new Attribute (Color.White);
-		object attrCopy = DeepMemberwiseCopy (attrSrc, attrDest);
+		var attrCopy = DeepMemberwiseCopy (attrSrc, attrDest);
 		Assert.Equal (attrSrc, attrCopy);
 
 		// Classes
-		var colorschemeDest = new ColorScheme () { Disabled = new Attribute (Color.Black) };
-		var colorschemeSrc = new ColorScheme () { Disabled = new Attribute (Color.White) };
-		object colorschemeCopy = DeepMemberwiseCopy (colorschemeSrc, colorschemeDest);
+		var colorschemeDest = new ColorScheme { Disabled = new Attribute (Color.Black) };
+		var colorschemeSrc = new ColorScheme { Disabled = new Attribute (Color.White) };
+		var colorschemeCopy = DeepMemberwiseCopy (colorschemeSrc, colorschemeDest);
 		Assert.Equal (colorschemeSrc, colorschemeCopy);
 
 		// Dictionaries
-		var dictDest = new Dictionary<string, Attribute> () { { "Disabled", new Attribute (Color.Black) } };
-		var dictSrc = new Dictionary<string, Attribute> () { { "Disabled", new Attribute (Color.White) } };
+		var dictDest = new Dictionary<string, Attribute> { { "Disabled", new Attribute (Color.Black) } };
+		var dictSrc = new Dictionary<string, Attribute> { { "Disabled", new Attribute (Color.White) } };
 		var dictCopy = (Dictionary<string, Attribute>)DeepMemberwiseCopy (dictSrc, dictDest);
 		Assert.Equal (dictSrc, dictCopy);
 
-		dictDest = new Dictionary<string, Attribute> () { { "Disabled", new Attribute (Color.Black) } };
-		dictSrc = new Dictionary<string, Attribute> () { { "Disabled", new Attribute (Color.White) }, { "Normal", new Attribute (Color.Blue) } };
+		dictDest = new Dictionary<string, Attribute> { { "Disabled", new Attribute (Color.Black) } };
+		dictSrc = new Dictionary<string, Attribute> { { "Disabled", new Attribute (Color.White) }, { "Normal", new Attribute (Color.Blue) } };
 		dictCopy = (Dictionary<string, Attribute>)DeepMemberwiseCopy (dictSrc, dictDest);
 		Assert.Equal (dictSrc, dictCopy);
 
 		// src adds an item
-		dictDest = new Dictionary<string, Attribute> () { { "Disabled", new Attribute (Color.Black) } };
-		dictSrc = new Dictionary<string, Attribute> () { { "Disabled", new Attribute (Color.White) }, { "Normal", new Attribute (Color.Blue) } };
+		dictDest = new Dictionary<string, Attribute> { { "Disabled", new Attribute (Color.Black) } };
+		dictSrc = new Dictionary<string, Attribute> { { "Disabled", new Attribute (Color.White) }, { "Normal", new Attribute (Color.Blue) } };
 		dictCopy = (Dictionary<string, Attribute>)DeepMemberwiseCopy (dictSrc, dictDest);
 		Assert.Equal (2, dictCopy.Count);
 		Assert.Equal (dictSrc ["Disabled"], dictCopy ["Disabled"]);
 		Assert.Equal (dictSrc ["Normal"], dictCopy ["Normal"]);
 
 		// src updates only one item
-		dictDest = new Dictionary<string, Attribute> () { { "Disabled", new Attribute (Color.Black) }, { "Normal", new Attribute (Color.White) } };
-		dictSrc = new Dictionary<string, Attribute> () { { "Disabled", new Attribute (Color.White) } };
+		dictDest = new Dictionary<string, Attribute> { { "Disabled", new Attribute (Color.Black) }, { "Normal", new Attribute (Color.White) } };
+		dictSrc = new Dictionary<string, Attribute> { { "Disabled", new Attribute (Color.White) } };
 		dictCopy = (Dictionary<string, Attribute>)DeepMemberwiseCopy (dictSrc, dictDest);
 		Assert.Equal (2, dictCopy.Count);
 		Assert.Equal (dictSrc ["Disabled"], dictCopy ["Disabled"]);
@@ -178,7 +178,8 @@ public class ConfigurationManagerTests {
 	/// </summary>
 	/// <remarks>
 	/// IMPORTANT: For the file generated to be valid, this must be the ONLY test run. Config Properties
-	/// are all static and thus can be overwritten by other tests.</remarks>
+	/// are all static and thus can be overwritten by other tests.
+	/// </remarks>
 	[Fact]
 	public void SaveDefaults ()
 	{
@@ -189,7 +190,7 @@ public class ConfigurationManagerTests {
 		GetHardCodedDefaults ();
 
 		// Serialize to a JSON string
-		string json = ToJson ();
+		var json = ToJson ();
 
 		// Write the JSON string to the file 
 		File.WriteAllText ("config.json", json);
@@ -297,7 +298,7 @@ public class ConfigurationManagerTests {
 		Assert.Equal (pi, Themes ["Default"] ["ColorSchemes"].PropertyInfo);
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void TestConfigurationManagerToJson ()
 	{
 		Reset ();
@@ -307,14 +308,10 @@ public class ConfigurationManagerTests {
 		Settings.Update (stream, "TestConfigurationManagerToJson");
 	}
 
-	[Fact, AutoInitShutdown (configLocation: ConfigLocations.None)]
-	public void TestConfigurationManagerInitDriver_NoLocations ()
-	{
+	[Fact] [AutoInitShutdown (configLocation: ConfigLocations.None)]
+	public void TestConfigurationManagerInitDriver_NoLocations () { }
 
-
-	}
-
-	[Fact, AutoInitShutdown (configLocation: ConfigLocations.DefaultOnly)]
+	[Fact] [AutoInitShutdown (configLocation: ConfigLocations.DefaultOnly)]
 	public void TestConfigurationManagerInitDriver ()
 	{
 		Assert.Equal ("Default", Themes.Theme);
@@ -354,7 +351,7 @@ public class ConfigurationManagerTests {
 	public void TestConfigurationManagerUpdateFromJson ()
 	{
 		// Arrange
-		string json = @"
+		var json = @"
 {
   ""$schema"": ""https://gui-cs.github.io/Terminal.Gui/schemas/tui-config-schema.json"",
   ""Application.QuitKey"": ""Alt-Z"",
@@ -518,12 +515,12 @@ public class ConfigurationManagerTests {
 		Assert.Equal (new Color (Color.Blue), Colors.ColorSchemes ["Base"].Normal.Background);
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void TestConfigurationManagerInvalidJsonThrows ()
 	{
 		ThrowOnJsonErrors = true;
 		// "yellow" is not a color
-		string json = @"
+		var json = @"
 			{
 				""Themes"" : [
                                         {
@@ -614,7 +611,7 @@ public class ConfigurationManagerTests {
 
 		ThrowOnJsonErrors = false;
 		// "brown" is not a color
-		string json = @"
+		var json = @"
 			{
 				""Themes"" : [ 
                                         {
@@ -690,7 +687,7 @@ public class ConfigurationManagerTests {
 		ThrowOnJsonErrors = false;
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void LoadConfigurationFromAllSources_ShouldLoadSettingsFromAllSources ()
 	{
 		//var _configFilename = "config.json";
@@ -736,7 +733,7 @@ public class ConfigurationManagerTests {
 		Settings ["Application.IsMouseDisabled"].PropertyValue = true;
 
 		Updated += ConfigurationManager_Updated;
-		bool fired = false;
+		var fired = false;
 		void ConfigurationManager_Updated (object sender, ConfigurationManagerEventArgs obj)
 		{
 			fired = true;
@@ -760,7 +757,7 @@ public class ConfigurationManagerTests {
 	{
 		Reset ();
 		Applied += ConfigurationManager_Applied;
-		bool fired = false;
+		var fired = false;
 		void ConfigurationManager_Applied (object sender, ConfigurationManagerEventArgs obj)
 		{
 			fired = true;

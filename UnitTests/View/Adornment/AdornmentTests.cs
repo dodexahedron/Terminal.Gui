@@ -7,10 +7,7 @@ namespace Terminal.Gui.ViewTests;
 public class AdornmentTests {
 	readonly ITestOutputHelper _output;
 
-	public AdornmentTests (ITestOutputHelper output)
-	{
-		_output = output;
-	}
+	public AdornmentTests (ITestOutputHelper output) => _output = output;
 
 	[Fact]
 	public void Setting_SuperView_Throws ()
@@ -29,7 +26,7 @@ public class AdornmentTests {
 	[Fact]
 	public void Setting_Thickness_Changes_Parent_Bounds ()
 	{
-		var parent = new View () {
+		var parent = new View {
 			Width = 10,
 			Height = 10
 		};
@@ -96,7 +93,7 @@ public class AdornmentTests {
 	[Fact]
 	public void FrameToScreen_Uses_Parent_Not_SuperView ()
 	{
-		var parent = new View () {
+		var parent = new View {
 			X = 1,
 			Y = 2,
 			Width = 10,
@@ -118,7 +115,7 @@ public class AdornmentTests {
 	[Fact]
 	public void BoundsToScreen_Uses_Parent_Not_SuperView ()
 	{
-		var parent = new View () {
+		var parent = new View {
 			X = 1,
 			Y = 2,
 			Width = 10,

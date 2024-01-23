@@ -1,18 +1,20 @@
 ﻿namespace Terminal.Gui;
 
 /// <summary>
-/// Represents a basic step that is displayed in a <see cref="Wizard"/>. The <see cref="WizardStep"/> view is divided horizontally in two. On the left is the
+/// Represents a basic step that is displayed in a <see cref="Wizard"/>. The <see cref="WizardStep"/> view is divided
+/// horizontally in two. On the left is the
 /// content view where <see cref="View"/>s can be added,  On the right is the help for the step.
 /// Set <see cref="WizardStep.HelpText"/> to set the help text. If the help text is empty the help pane will not
-/// be shown. 
+/// be shown.
 /// 
-/// If there are no Views added to the WizardStep the <see cref="HelpText"/> (if not empty) will fill the wizard step. 
+/// If there are no Views added to the WizardStep the <see cref="HelpText"/> (if not empty) will fill the wizard step.
 /// </summary>
 /// <remarks>
 /// If <see cref="Button"/>s are added, do not set <see cref="Button.IsDefault"/> to true as this will conflict
 /// with the Next button of the Wizard.
 /// 
-/// Subscribe to the <see cref="View.VisibleChanged"/> event to be notified when the step is active; see also: <see cref="Wizard.StepChanged"/>.
+/// Subscribe to the <see cref="View.VisibleChanged"/> event to be notified when the step is active; see also:
+/// <see cref="Wizard.StepChanged"/>.
 /// 
 /// To enable or disable a step from being shown to the user, set <see cref="View.Enabled"/>.
 /// 
@@ -39,35 +41,8 @@ public class WizardStep : FrameView {
 	//private string title = string.Empty;
 
 	// The contentView works like the ContentView in FrameView.
-	private View contentView = new View () { Id = "WizardContentView" };
-
-	/// <summary>
-	/// Sets or gets help text for the <see cref="WizardStep"/>.If <see cref="WizardStep.HelpText"/> is empty
-	/// the help pane will not be visible and the content will fill the entire WizardStep.
-	/// </summary>
-	/// <remarks>The help text is displayed using a read-only <see cref="TextView"/>.</remarks>
-	public string HelpText {
-		get => helpTextView.Text;
-		set {
-			helpTextView.Text = value;
-			ShowHide ();
-			SetNeedsDisplay ();
-		}
-	}
-	private TextView helpTextView = new TextView ();
-
-	/// <summary>
-	/// Sets or gets the text for the back button. The back button will only be visible on 
-	/// steps after the first step.
-	/// </summary>
-	/// <remarks>The default text is "Back"</remarks>
-	public string BackButtonText { get; set; } = string.Empty;
-
-	/// <summary>
-	/// Sets or gets the text for the next/finish button.
-	/// </summary>
-	/// <remarks>The default text is "Next..." if the Pane is not the last pane. Otherwise it is "Finish"</remarks>
-	public string NextButtonText { get; set; } = string.Empty;
+	readonly View contentView = new() { Id = "WizardContentView" };
+	readonly TextView helpTextView = new ();
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="Wizard"/> class using <see cref="LayoutStyle.Computed"/> positioning.
@@ -131,6 +106,33 @@ public class WizardStep : FrameView {
 	}
 
 	/// <summary>
+	/// Sets or gets help text for the <see cref="WizardStep"/>.If <see cref="WizardStep.HelpText"/> is empty
+	/// the help pane will not be visible and the content will fill the entire WizardStep.
+	/// </summary>
+	/// <remarks>The help text is displayed using a read-only <see cref="TextView"/>.</remarks>
+	public string HelpText {
+		get => helpTextView.Text;
+		set {
+			helpTextView.Text = value;
+			ShowHide ();
+			SetNeedsDisplay ();
+		}
+	}
+
+	/// <summary>
+	/// Sets or gets the text for the back button. The back button will only be visible on
+	/// steps after the first step.
+	/// </summary>
+	/// <remarks>The default text is "Back"</remarks>
+	public string BackButtonText { get; set; } = string.Empty;
+
+	/// <summary>
+	/// Sets or gets the text for the next/finish button.
+	/// </summary>
+	/// <remarks>The default text is "Next..." if the Pane is not the last pane. Otherwise it is "Finish"</remarks>
+	public string NextButtonText { get; set; } = string.Empty;
+
+	/// <summary>
 	/// Does the work to show and hide the contentView and helpView as appropriate
 	/// </summary>
 	internal void ShowHide ()
@@ -151,17 +153,16 @@ public class WizardStep : FrameView {
 		} else {
 			if (helpTextView.Text.Length > 0) {
 				helpTextView.X = 0;
-			} else {
-				// Error - no pane shown
 			}
 
+			// Error - no pane shown
 		}
 		contentView.Visible = contentView.InternalSubviews?.Count > 0;
 		helpTextView.Visible = helpTextView.Text.Length > 0;
 	}
 
 	/// <summary>
-	/// Add the specified <see cref="View"/> to the <see cref="WizardStep"/>. 
+	/// Add the specified <see cref="View"/> to the <see cref="WizardStep"/>.
 	/// </summary>
 	/// <param name="view"><see cref="View"/> to add to this container</param>
 	public override void Add (View view)
@@ -174,7 +175,7 @@ public class WizardStep : FrameView {
 	}
 
 	/// <summary>
-	///   Removes a <see cref="View"/> from <see cref="WizardStep"/>.
+	/// Removes a <see cref="View"/> from <see cref="WizardStep"/>.
 	/// </summary>
 	/// <remarks>
 	/// </remarks>
@@ -193,13 +194,13 @@ public class WizardStep : FrameView {
 		}
 
 		if (contentView.InternalSubviews.Count < 1) {
-			this.CanFocus = false;
+			CanFocus = false;
 		}
 		ShowHide ();
 	}
 
 	/// <summary>
-	///   Removes all <see cref="View"/>s from the <see cref="WizardStep"/>.
+	/// Removes all <see cref="View"/>s from the <see cref="WizardStep"/>.
 	/// </summary>
 	/// <remarks>
 	/// </remarks>
@@ -208,5 +209,4 @@ public class WizardStep : FrameView {
 		contentView.RemoveAll ();
 		ShowHide ();
 	}
-
 } // end of WizardStep class

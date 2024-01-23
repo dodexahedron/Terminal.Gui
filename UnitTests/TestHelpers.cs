@@ -1,5 +1,4 @@
-﻿using CsvHelper.Configuration.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -137,7 +136,7 @@ public class SetupFakeDriverAttribute : BeforeAfterTestAttribute {
 	{
 		Debug.WriteLine ($"Before: {methodUnderTest.Name}");
 		Assert.Null (Application.Driver);
-		Application.Driver = new FakeDriver () { Rows = 10, Cols = 10 };
+		Application.Driver = new FakeDriver { Rows = 10, Cols = 10 };
 	}
 
 	public override void After (MethodInfo methodUnderTest)
@@ -147,26 +146,19 @@ public class SetupFakeDriverAttribute : BeforeAfterTestAttribute {
 	}
 }
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-public class TestDateAttribute : Xunit.Sdk.BeforeAfterTestAttribute
-{
-    CultureInfo _currentCulture = CultureInfo.CurrentCulture;
+[AttributeUsage (AttributeTargets.Class | AttributeTargets.Method)]
+public class TestDateAttribute : BeforeAfterTestAttribute {
+	readonly CultureInfo _currentCulture = CultureInfo.CurrentCulture;
 
-    public TestDateAttribute()
-    {
-        CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-    }
+	public TestDateAttribute () => CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-    public override void Before(MethodInfo methodUnderTest)
-    {
-		Assert.Equal(CultureInfo.CurrentCulture, CultureInfo.InvariantCulture);
-    }
+	public override void Before (MethodInfo methodUnderTest) => Assert.Equal (CultureInfo.CurrentCulture, CultureInfo.InvariantCulture);
 
-    public override void After(MethodInfo methodUnderTest)
-    {
-        CultureInfo.CurrentCulture = _currentCulture;
-        Assert.Equal(CultureInfo.CurrentCulture, _currentCulture);
-    }
+	public override void After (MethodInfo methodUnderTest)
+	{
+		CultureInfo.CurrentCulture = _currentCulture;
+		Assert.Equal (CultureInfo.CurrentCulture, _currentCulture);
+	}
 }
 
 partial class TestHelpers {
@@ -352,11 +344,13 @@ partial class TestHelpers {
 #pragma warning disable xUnit1013 // Public method should be marked as test
 	/// <summary>
 	/// Verifies <paramref name="expectedAttributes"/> are found at the locations specified by <paramref name="expectedLook"/>.
-	/// <paramref name="expectedLook"/> is a bitmap of indexes into <paramref name="expectedAttributes"/> (e.g. "00110" 
-	/// means the attribute at <c>expectedAttributes[1]</c> is expected at the 3rd and 4th columns of the 1st row of driver.Contents).
+	/// <paramref name="expectedLook"/> is a bitmap of indexes into <paramref name="expectedAttributes"/> (e.g. "00110"
+	/// means the attribute at <c>expectedAttributes[1]</c> is expected at the 3rd and 4th columns of the 1st row of
+	/// driver.Contents).
 	/// </summary>
 	/// <param name="expectedLook">
-	/// Numbers between 0 and 9 for each row/col of the console.  Must be valid indexes into <paramref name="expectedAttributes"/>.
+	/// Numbers between 0 and 9 for each row/col of the console.  Must be valid indexes into
+	/// <paramref name="expectedAttributes"/>.
 	/// </param>
 	/// <param name="driver">The ConsoleDriver to use. If null <see cref="Application.Driver"/> will be used.</param>
 	/// <param name="expectedAttributes"></param>
@@ -385,7 +379,7 @@ partial class TestHelpers {
 				case 0:
 					throw new Exception ($"{DriverContentsToString (driver)}\n" +
 					                     $"Expected Attribute {val} (PlatformColor = {val.Value.PlatformColor}) at Contents[{line},{c}] {contents [line, c]} ((PlatformColor = {contents [line, c].Attribute.Value.PlatformColor}) was not found.\n" +
-							     $"  Expected: {string.Join (",", expectedAttributes.Select (c => c))}\n" +
+					                     $"  Expected: {string.Join (",", expectedAttributes.Select (c => c))}\n" +
 					                     $"  But Was: <not found>");
 				case > 1:
 					throw new ArgumentException ($"Bad value for expectedColors, {match.Count} Attributes had the same Value");
@@ -396,9 +390,9 @@ partial class TestHelpers {
 
 				if (colorUsed != userExpected) {
 					throw new Exception ($"{DriverContentsToString (driver)}\n" +
-						$"Unexpected Attribute at Contents[{line},{c}] {contents [line, c]}.\n" +
-						$"  Expected: {userExpected} ({expectedAttributes [int.Parse (userExpected.ToString ())]})\n" +
-						$"  But Was:   {colorUsed} ({val})\n");
+					                     $"Unexpected Attribute at Contents[{line},{c}] {contents [line, c]}.\n" +
+					                     $"  Expected: {userExpected} ({expectedAttributes [int.Parse (userExpected.ToString ())]})\n" +
+					                     $"  But Was:   {colorUsed} ({val})\n");
 				}
 			}
 

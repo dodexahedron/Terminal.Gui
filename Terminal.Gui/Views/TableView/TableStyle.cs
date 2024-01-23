@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace Terminal.Gui; 
+namespace Terminal.Gui;
 
 /// <summary>
 /// Defines rendering options that affect how the table is displayed.
-/// 
 /// <a href="../docs/tableview.md">See TableView Deep Dive for more information</a>.
 /// </summary>
 public class TableStyle {
@@ -13,8 +12,10 @@ public class TableStyle {
 	/// Gets or sets a flag indicating whether to render headers of a <see cref="TableView"/>.
 	/// Defaults to <see langword="true"/>.
 	/// </summary>
-	/// <remarks><see cref="ShowHorizontalHeaderOverline"/>, <see cref="ShowHorizontalHeaderUnderline"/> etc
-	/// may still be used even if <see cref="ShowHeaders"/> is <see langword="false"/>.</remarks>
+	/// <remarks>
+	/// <see cref="ShowHorizontalHeaderOverline"/>, <see cref="ShowHorizontalHeaderUnderline"/> etc
+	/// may still be used even if <see cref="ShowHeaders"/> is <see langword="false"/>.
+	/// </remarks>
 	public bool ShowHeaders { get; set; } = true;
 
 	/// <summary>
@@ -43,7 +44,7 @@ public class TableStyle {
 	public bool ShowVerticalHeaderLines { get; set; } = true;
 
 	/// <summary>
-	/// True to render a arrows on the right/left of the table when 
+	/// True to render a arrows on the right/left of the table when
 	/// there are more column(s) that can be scrolled to.  Requires
 	/// <see cref="ShowHorizontalHeaderUnderline"/> to be true.
 	/// Defaults to true
@@ -73,7 +74,7 @@ public class TableStyle {
 	/// <summary>
 	/// Collection of columns for which you want special rendering (e.g. custom column lengths, text alignment etc)
 	/// </summary>
-	public Dictionary<int, ColumnStyle> ColumnStyles { get; set; } = new Dictionary<int, ColumnStyle> ();
+	public Dictionary<int, ColumnStyle> ColumnStyles { get; set; } = new ();
 
 	/// <summary>
 	/// Delegate for coloring specific rows in a different color.  For cell color <see cref="ColumnStyle.ColorGetter"/>
@@ -83,49 +84,49 @@ public class TableStyle {
 
 	/// <summary>
 	/// Determines rendering when the last column in the table is visible but it's
-	/// content or <see cref="ColumnStyle.MaxWidth"/> is less than the remaining 
+	/// content or <see cref="ColumnStyle.MaxWidth"/> is less than the remaining
 	/// space in the control.  True (the default) will expand the column to fill
 	/// the remaining bounds of the control.  False will draw a column ending line
-	/// and leave a blank column that cannot be selected in the remaining space.  
+	/// and leave a blank column that cannot be selected in the remaining space.
 	/// </summary>
 	/// <value></value>
 	public bool ExpandLastColumn { get; set; } = true;
 
 	/// <summary>
-	/// <para>
-	/// Determines how <see cref="TableView.ColumnOffset"/> is updated when scrolling
-	/// right off the end of the currently visible area.
-	/// </para>
-	/// <para>
-	/// If true then when scrolling right the scroll offset is increased the minimum required to show
-	/// the new column.  This may be slow if you have an incredibly large number of columns in
-	/// your table and/or slow <see cref="ColumnStyle.RepresentationGetter"/> implementations
-	/// </para>
-	/// <para>
-	/// If false then scroll offset is set to the currently selected column (i.e. PageRight).
-	/// </para>
+	///         <para>
+	///         Determines how <see cref="TableView.ColumnOffset"/> is updated when scrolling
+	///         right off the end of the currently visible area.
+	///         </para>
+	///         <para>
+	///         If true then when scrolling right the scroll offset is increased the minimum required to show
+	///         the new column.  This may be slow if you have an incredibly large number of columns in
+	///         your table and/or slow <see cref="ColumnStyle.RepresentationGetter"/> implementations
+	///         </para>
+	///         <para>
+	///         If false then scroll offset is set to the currently selected column (i.e. PageRight).
+	///         </para>
 	/// </summary>
 	public bool SmoothHorizontalScrolling { get; set; } = true;
 
 	/// <summary>
-	/// Returns the entry from <see cref="ColumnStyles"/> for the given <paramref name="col"/> or null if no custom styling is defined for it
+	/// Returns the entry from <see cref="ColumnStyles"/> for the given <paramref name="col"/> or null if no custom styling is
+	/// defined for it
 	/// </summary>
 	/// <param name="col"></param>
 	/// <returns></returns>
-	public ColumnStyle GetColumnStyleIfAny (int col)
-	{
-		return ColumnStyles.TryGetValue (col, out ColumnStyle result) ? result : null;
-	}
+	public ColumnStyle GetColumnStyleIfAny (int col) => ColumnStyles.TryGetValue (col, out var result) ? result : null;
 
 	/// <summary>
-	/// Returns an existing <see cref="ColumnStyle"/> for the given <paramref name="col"/> or creates a new one with default options
+	/// Returns an existing <see cref="ColumnStyle"/> for the given <paramref name="col"/> or creates a new one with default
+	/// options
 	/// </summary>
 	/// <param name="col"></param>
 	/// <returns></returns>
 	public ColumnStyle GetOrCreateColumnStyle (int col)
 	{
-		if (!ColumnStyles.ContainsKey (col))
+		if (!ColumnStyles.ContainsKey (col)) {
 			ColumnStyles.Add (col, new ColumnStyle ());
+		}
 
 		return ColumnStyles [col];
 	}

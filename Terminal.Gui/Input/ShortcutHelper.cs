@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 
 namespace Terminal.Gui;
+
 /// <summary>
 /// Represents a helper to manipulate shortcut keys used on views.
 /// </summary>
 public class ShortcutHelper {
 	// TODO: Update this to use Key, not KeyCode
-	private KeyCode shortcut;
+	KeyCode shortcut;
 
 	/// <summary>
 	/// This is the global setting that can be used as a global shortcut to invoke the action on the view.
@@ -27,7 +27,7 @@ public class ShortcutHelper {
 	/// The keystroke combination used in the <see cref="Shortcut"/> as string.
 	/// </summary>
 	public virtual string ShortcutTag => Key.ToString (shortcut, MenuBar.ShortcutDelimiter);
-	
+
 	/// <summary>
 	/// Return key as string.
 	/// </summary>
@@ -43,13 +43,13 @@ public class ShortcutHelper {
 		knm = key;
 		var mK = key & (KeyCode.AltMask | KeyCode.CtrlMask | KeyCode.ShiftMask);
 		knm &= ~mK;
-		for (uint i = (uint)KeyCode.F1; i < (uint)KeyCode.F12; i++) {
+		for (var i = (uint)KeyCode.F1; i < (uint)KeyCode.F12; i++) {
 			if (knm == (KeyCode)i) {
 				mK |= (KeyCode)i;
 			}
 		}
 		knm &= ~mK;
-		uint.TryParse (knm.ToString (), out uint c);
+		uint.TryParse (knm.ToString (), out var c);
 		var s = mK == KeyCode.Null ? "" : mK.ToString ();
 		if (s != "" && (knm != KeyCode.Null || c > 0)) {
 			s += ",";
@@ -70,14 +70,14 @@ public class ShortcutHelper {
 			return default;
 		}
 
-		KeyCode key = KeyCode.Null;
+		var key = KeyCode.Null;
 		//var hasCtrl = false;
 		if (delimiter == default) {
 			delimiter = MenuBar.ShortcutDelimiter;
 		}
 
-		string [] keys = sCut.Split (delimiter.ToString());
-		for (int i = 0; i < keys.Length; i++) {
+		var keys = sCut.Split (delimiter.ToString ());
+		for (var i = 0; i < keys.Length; i++) {
 			var k = keys [i];
 			if (k == "Ctrl") {
 				//hasCtrl = true;
@@ -87,15 +87,15 @@ public class ShortcutHelper {
 			} else if (k == "Alt") {
 				key |= KeyCode.AltMask;
 			} else if (k.StartsWith ("F") && k.Length > 1) {
-				int.TryParse (k.Substring (1).ToString (), out int n);
-				for (uint j = (uint)KeyCode.F1; j <= (uint)KeyCode.F12; j++) {
-					int.TryParse (((KeyCode)j).ToString ().Substring (1), out int f);
+				int.TryParse (k.Substring (1), out var n);
+				for (var j = (uint)KeyCode.F1; j <= (uint)KeyCode.F12; j++) {
+					int.TryParse (((KeyCode)j).ToString ().Substring (1), out var f);
 					if (f == n) {
 						key |= (KeyCode)j;
 					}
 				}
 			} else {
-				key |= (KeyCode)Enum.Parse (typeof (KeyCode), k.ToString ());
+				key |= (KeyCode)Enum.Parse (typeof (KeyCode), k);
 			}
 		}
 
@@ -110,7 +110,7 @@ public class ShortcutHelper {
 	/// <param name="last">Last key in range.</param>
 	public static bool CheckKeysFlagRange (KeyCode key, KeyCode first, KeyCode last)
 	{
-		for (uint i = (uint)first; i < (uint)last; i++) {
+		for (var i = (uint)first; i < (uint)last; i++) {
 			if ((key | (KeyCode)i) == key) {
 				return true;
 			}
@@ -139,14 +139,13 @@ public class ShortcutHelper {
 	/// <returns><c>true</c> if is valid.<c>false</c>otherwise.</returns>
 	public static bool PostShortcutValidation (KeyCode key)
 	{
-		GetKeyToString (key, out KeyCode knm);
+		GetKeyToString (key, out var knm);
 
 		if (CheckKeysFlagRange (key, KeyCode.F1, KeyCode.F12) ||
-			((key & (KeyCode.CtrlMask | KeyCode.ShiftMask | KeyCode.AltMask)) != 0 && knm != KeyCode.Null)) {
+		    (key & (KeyCode.CtrlMask | KeyCode.ShiftMask | KeyCode.AltMask)) != 0 && knm != KeyCode.Null) {
 			return true;
 		}
 		Debug.WriteLine ($"WARNING: {Key.ToString (key)} is not a valid shortcut key.");
 		return false;
 	}
 }
-

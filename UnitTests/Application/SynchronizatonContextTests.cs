@@ -1,83 +1,73 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading;
 using System.Threading.Tasks;
-using Terminal.Gui;
 using Xunit;
-using Xunit.Sdk;
-
 // Alias Console to MockConsole so we don't accidentally use Console
 using Console = Terminal.Gui.FakeConsole;
 
-namespace Terminal.Gui.ApplicationTests {
-	public class SyncrhonizationContextTests {
+namespace Terminal.Gui.ApplicationTests; 
 
-		[Fact, AutoInitShutdown]
-		public void SynchronizationContext_Post ()
-		{
-			var context = SynchronizationContext.Current;
+public class SyncrhonizationContextTests {
 
-			var success = false;
-			Task.Run (() => {
-				Thread.Sleep (1_000);
+	[Fact] [AutoInitShutdown]
+	public void SynchronizationContext_Post ()
+	{
+		var context = SynchronizationContext.Current;
 
-				// non blocking
-				context.Post (
-					delegate (object o) {
-						success = true;
+		var success = false;
+		Task.Run (() => {
+			Thread.Sleep (1_000);
 
-						// then tell the application to quit
-						Application.Invoke (() => Application.RequestStop ());
-					}, null);
-				Assert.False (success);
-			});
+			// non blocking
+			context.Post (
+				delegate {
+					success = true;
 
-			// blocks here until the RequestStop is processed at the end of the test
-			Application.Run ();
+					// then tell the application to quit
+					Application.Invoke (() => Application.RequestStop ());
+				}, null);
+			Assert.False (success);
+		});
+
+		// blocks here until the RequestStop is processed at the end of the test
+		Application.Run ();
+		Assert.True (success);
+	}
+
+	[Fact] [AutoInitShutdown]
+	public void SynchronizationContext_Send ()
+	{
+		var context = SynchronizationContext.Current;
+
+		var success = false;
+		Task.Run (() => {
+			Thread.Sleep (1_000);
+
+			// blocking
+			context.Send (
+				delegate {
+					success = true;
+
+					// then tell the application to quit
+					Application.Invoke (() => Application.RequestStop ());
+				}, null);
 			Assert.True (success);
-		}
+		});
 
-		[Fact, AutoInitShutdown]
-		public void SynchronizationContext_Send ()
-		{
-			var context = SynchronizationContext.Current;
+		// blocks here until the RequestStop is processed at the end of the test
+		Application.Run ();
+		Assert.True (success);
 
-			var success = false;
-			Task.Run (() => {
-				Thread.Sleep (1_000);
+	}
 
-				// blocking
-				context.Send (
-					delegate (object o) {
-						success = true;
+	[Fact] [AutoInitShutdown]
+	public void SynchronizationContext_CreateCopy ()
+	{
+		var context = SynchronizationContext.Current;
+		Assert.NotNull (context);
 
-						// then tell the application to quit
-						Application.Invoke (() => Application.RequestStop ());
-					}, null);
-				Assert.True (success);
-			});
+		var contextCopy = context.CreateCopy ();
+		Assert.NotNull (contextCopy);
 
-			// blocks here until the RequestStop is processed at the end of the test
-			Application.Run ();
-			Assert.True (success);
-
-		}
-
-		[Fact, AutoInitShutdown]
-		public void SynchronizationContext_CreateCopy ()
-		{
-			var context = SynchronizationContext.Current;
-			Assert.NotNull (context);
-
-			var contextCopy = context.CreateCopy ();
-			Assert.NotNull (contextCopy);
-
-			Assert.NotEqual (context, contextCopy);
-		}
-
+		Assert.NotEqual (context, contextCopy);
 	}
 }

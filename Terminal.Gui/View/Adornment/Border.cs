@@ -4,56 +4,63 @@ using System.Linq;
 namespace Terminal.Gui;
 
 /// <summary>
-/// The Border for a <see cref="View"/>. 
+/// The Border for a <see cref="View"/>.
 /// </summary>
 /// <remarks>
-/// <para>
-/// Renders a border around the view with the <see cref="View.Title"/>. A border using <see cref="LineStyle"/>
-/// will be drawn on the sides of <see cref="Thickness"/> that are greater than zero. 
-/// </para>
-/// <para>
-/// The <see cref="View.Title"/> of <see cref="Adornment.Parent"/> will be drawn based on the value of <see cref="Thickness.Top"/>:
-/// </para>
-/// <para>
-/// If <c>1</c>:
-/// <code>
+///         <para>
+///         Renders a border around the view with the <see cref="View.Title"/>. A border using <see cref="LineStyle"/>
+///         will be drawn on the sides of <see cref="Thickness"/> that are greater than zero.
+///         </para>
+///         <para>
+///         The <see cref="View.Title"/> of <see cref="Adornment.Parent"/> will be drawn based on the value of
+///         <see cref="Thickness.Top"/>:
+///         </para>
+///         <para>
+///         If <c>1</c>:
+///         <code>
 /// ┌┤1234├──┐
 /// │        │
 /// └────────┘
 /// </code>
-/// </para>
-/// <para>
-/// If <c>2</c>:
-/// <code>
+///         </para>
+///         <para>
+///         If <c>2</c>:
+///         <code>
 ///  ┌────┐
 /// ┌┤1234├──┐
 /// │        │
 /// └────────┘
 /// </code>
-/// </para>
-/// <para>
-/// If <c>3</c>:
-/// <code>
+///         </para>
+///         <para>
+///         If <c>3</c>:
+///         <code>
 ///  ┌────┐
 /// ┌┤1234├──┐
 /// │└────┘  │
 /// │        │
 /// └────────┘
 /// </code>
-/// </para>
-/// <para/>
-/// <para>
-/// See the <see cref="Adornment"/> class. 
-/// </para>
+///         </para>
+///         <para/>
+///         <para>
+///         See the <see cref="Adornment"/> class.
+///         </para>
 /// </remarks>
 public class Border : Adornment {
-	LineStyle? _lineStyle = null;
+	LineStyle? _lineStyle;
 
-	/// <inheritdoc />
-	public Border () { /* Do nothing; A parameter-less constructor is required to support all views unit tests. */ }
+	/// <inheritdoc/>
+	public Border ()
+	{
+		/* Do nothing; A parameter-less constructor is required to support all views unit tests. */
+	}
 
-	/// <inheritdoc />
-	public Border (View parent) : base (parent) { /* Do nothing; View.CreateAdornment requires a constructor that takes a parent */ }
+	/// <inheritdoc/>
+	public Border (View parent) : base (parent)
+	{
+		/* Do nothing; View.CreateAdornment requires a constructor that takes a parent */
+	}
 
 	/// <summary>
 	/// The color scheme for the Border. If set to <see langword="null"/>, gets the <see cref="Adornment.Parent"/> scheme.
@@ -90,7 +97,7 @@ public class Border : Adornment {
 		set => _lineStyle = value;
 	}
 
-	/// <inheritdoc />
+	/// <inheritdoc/>
 	public override void OnDrawContent (Rect contentArea)
 	{
 		base.OnDrawContent (contentArea);

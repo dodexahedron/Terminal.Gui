@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using Terminal.Gui;
 using Terminal.Gui.TextValidateProviders;
 
-namespace UICatalog.Scenarios; 
+namespace UICatalog.Scenarios;
 
 [ScenarioMetadata ("Text Input Controls", "Tests all text input controls")]
 [ScenarioCategory ("Controls")]
@@ -161,12 +161,12 @@ public class Text : Scenario {
 		};
 		Win.Add (labelMirroringHexEditor);
 
-			var dateField = new DateField (System.DateTime.Now) {
-				X = 1,
-				Y = Pos.Bottom (hexEditor) + 1,
-				Width = 20
-			};
-			Win.Add (dateField);
+		var dateField = new DateField (DateTime.Now) {
+			X = 1,
+			Y = Pos.Bottom (hexEditor) + 1,
+			Width = 20
+		};
+		Win.Add (dateField);
 
 		var labelMirroringDateField = new Label (dateField.Text) {
 			X = Pos.Right (dateField) + 1,

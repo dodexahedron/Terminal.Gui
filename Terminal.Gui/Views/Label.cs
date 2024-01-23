@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Terminal.Gui; 
+namespace Terminal.Gui;
 
 /// <summary>
 /// The Label <see cref="View"/> displays a string at a given position and supports multiple lines separated by newline
@@ -33,7 +33,7 @@ public class Label : View {
 
 	void SetInitialProperties (bool autosize = true)
 	{
-		Height   = 1;
+		Height = 1;
 		AutoSize = autosize;
 		// Things this view knows how to do
 		AddCommand (Command.Default, () => {

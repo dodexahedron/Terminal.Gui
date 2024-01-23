@@ -1,11 +1,11 @@
-﻿using CsvHelper;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using CsvHelper;
 using Terminal.Gui;
 
 namespace UICatalog.Scenarios;
@@ -13,13 +13,13 @@ namespace UICatalog.Scenarios;
 [ScenarioMetadata ("Csv Editor", "Open and edit simple CSV files using the TableView class.")]
 [ScenarioCategory ("TableView")] [ScenarioCategory ("TextView")] [ScenarioCategory ("Controls")] [ScenarioCategory ("Dialogs")] [ScenarioCategory ("Text and Formatting")] [ScenarioCategory ("Dialogs")] [ScenarioCategory ("Top Level Windows")] [ScenarioCategory ("Files and IO")]
 public class CsvEditor : Scenario {
-	TableView tableView;
 	string _currentFile;
 	DataTable _currentTable;
+	MenuItem _miCentered;
 	MenuItem _miLeft;
 	MenuItem _miRight;
-	MenuItem _miCentered;
 	TextField _selectedCellLabel;
+	TableView tableView;
 
 	public override void Setup ()
 	{
@@ -27,7 +27,7 @@ public class CsvEditor : Scenario {
 		Win.Y = 1; // menu
 		Win.Height = Dim.Fill (1); // status bar
 
-		tableView = new TableView () {
+		tableView = new TableView {
 			X = 0,
 			Y = 0,
 			Width = Dim.Fill (),
@@ -40,7 +40,7 @@ public class CsvEditor : Scenario {
 			new ("_Quit", "Quits The App", () => Quit ())
 		});
 		//fileMenu.Help = "Help";
-		var menu = new MenuBar (new MenuBarItem [] {
+		var menu = new MenuBar (new [] {
 			fileMenu,
 			new ("_Edit", new MenuItem [] {
 				new ("_New Column", "", () => AddColumn ()),
@@ -52,7 +52,7 @@ public class CsvEditor : Scenario {
 				new ("_Sort Asc", "", () => Sort (true)),
 				new ("_Sort Desc", "", () => Sort (false))
 			}),
-			new ("_View", new MenuItem [] {
+			new ("_View", new [] {
 				_miLeft = new MenuItem ("_Align Left", "", () => Align (TextAlignment.Left)),
 				_miRight = new MenuItem ("_Align Right", "", () => Align (TextAlignment.Right)),
 				_miCentered = new MenuItem ("_Align Centered", "", () => Align (TextAlignment.Centered)),
@@ -72,7 +72,7 @@ public class CsvEditor : Scenario {
 
 		Win.Add (tableView);
 
-		_selectedCellLabel = new TextField () {
+		_selectedCellLabel = new TextField {
 			X = 0,
 			Y = Pos.Bottom (tableView),
 			Text = "0,0",
@@ -132,7 +132,7 @@ public class CsvEditor : Scenario {
 
 		var currentCol = _currentTable.Columns [tableView.SelectedColumn];
 
-		if (GetText ("Rename Column", "Name:", currentCol.ColumnName, out string newName)) {
+		if (GetText ("Rename Column", "Name:", currentCol.ColumnName, out var newName)) {
 			currentCol.ColumnName = newName;
 			tableView.Update ();
 		}
@@ -175,9 +175,9 @@ public class CsvEditor : Scenario {
 
 			var currentCol = _currentTable.Columns [tableView.SelectedColumn];
 
-			if (GetText ("Move Column", "New Index:", currentCol.Ordinal.ToString (), out string newOrdinal)) {
+			if (GetText ("Move Column", "New Index:", currentCol.Ordinal.ToString (), out var newOrdinal)) {
 
-				int newIdx = Math.Min (Math.Max (0, int.Parse (newOrdinal)), tableView.Table.Columns - 1);
+				var newIdx = Math.Min (Math.Max (0, int.Parse (newOrdinal)), tableView.Table.Columns - 1);
 
 				currentCol.SetOrdinal (newIdx);
 
@@ -204,7 +204,7 @@ public class CsvEditor : Scenario {
 			return;
 		}
 
-		string colName = tableView.Table.ColumnNames [tableView.SelectedColumn];
+		var colName = tableView.Table.ColumnNames [tableView.SelectedColumn];
 
 		_currentTable.DefaultView.Sort = colName + (asc ? " asc" : " desc");
 		SetTable (_currentTable.DefaultView.ToTable ());
@@ -226,19 +226,19 @@ public class CsvEditor : Scenario {
 
 		try {
 
-			int oldIdx = tableView.SelectedRow;
+			var oldIdx = tableView.SelectedRow;
 
 			var currentRow = _currentTable.Rows [oldIdx];
 
-			if (GetText ("Move Row", "New Row:", oldIdx.ToString (), out string newOrdinal)) {
+			if (GetText ("Move Row", "New Row:", oldIdx.ToString (), out var newOrdinal)) {
 
-				int newIdx = Math.Min (Math.Max (0, int.Parse (newOrdinal)), tableView.Table.Rows - 1);
+				var newIdx = Math.Min (Math.Max (0, int.Parse (newOrdinal)), tableView.Table.Rows - 1);
 
 				if (newIdx == oldIdx) {
 					return;
 				}
 
-				object [] arrayItems = currentRow.ItemArray;
+				var arrayItems = currentRow.ItemArray;
 				_currentTable.Rows.Remove (currentRow);
 
 				// Removing and Inserting the same DataRow seems to result in it loosing its values so we have to create a new instance
@@ -288,7 +288,7 @@ public class CsvEditor : Scenario {
 
 		var style = tableView.Style.GetOrCreateColumnStyle (col.Ordinal);
 
-		if (GetText ("Format", "Pattern:", style.Format ?? "", out string newPattern)) {
+		if (GetText ("Format", "Pattern:", style.Format ?? "", out var newPattern)) {
 			style.Format = newPattern;
 			tableView.Update ();
 		}
@@ -312,7 +312,7 @@ public class CsvEditor : Scenario {
 
 		var newRow = _currentTable.NewRow ();
 
-		int newRowIdx = Math.Min (Math.Max (0, tableView.SelectedRow + 1), tableView.Table.Rows);
+		var newRowIdx = Math.Min (Math.Max (0, tableView.SelectedRow + 1), tableView.Table.Rows);
 
 		_currentTable.Rows.InsertAt (newRow, newRowIdx);
 		tableView.Update ();
@@ -324,13 +324,13 @@ public class CsvEditor : Scenario {
 			return;
 		}
 
-		if (GetText ("Enter column name", "Name:", "", out string colName)) {
+		if (GetText ("Enter column name", "Name:", "", out var colName)) {
 
 			var col = new DataColumn (colName);
 
-			int newColIdx = Math.Min (Math.Max (0, tableView.SelectedColumn + 1), tableView.Table.Columns);
+			var newColIdx = Math.Min (Math.Max (0, tableView.SelectedColumn + 1), tableView.Table.Columns);
 
-			int result = MessageBox.Query ("Column Type", "Pick a data type for the column", new string [] { "Date", "Integer", "Double", "Text", "Cancel" });
+			var result = MessageBox.Query ("Column Type", "Pick a data type for the column", "Date", "Integer", "Double", "Text", "Cancel");
 
 			if (result <= -1 || result >= 4) {
 				return;
@@ -368,14 +368,14 @@ public class CsvEditor : Scenario {
 			new StreamWriter (File.OpenWrite (_currentFile)),
 			CultureInfo.InvariantCulture);
 
-		foreach (string col in _currentTable.Columns.Cast<DataColumn> ().Select (c => c.ColumnName)) {
+		foreach (var col in _currentTable.Columns.Cast<DataColumn> ().Select (c => c.ColumnName)) {
 			writer.WriteField (col);
 		}
 
 		writer.NextRecord ();
 
 		foreach (DataRow row in _currentTable.Rows) {
-			foreach (object item in row.ItemArray) {
+			foreach (var item in row.ItemArray) {
 				writer.WriteField (item);
 			}
 			writer.NextRecord ();
@@ -385,7 +385,7 @@ public class CsvEditor : Scenario {
 
 	void Open ()
 	{
-		var ofd = new FileDialog () {
+		var ofd = new FileDialog {
 			AllowedTypes = new List<IAllowedType> { new AllowedType ("Comma Separated Values", ".csv") }
 		};
 		ofd.Style.OkButtonText = "Open";
@@ -400,7 +400,7 @@ public class CsvEditor : Scenario {
 	void Open (string filename)
 	{
 
-		int lineNumber = 0;
+		var lineNumber = 0;
 		_currentFile = null;
 
 		try {
@@ -411,7 +411,7 @@ public class CsvEditor : Scenario {
 			reader.Read ();
 
 			if (reader.ReadHeader ()) {
-				foreach (string h in reader.HeaderRecord) {
+				foreach (var h in reader.HeaderRecord) {
 					dt.Columns.Add (h);
 				}
 			}
@@ -420,7 +420,7 @@ public class CsvEditor : Scenario {
 				lineNumber++;
 
 				var newRow = dt.Rows.Add ();
-				for (int i = 0; i < dt.Columns.Count; i++) {
+				for (var i = 0; i < dt.Columns.Count; i++) {
 					newRow [i] = reader [i];
 				}
 			}
@@ -466,13 +466,13 @@ public class CsvEditor : Scenario {
 
 	}
 
-		private void TableViewKeyPress (object sender, Key e)
-		{
-			if (e.KeyCode == KeyCode.Delete) {
+	void TableViewKeyPress (object sender, Key e)
+	{
+		if (e.KeyCode == KeyCode.Delete) {
 
 			if (tableView.FullRowSelect) {
 				// Delete button deletes all rows when in full row mode
-				foreach (int toRemove in tableView.GetAllSelectedCells ().Select (p => p.Y).Distinct ().OrderByDescending (i => i)) {
+				foreach (var toRemove in tableView.GetAllSelectedCells ().Select (p => p.Y).Distinct ().OrderByDescending (i => i)) {
 					_currentTable.Rows.RemoveAt (toRemove);
 				}
 			} else {
@@ -500,7 +500,7 @@ public class CsvEditor : Scenario {
 
 	bool GetText (string title, string label, string initialText, out string enteredText)
 	{
-		bool okPressed = false;
+		var okPressed = false;
 
 		var ok = new Button ("Ok", true);
 		ok.Clicked += (s, e) => {
@@ -511,13 +511,13 @@ public class CsvEditor : Scenario {
 		cancel.Clicked += (s, e) => { Application.RequestStop (); };
 		var d = new Dialog (ok, cancel) { Title = title };
 
-		var lbl = new Label () {
+		var lbl = new Label {
 			X = 0,
 			Y = 1,
 			Text = label
 		};
 
-		var tf = new TextField () {
+		var tf = new TextField {
 			Text = initialText,
 			X = 0,
 			Y = 2,
@@ -539,11 +539,11 @@ public class CsvEditor : Scenario {
 			return;
 		}
 
-		string oldValue = _currentTable.Rows [e.Row] [e.Col].ToString ();
+		var oldValue = _currentTable.Rows [e.Row] [e.Col].ToString ();
 
-		if (GetText ("Enter new value", _currentTable.Columns [e.Col].ColumnName, oldValue, out string newText)) {
+		if (GetText ("Enter new value", _currentTable.Columns [e.Col].ColumnName, oldValue, out var newText)) {
 			try {
-				_currentTable.Rows [e.Row] [e.Col] = string.IsNullOrWhiteSpace (newText) ? DBNull.Value : (object)newText;
+				_currentTable.Rows [e.Row] [e.Col] = string.IsNullOrWhiteSpace (newText) ? DBNull.Value : newText;
 			} catch (Exception ex) {
 				MessageBox.ErrorQuery (60, 20, "Failed to set text", ex.Message, "Ok");
 			}

@@ -1,7 +1,5 @@
-﻿using System;
-using Xunit;
+﻿using Xunit;
 using Xunit.Abstractions;
-
 // Alias Console to MockConsole so we don't accidentally use Console
 using Console = Terminal.Gui.FakeConsole;
 
@@ -16,9 +14,9 @@ public class KeyboardEventTests {
 	public void KeyPress_Handled_Cancels ()
 	{
 		var view = new View ();
-		bool invokingKeyBindingsInvoked = false;
-		bool processKeyPressInvoked = false;
-		bool setHandledTo = false;
+		var invokingKeyBindingsInvoked = false;
+		var processKeyPressInvoked = false;
+		var setHandledTo = false;
 
 		view.KeyDown += (s, e) => {
 			e.Handled = setHandledTo;
@@ -54,10 +52,10 @@ public class KeyboardEventTests {
 	public void InvokingKeyBindings_Handled_Cancels ()
 	{
 		var view = new View ();
-		bool keyPressInvoked = false;
-		bool invokingKeyBindingsInvoked = false;
-		bool processKeyPressInvoked = false;
-		bool setHandledTo = false;
+		var keyPressInvoked = false;
+		var invokingKeyBindingsInvoked = false;
+		var processKeyPressInvoked = false;
+		var setHandledTo = false;
 
 		view.KeyDown += (s, e) => {
 			keyPressInvoked = true;
@@ -103,30 +101,16 @@ public class KeyboardEventTests {
 		var view = new KeyBindingsTestView ();
 		view.CommandReturns = toReturn;
 
-		bool? result = view.OnInvokingKeyBindings (new Key (KeyCode.A));
+		var result = view.OnInvokingKeyBindings (new Key (KeyCode.A));
 		Assert.Equal (expected, result);
-	}
-
-	/// <summary>
-	/// A view that overrides the OnKey* methods so we can test that they are called. 
-	/// </summary>
-	public class KeyBindingsTestView : View {
-		public bool? CommandReturns { get; set; }
-
-		public KeyBindingsTestView ()
-		{
-			CanFocus = true;
-			AddCommand (Command.Default, () => CommandReturns);
-			KeyBindings.Add (KeyCode.A, Command.Default);
-		}
 	}
 
 	[Fact]
 	public void KeyDown_Handled_True_Stops_Processing ()
 	{
-		bool keyDown = false;
-		bool invokingKeyBindings = false;
-		bool keyPressed = false;
+		var keyDown = false;
+		var invokingKeyBindings = false;
+		var keyPressed = false;
 
 		var view = new OnKeyTestView ();
 		Assert.True (view.CanFocus);
@@ -167,9 +151,9 @@ public class KeyboardEventTests {
 	[Fact]
 	public void InvokingKeyBindings_Handled_True_Stops_Processing ()
 	{
-		bool keyDown = false;
-		bool invokingKeyBindings = false;
-		bool keyPressed = false;
+		var keyDown = false;
+		var invokingKeyBindings = false;
+		var keyPressed = false;
 
 		var view = new OnKeyTestView ();
 		Assert.True (view.CanFocus);
@@ -211,9 +195,9 @@ public class KeyboardEventTests {
 	[Fact]
 	public void KeyPressed_Handled_True_Stops_Processing ()
 	{
-		bool keyDown = false;
-		bool invokingKeyBindings = false;
-		bool keyPressed = false;
+		var keyDown = false;
+		var invokingKeyBindings = false;
+		var keyPressed = false;
 
 		var view = new OnKeyTestView ();
 		Assert.True (view.CanFocus);
@@ -255,7 +239,7 @@ public class KeyboardEventTests {
 	[Fact]
 	public void KeyUp_Handled_True_Stops_Processing ()
 	{
-		bool keyUp = false;
+		var keyUp = false;
 
 		var view = new OnKeyTestView ();
 		Assert.True (view.CanFocus);
@@ -278,75 +262,15 @@ public class KeyboardEventTests {
 		Assert.False (view.OnKeyPressedContinued);
 	}
 
-	/// <summary>
-	/// A view that overrides the OnKey* methods so we can test that they are called. 
-	/// </summary>
-	public class OnKeyTestView : View {
-		public bool CancelVirtualMethods { set; private get; }
-
-		public OnKeyTestView () => CanFocus = true;
-
-		public override string Text { get; set; }
-
-		public bool OnKeyDownContinued { get; set; }
-
-		public bool OnInvokingKeyBindingsContinued { get; set; }
-
-		public bool OnKeyPressedContinued { get; set; }
-
-		public bool OnKeyUpContinued { get; set; }
-
-		public override bool OnKeyDown (Key keyEvent)
-		{
-			if (base.OnKeyDown (keyEvent)) {
-				return true;
-			}
-
-			OnKeyDownContinued = true;
-			return CancelVirtualMethods;
-		}
-
-		public override bool? OnInvokingKeyBindings (Key keyEvent)
-		{
-			bool? handled = base.OnInvokingKeyBindings (keyEvent);
-			if (handled != null && (bool)handled) {
-				return true;
-			}
-
-			OnInvokingKeyBindingsContinued = true;
-			return CancelVirtualMethods;
-		}
-
-		public override bool OnProcessKeyDown (Key keyEvent)
-		{
-			if (base.OnProcessKeyDown (keyEvent)) {
-				return true;
-			}
-
-			OnKeyPressedContinued = true;
-			return CancelVirtualMethods;
-		}
-
-		public override bool OnKeyUp (Key keyEvent)
-		{
-			if (base.OnKeyUp (keyEvent)) {
-				return true;
-			}
-
-			OnKeyUpContinued = true;
-			return CancelVirtualMethods;
-		}
-	}
-
 	[Theory]
 	[InlineData (true, false, false)]
 	[InlineData (true, true, false)]
 	[InlineData (true, true, true)]
 	public void Events_Are_Called_With_Only_Key_Modifiers (bool shift, bool alt, bool control)
 	{
-		bool keyDown = false;
-		bool keyPressed = false;
-		bool keyUp = false;
+		var keyDown = false;
+		var keyPressed = false;
+		var keyUp = false;
 
 		var view = new OnKeyTestView ();
 		view.CancelVirtualMethods = false;
@@ -403,19 +327,19 @@ public class KeyboardEventTests {
 			}
 			_output.WriteLine ($"Testing {view.GetType ().Name}");
 
-			bool keyDown = false;
+			var keyDown = false;
 			view.KeyDown += (s, a) => {
 				a.Handled = false; // don't handle it so the other events are called
 				keyDown = true;
 			};
 
-			bool invokingKeyBindings = false;
+			var invokingKeyBindings = false;
 			view.InvokingKeyBindings += (s, a) => {
 				a.Handled = false; // don't handle it so the other events are called
 				invokingKeyBindings = true;
 			};
 
-			bool keyDownProcessed = false;
+			var keyDownProcessed = false;
 			view.ProcessKeyDown += (s, a) => {
 				a.Handled = true;
 				keyDownProcessed = true;
@@ -443,9 +367,9 @@ public class KeyboardEventTests {
 			}
 			_output.WriteLine ($"Testing {view.GetType ().Name}");
 
-			bool keyUp = false;
+			var keyUp = false;
 			view.KeyUp += (s, a) => {
-				a.Handled = true;  
+				a.Handled = true;
 				keyUp = true;
 			};
 
@@ -454,5 +378,81 @@ public class KeyboardEventTests {
 			view.Dispose ();
 		}
 
+	}
+
+	/// <summary>
+	/// A view that overrides the OnKey* methods so we can test that they are called.
+	/// </summary>
+	public class KeyBindingsTestView : View {
+
+		public KeyBindingsTestView ()
+		{
+			CanFocus = true;
+			AddCommand (Command.Default, () => CommandReturns);
+			KeyBindings.Add (KeyCode.A, Command.Default);
+		}
+
+		public bool? CommandReturns { get; set; }
+	}
+
+	/// <summary>
+	/// A view that overrides the OnKey* methods so we can test that they are called.
+	/// </summary>
+	public class OnKeyTestView : View {
+
+		public OnKeyTestView () => CanFocus = true;
+
+		public bool CancelVirtualMethods { set; private get; }
+
+		public override string Text { get; set; }
+
+		public bool OnKeyDownContinued { get; set; }
+
+		public bool OnInvokingKeyBindingsContinued { get; set; }
+
+		public bool OnKeyPressedContinued { get; set; }
+
+		public bool OnKeyUpContinued { get; set; }
+
+		public override bool OnKeyDown (Key keyEvent)
+		{
+			if (base.OnKeyDown (keyEvent)) {
+				return true;
+			}
+
+			OnKeyDownContinued = true;
+			return CancelVirtualMethods;
+		}
+
+		public override bool? OnInvokingKeyBindings (Key keyEvent)
+		{
+			var handled = base.OnInvokingKeyBindings (keyEvent);
+			if (handled != null && (bool)handled) {
+				return true;
+			}
+
+			OnInvokingKeyBindingsContinued = true;
+			return CancelVirtualMethods;
+		}
+
+		public override bool OnProcessKeyDown (Key keyEvent)
+		{
+			if (base.OnProcessKeyDown (keyEvent)) {
+				return true;
+			}
+
+			OnKeyPressedContinued = true;
+			return CancelVirtualMethods;
+		}
+
+		public override bool OnKeyUp (Key keyEvent)
+		{
+			if (base.OnKeyUp (keyEvent)) {
+				return true;
+			}
+
+			OnKeyUpContinued = true;
+			return CancelVirtualMethods;
+		}
 	}
 }

@@ -290,7 +290,7 @@ public class AttributeTests {
 		Assert.False (attr2.Equals (attr1));
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void Equals_Initialized ()
 	{
 		Assert.NotNull (Application.Driver);
@@ -302,7 +302,7 @@ public class AttributeTests {
 		Assert.True (attr2.Equals (attr1));
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void NotEquals_Initialized ()
 	{
 		var attr1 = new Attribute (Color.Red, Color.Green);

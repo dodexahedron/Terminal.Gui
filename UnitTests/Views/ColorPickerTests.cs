@@ -1,12 +1,7 @@
-﻿using Terminal.Gui;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿using Xunit;
 
 namespace Terminal.Gui.ViewsTests;
+
 public class ColorPickerTests {
 	[Fact]
 	public void Constructors ()
@@ -29,22 +24,22 @@ public class ColorPickerTests {
 		var colorPicker = new ColorPicker ();
 		Assert.Equal (ColorName.Black, colorPicker.SelectedColor);
 
-		Assert.True (colorPicker.NewKeyDownEvent (new (KeyCode.CursorRight)));
+		Assert.True (colorPicker.NewKeyDownEvent (new Key (KeyCode.CursorRight)));
 		Assert.Equal (ColorName.Blue, colorPicker.SelectedColor);
 
-		Assert.True (colorPicker.NewKeyDownEvent (new (KeyCode.CursorDown)));
+		Assert.True (colorPicker.NewKeyDownEvent (new Key (KeyCode.CursorDown)));
 		Assert.Equal (ColorName.BrightBlue, colorPicker.SelectedColor);
 
-		Assert.True (colorPicker.NewKeyDownEvent (new (KeyCode.CursorLeft)));
+		Assert.True (colorPicker.NewKeyDownEvent (new Key (KeyCode.CursorLeft)));
 		Assert.Equal (ColorName.DarkGray, colorPicker.SelectedColor);
 
-		Assert.True (colorPicker.NewKeyDownEvent (new (KeyCode.CursorUp)));
+		Assert.True (colorPicker.NewKeyDownEvent (new Key (KeyCode.CursorUp)));
 		Assert.Equal (ColorName.Black, colorPicker.SelectedColor);
 
-		Assert.True (colorPicker.NewKeyDownEvent (new (KeyCode.CursorLeft)));
+		Assert.True (colorPicker.NewKeyDownEvent (new Key (KeyCode.CursorLeft)));
 		Assert.Equal (ColorName.Black, colorPicker.SelectedColor);
 
-		Assert.True (colorPicker.NewKeyDownEvent (new (KeyCode.CursorUp)));
+		Assert.True (colorPicker.NewKeyDownEvent (new Key (KeyCode.CursorUp)));
 		Assert.Equal (ColorName.Black, colorPicker.SelectedColor);
 	}
 
@@ -52,7 +47,7 @@ public class ColorPickerTests {
 	[AutoInitShutdown]
 	public void MouseEvents ()
 	{
-		var colorPicker = new ColorPicker () {
+		var colorPicker = new ColorPicker {
 			X = 0,
 			Y = 0,
 			Height = 4,
@@ -64,7 +59,7 @@ public class ColorPickerTests {
 
 		Assert.False (colorPicker.MouseEvent (new MouseEvent ()));
 
-		Assert.True (colorPicker.MouseEvent (new MouseEvent () { Flags = MouseFlags.Button1Clicked, X = 4, Y = 1 }));
+		Assert.True (colorPicker.MouseEvent (new MouseEvent { Flags = MouseFlags.Button1Clicked, X = 4, Y = 1 }));
 		Assert.Equal (ColorName.Blue, colorPicker.SelectedColor);
 	}
 

@@ -300,11 +300,11 @@ public partial class View {
 		var hotkeySpec = HotKeySpecifier == (Rune)0xffff ? (Rune)'_' : HotKeySpecifier;
 		Application.Driver.SetAttribute (normalColor);
 		foreach (var rune in text.EnumerateRunes ()) {
-			if (rune == new Rune(hotkeySpec.Value)) {
+			if (rune == new Rune (hotkeySpec.Value)) {
 				Application.Driver.SetAttribute (hotColor);
 				continue;
 			}
-			Application.Driver.AddRune ((Rune)rune);
+			Application.Driver.AddRune (rune);
 			Application.Driver.SetAttribute (normalColor);
 		}
 	}
@@ -513,9 +513,9 @@ public partial class View {
 		if (_subviews != null && SubViewNeedsDisplay) {
 			var subviewsNeedingDraw = _subviews.Where (
 				view => view.Visible &&
-					(view.NeedsDisplay ||
-					 view.SubViewNeedsDisplay ||
-					 view.LayoutNeeded)
+				        (view.NeedsDisplay ||
+				         view.SubViewNeedsDisplay ||
+				         view.LayoutNeeded)
 			);
 
 			foreach (var view in subviewsNeedingDraw) {

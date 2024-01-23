@@ -8,28 +8,34 @@ namespace Terminal.Gui;
 
 /// <summary>
 /// Adornments are a special form of <see cref="View"/> that appear outside of the <see cref="View.Bounds"/>:
-/// <see cref="Margin"/>, <see cref="Border"/>, and <see cref="Padding"/>. They are defined using the <see cref="Thickness"/>
-/// class, which specifies the thickness of the sides of a rectangle. 
+/// <see cref="Margin"/>, <see cref="Border"/>, and <see cref="Padding"/>. They are defined using the
+/// <see cref="Thickness"/>
+/// class, which specifies the thickness of the sides of a rectangle.
 /// </summary>
 /// <remarsk>
-/// <para>
-/// There is no prevision for creating additional subclasses of Adornment. It is not abstract to enable unit testing.
-/// </para>
-/// <para>
-/// Each of <see cref="Margin"/>, <see cref="Border"/>, and <see cref="Padding"/> can be customized.
-/// </para>
+///         <para>
+///         There is no prevision for creating additional subclasses of Adornment. It is not abstract to enable unit
+///         testing.
+///         </para>
+///         <para>
+///         Each of <see cref="Margin"/>, <see cref="Border"/>, and <see cref="Padding"/> can be customized.
+///         </para>
 /// </remarsk>
 public class Adornment : View {
-	/// <inheritdoc />
-	public Adornment () { /* Do nothing; A parameter-less constructor is required to support all views unit tests. */ }
+
+	Thickness _thickness = Thickness.Empty;
+
+	/// <inheritdoc/>
+	public Adornment ()
+	{
+		/* Do nothing; A parameter-less constructor is required to support all views unit tests. */
+	}
 
 	/// <summary>
 	/// Constructs a new adornment for the view specified by <paramref name="parent"/>.
 	/// </summary>
 	/// <param name="parent"></param>
 	public Adornment (View parent) => Parent = parent;
-
-	Thickness _thickness = Thickness.Empty;
 
 	/// <summary>
 	/// The Parent of this Adornment (the View this Adornment surrounds).
@@ -41,7 +47,8 @@ public class Adornment : View {
 	public View Parent { get; set; }
 
 	/// <summary>
-	/// Adornments cannot be used as sub-views (see <see cref="Parent"/>); this method always throws an <see cref="InvalidOperationException"/>.
+	/// Adornments cannot be used as sub-views (see <see cref="Parent"/>); this method always throws an
+	/// <see cref="InvalidOperationException"/>.
 	/// TODO: Are we sure?
 	/// </summary>
 	public override View SuperView {
@@ -83,11 +90,9 @@ public class Adornment : View {
 		set => throw new InvalidOperationException ("It makes no sense to set Bounds of a Thickness.");
 	}
 
-	internal override Adornment CreateAdornment (Type adornmentType)
-	{
+	internal override Adornment CreateAdornment (Type adornmentType) =>
 		/* Do nothing - Adornments do not have Adornments */
-		return null;
-	}
+		null;
 
 	internal override void LayoutAdornments ()
 	{
@@ -136,7 +141,7 @@ public class Adornment : View {
 	/// </summary>
 	/// <returns></returns>
 	public override bool OnRenderLineCanvas () => false;
-	
+
 	/// <summary>
 	/// Redraws the Adornments that comprise the <see cref="Adornment"/>.
 	/// </summary>
@@ -148,7 +153,7 @@ public class Adornment : View {
 
 		var screenBounds = BoundsToScreen (Frame);
 
-		Attribute normalAttr = GetNormalColor ();
+		var normalAttr = GetNormalColor ();
 
 		// This just draws/clears the thickness, not the insides.
 		Driver.SetAttribute (normalAttr);

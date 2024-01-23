@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
-namespace Terminal.Gui; 
+namespace Terminal.Gui;
 
 /// <summary>
-/// Navigates a collection of items using keystrokes. The keystrokes are used to build a search string. 
+/// Navigates a collection of items using keystrokes. The keystrokes are used to build a search string.
 /// The <see cref="SearchString"/> is used to find the next item in the collection that matches the search string
 /// when <see cref="GetNextMatchingItem(int, char)"/> is called.
 /// <para>
-/// If the user types keystrokes that can't be found in the collection, 
+/// If the user types keystrokes that can't be found in the collection,
 /// the search string is cleared and the next item is found that starts with the last keystroke.
 /// </para>
 /// <para>
@@ -19,6 +17,8 @@ namespace Terminal.Gui;
 /// </summary>
 public abstract class CollectionNavigatorBase {
 	DateTime _lastKeystroke = DateTime.Now;
+
+	string _searchString = "";
 
 	/// <summary>
 	/// Gets or sets the number of milliseconds to delay before clearing the search string. The delay is
@@ -30,13 +30,6 @@ public abstract class CollectionNavigatorBase {
 	/// The comparer function to use when searching the collection.
 	/// </summary>
 	public StringComparer Comparer { get; set; } = StringComparer.InvariantCultureIgnoreCase;
-
-	/// <summary>
-	/// This event is invoked when <see cref="SearchString"/>  changes. Useful for debugging.
-	/// </summary>
-	public event EventHandler<KeystrokeNavigatorEventArgs> SearchStringChanged;
-
-	string _searchString = "";
 
 	/// <summary>
 	/// Gets the current search string. This includes the set of keystrokes that have been pressed
@@ -51,19 +44,28 @@ public abstract class CollectionNavigatorBase {
 	}
 
 	/// <summary>
-	/// Invoked when the <see cref="SearchString"/> changes. Useful for debugging. Invokes the <see cref="SearchStringChanged"/> event.
+	/// This event is invoked when <see cref="SearchString"/>  changes. Useful for debugging.
+	/// </summary>
+	public event EventHandler<KeystrokeNavigatorEventArgs> SearchStringChanged;
+
+	/// <summary>
+	/// Invoked when the <see cref="SearchString"/> changes. Useful for debugging. Invokes the
+	/// <see cref="SearchStringChanged"/> event.
 	/// </summary>
 	/// <param name="e"></param>
 	public virtual void OnSearchStringChanged (KeystrokeNavigatorEventArgs e) => SearchStringChanged?.Invoke (this, e);
 
 	/// <summary>
-	/// Gets the index of the next item in the collection that matches the current <see cref="SearchString"/> plus the provided character (typically
+	/// Gets the index of the next item in the collection that matches the current <see cref="SearchString"/> plus the provided
+	/// character (typically
 	/// from a key press).
 	/// </summary>
 	/// <param name="currentIndex">The index in the collection to start the search from.</param>
 	/// <param name="keyStruck">The character of the key the user pressed.</param>
-	/// <returns>The index of the item that matches what the user has typed. 
-	/// Returns <see langword="-1"/> if no item in the collection matched.</returns>
+	/// <returns>
+	/// The index of the item that matches what the user has typed.
+	/// Returns <see langword="-1"/> if no item in the collection matched.
+	/// </returns>
 	public int GetNextMatchingItem (int currentIndex, char keyStruck)
 	{
 		if (!char.IsControl (keyStruck)) {
@@ -72,7 +74,7 @@ public abstract class CollectionNavigatorBase {
 			// a candidate search is things that begin with "dd"
 			// but if we find none then we must fallback on cycling
 			// d instead and discard the candidate state
-			string candidateState = "";
+			var candidateState = "";
 
 			// is it a second or third (etc) keystroke within a short time
 			if (SearchString.Length > 0 && DateTime.Now - _lastKeystroke < TimeSpan.FromMilliseconds (TypingDelay)) {
@@ -84,7 +86,7 @@ public abstract class CollectionNavigatorBase {
 				SearchString = new string (keyStruck, 1);
 			}
 
-			int idxCandidate = GetNextMatchingItem (currentIndex, candidateState,
+			var idxCandidate = GetNextMatchingItem (currentIndex, candidateState,
 				// prefer not to move if there are multiple characters e.g. "ca" + 'r' should stay on "car" and not jump to "cart"
 				candidateState.Length > 1);
 
@@ -122,23 +124,23 @@ public abstract class CollectionNavigatorBase {
 			// Found another "d" or just leave index as it was
 			return idxCandidate;
 
-		} else {
-			// clear state because keypress was a control char
-			ClearSearchString ();
-
-			// control char indicates no selection
-			return -1;
 		}
+		// clear state because keypress was a control char
+		ClearSearchString ();
+
+		// control char indicates no selection
+		return -1;
 	}
 
 	/// <summary>
-	/// Gets the index of the next item in the collection that matches <paramref name="search"/>. 
+	/// Gets the index of the next item in the collection that matches <paramref name="search"/>.
 	/// </summary>
 	/// <param name="currentIndex">The index in the collection to start the search from.</param>
 	/// <param name="search">The search string to use.</param>
-	/// <param name="minimizeMovement">Set to <see langword="true"/> to stop the search on the first match
+	/// <param name="minimizeMovement">
+	/// Set to <see langword="true"/> to stop the search on the first match
 	/// if there are multiple matches for <paramref name="search"/>.
-	/// e.g. "ca" + 'r' should stay on "car" and not jump to "cart". If <see langword="false"/> (the default), 
+	/// e.g. "ca" + 'r' should stay on "car" and not jump to "cart". If <see langword="false"/> (the default),
 	/// the next matching item will be returned, even if it is above in the collection.
 	/// </param>
 	/// <returns>The index of the next matching item or <see langword="-1"/> if no match was found.</returns>
@@ -148,7 +150,7 @@ public abstract class CollectionNavigatorBase {
 			return -1;
 		}
 
-		int collectionLength = GetCollectionLength ();
+		var collectionLength = GetCollectionLength ();
 
 		if (currentIndex != -1 && currentIndex < collectionLength && IsMatch (search, ElementAt (currentIndex))) {
 			// we are already at a match
@@ -157,9 +159,9 @@ public abstract class CollectionNavigatorBase {
 				return currentIndex;
 			}
 
-			for (int i = 1; i < collectionLength; i++) {
+			for (var i = 1; i < collectionLength; i++) {
 				//circular
-				int idxCandidate = (i + currentIndex) % collectionLength;
+				var idxCandidate = (i + currentIndex) % collectionLength;
 				if (IsMatch (search, ElementAt (idxCandidate))) {
 					return idxCandidate;
 				}
@@ -167,17 +169,16 @@ public abstract class CollectionNavigatorBase {
 
 			// nothing else starts with the search term
 			return currentIndex;
-		} else {
-			// search terms no longer match the current selection or there is none
-			for (int i = 0; i < collectionLength; i++) {
-				if (IsMatch (search, ElementAt (i))) {
-					return i;
-				}
-			}
-
-			// Nothing matches
-			return -1;
 		}
+		// search terms no longer match the current selection or there is none
+		for (var i = 0; i < collectionLength; i++) {
+			if (IsMatch (search, ElementAt (i))) {
+				return i;
+			}
+		}
+
+		// Nothing matches
+		return -1;
 	}
 
 	/// <summary>

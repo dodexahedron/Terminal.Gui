@@ -1,29 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Terminal.Gui {
+namespace Terminal.Gui; 
 
-	static class ReadOnlyCollectionExtensions {
+static class ReadOnlyCollectionExtensions {
 
-		public static int IndexOf<T> (this IReadOnlyCollection<T> self, Func<T, bool> predicate)
-		{
-			int i = 0;
-			foreach (T element in self) {
-				if (predicate (element))
-					return i;
-				i++;
+	public static int IndexOf<T> (this IReadOnlyCollection<T> self, Func<T, bool> predicate)
+	{
+		var i = 0;
+		foreach (var element in self) {
+			if (predicate (element)) {
+				return i;
 			}
-			return -1;
+			i++;
 		}
-		public static int IndexOf<T> (this IReadOnlyCollection<T> self, T toFind)
-		{
-			int i = 0;
-			foreach (T element in self) {
-				if (Equals (element, toFind))
-					return i;
-				i++;
+		return -1;
+	}
+
+	public static int IndexOf<T> (this IReadOnlyCollection<T> self, T toFind)
+	{
+		var i = 0;
+		foreach (var element in self) {
+			if (Equals (element, toFind)) {
+				return i;
 			}
-			return -1;
+			i++;
 		}
+		return -1;
 	}
 }

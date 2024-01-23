@@ -32,16 +32,27 @@ public class FileDialog : Dialog {
 		'"', '<', '>', '|', '*', '?'
 	};
 
-	Dictionary<IDirectoryInfo, string> _treeRoots = new ();
-	MenuBarItem allowedTypeMenu;
-	MenuBar allowedTypeMenuBar;
-	MenuItem [] allowedTypeMenuItems;
 	readonly Button btnBack;
 	readonly Button btnCancel;
 	readonly Button btnForward;
 	readonly Button btnOk;
 	readonly Button btnToggleSplitterCollapse;
 	readonly Button btnUp;
+	readonly IFileSystem fileSystem;
+
+	readonly FileDialogHistory history;
+	readonly SpinnerView spinnerView;
+	readonly TileView splitContainer;
+
+	readonly TableView tableView;
+	readonly TextField tbFind;
+	readonly TextField tbPath;
+	readonly TreeView<IFileSystemInfo> treeView;
+
+	Dictionary<IDirectoryInfo, string> _treeRoots = new ();
+	MenuBarItem allowedTypeMenu;
+	MenuBar allowedTypeMenuBar;
+	MenuItem [] allowedTypeMenuItems;
 
 	int currentSortColumn;
 
@@ -49,9 +60,6 @@ public class FileDialog : Dialog {
 
 	bool disposed;
 	string feedback;
-	readonly IFileSystem fileSystem;
-
-	readonly FileDialogHistory history;
 	bool loaded;
 
 	/// <summary>
@@ -60,13 +68,6 @@ public class FileDialog : Dialog {
 	internal object onlyOneSearchLock = new ();
 
 	bool pushingState;
-	readonly SpinnerView spinnerView;
-	readonly TileView splitContainer;
-
-	readonly TableView tableView;
-	readonly TextField tbFind;
-	readonly TextField tbPath;
-	readonly TreeView<IFileSystemInfo> treeView;
 
 	/// <summary>
 	/// Initializes a new instance of the <see cref="FileDialog"/> class.
@@ -526,12 +527,12 @@ public class FileDialog : Dialog {
 		}
 
 		return tableView.GetAllSelectedCells ()
-				.Select (c => c.Y)
-				.Distinct ()
-				.Select (RowToStats)
-				.Where (s => !s.IsParent)
-				.Select (d => d.FileSystemInfo)
-				.ToArray ();
+			.Select (c => c.Y)
+			.Distinct ()
+			.Select (RowToStats)
+			.Where (s => !s.IsParent)
+			.Select (d => d.FileSystemInfo)
+			.ToArray ();
 	}
 
 
@@ -677,10 +678,10 @@ public class FileDialog : Dialog {
 
 			allowedTypeMenu = new MenuBarItem ("<placeholder>",
 				allowedTypeMenuItems = AllowedTypes.Select (
-									   (a, i) => new MenuItem (a.ToString (), null, () => {
-										   AllowedTypeMenuClicked (i);
-									   }))
-								   .ToArray ());
+						(a, i) => new MenuItem (a.ToString (), null, () => {
+							AllowedTypeMenuClicked (i);
+						}))
+					.ToArray ());
 
 			allowedTypeMenuBar = new MenuBar (new [] { allowedTypeMenu }) {
 				Width = width,
@@ -810,9 +811,9 @@ public class FileDialog : Dialog {
 
 		// Don't include ".." (IsParent) in multiselections
 		MultiSelected = toMultiAccept
-				.Where (s => !s.IsParent)
-				.Select (s => s.FileSystemInfo.FullName)
-				.ToList ().AsReadOnly ();
+			.Where (s => !s.IsParent)
+			.Select (s => s.FileSystemInfo.FullName)
+			.ToList ().AsReadOnly ();
 
 		Path = MultiSelected.Count == 1 ? MultiSelected [0] : string.Empty;
 
@@ -1269,8 +1270,8 @@ public class FileDialog : Dialog {
 
 		// This portion is never reordered (aways .. at top then folders)
 		var forcedOrder = stats
-				  .OrderByDescending (f => f.IsParent)
-				  .ThenBy (f => f.IsDir ? -1 : 100);
+			.OrderByDescending (f => f.IsParent)
+			.ThenBy (f => f.IsDir ? -1 : 100);
 
 		// This portion is flexible based on the column clicked (e.g. alphabetical)
 		var ordered =
@@ -1361,13 +1362,13 @@ public class FileDialog : Dialog {
 	/// downwards.
 	/// </summary>
 	internal class SearchState : FileDialogState {
-		bool cancel;
-		bool finished;
 
 		// TODO: Add thread safe child adding
 		readonly List<FileSystemInfoStats> found = new ();
 		readonly object oLockFound = new ();
 		readonly CancellationTokenSource token = new ();
+		bool cancel;
+		bool finished;
 
 		public SearchState (IDirectoryInfo dir, FileDialog parent, string searchTerms) : base (dir, parent)
 		{

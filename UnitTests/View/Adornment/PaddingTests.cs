@@ -2,29 +2,27 @@
 using Xunit.Abstractions;
 
 namespace Terminal.Gui.ViewTests;
+
 public class PaddingTests {
 	readonly ITestOutputHelper _output;
 
-	public PaddingTests (ITestOutputHelper output)
-	{
-		_output = output;
-	}
+	public PaddingTests (ITestOutputHelper output) => _output = output;
 
-	[Fact, SetupFakeDriver]
+	[Fact] [SetupFakeDriver]
 	public void Padding_Uses_Parent_ColorScheme ()
 	{
 		((FakeDriver)Application.Driver).SetBufferSize (5, 5);
-		var view = new View () {
+		var view = new View {
 			Height = 3,
 			Width = 3
 		};
 		view.Padding.Thickness = new Thickness (1);
 
-		view.ColorScheme = new ColorScheme () {
+		view.ColorScheme = new ColorScheme {
 			Normal = new Attribute (Color.Red, Color.Green),
-			Focus = new Attribute (Color.Green, Color.Red),
+			Focus = new Attribute (Color.Green, Color.Red)
 		};
-		
+
 		Assert.Equal (ColorName.Red, view.Padding.GetNormalColor ().Foreground.ColorName);
 		Assert.Equal (view.GetNormalColor (), view.Padding.GetNormalColor ());
 

@@ -5,9 +5,9 @@ using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using static Unix.Terminal.Curses;
 
 namespace Terminal.Gui;
+
 /// <summary>
 /// Provides a platform-independent API for managing ANSI escape sequences.
 /// </summary>
@@ -18,6 +18,32 @@ namespace Terminal.Gui;
 /// * https://vt100.net/
 /// </remarks>
 public static class EscSeqUtils {
+
+	/// <summary>
+	/// Options for ANSI ESC "[xJ" - Clears part of the screen.
+	/// </summary>
+	public enum ClearScreenOptions {
+		/// <summary>
+		/// If n is 0 (or missing), clear from cursor to end of screen.
+		/// </summary>
+		CursorToEndOfScreen = 0,
+
+		/// <summary>
+		/// If n is 1, clear from cursor to beginning of the screen.
+		/// </summary>
+		CursorToBeginningOfScreen = 1,
+
+		/// <summary>
+		/// If n is 2, clear entire screen (and moves cursor to upper left on DOS ANSI.SYS).
+		/// </summary>
+		EntireScreen = 2,
+
+		/// <summary>
+		/// If n is 3, clear entire screen and delete all lines saved in the scrollback buffer
+		/// </summary>
+		EntireScreenAndScrollbackBuffer = 3
+	}
+
 	/// <summary>
 	/// Escape key code (ASCII 27/0x1B).
 	/// </summary>
@@ -59,23 +85,11 @@ public static class EscSeqUtils {
 	public static readonly string CSI_DisableUrxvtExtModeMouse = CSI + "?1015l";
 
 	/// <summary>
-	/// Control sequence for enabling mouse events.
-	/// </summary>
-	public static string CSI_EnableMouseEvents { get; set; } =
-		CSI_EnableAnyEventMouse + CSI_EnableUrxvtExtModeMouse + CSI_EnableSgrExtModeMouse;
-
-	/// <summary>
-	/// Control sequence for disabling mouse events.
-	/// </summary>
-	public static string CSI_DisableMouseEvents { get; set; } =
-		CSI_DisableAnyEventMouse + CSI_DisableUrxvtExtModeMouse + CSI_DisableSgrExtModeMouse;
-
-	/// <summary>
 	/// ESC [ ? 1047 h - Activate xterm alternative buffer (no backscroll)
 	/// </summary>
 	/// <remarks>
 	/// From https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Functions-using-CSI-_-ordered-by-the-final-character_s_
-	/// Use Alternate Screen Buffer, xterm. 
+	/// Use Alternate Screen Buffer, xterm.
 	/// </remarks>
 	public static readonly string CSI_ActivateAltBufferNoBackscroll = CSI + "?1047h";
 
@@ -110,27 +124,28 @@ public static class EscSeqUtils {
 	/// </remarks>
 	public static readonly string CSI_RestoreCursorAndRestoreAltBufferWithBackscroll = CSI + "?1049l";
 
+	static MouseFlags? lastMouseButtonPressed;
+
+	//private static MouseFlags? lastMouseButtonReleased;
+	static bool isButtonPressed;
+
+	//private static bool isButtonReleased;
+	static bool isButtonClicked;
+	static bool isButtonDoubleClicked;
+	static bool isButtonTripleClicked;
+	static Point point;
+
 	/// <summary>
-	/// Options for ANSI ESC "[xJ" - Clears part of the screen.
+	/// Control sequence for enabling mouse events.
 	/// </summary>
-	public enum ClearScreenOptions {
-		/// <summary>
-		/// If n is 0 (or missing), clear from cursor to end of screen.
-		/// </summary>
-		CursorToEndOfScreen = 0,
-		/// <summary>
-		/// If n is 1, clear from cursor to beginning of the screen.
-		/// </summary>
-		CursorToBeginningOfScreen = 1,
-		/// <summary>
-		/// If n is 2, clear entire screen (and moves cursor to upper left on DOS ANSI.SYS).
-		/// </summary>
-		EntireScreen = 2,
-		/// <summary>
-		/// If n is 3, clear entire screen and delete all lines saved in the scrollback buffer
-		/// </summary>
-		EntireScreenAndScrollbackBuffer = 3
-	}
+	public static string CSI_EnableMouseEvents { get; set; } =
+		CSI_EnableAnyEventMouse + CSI_EnableUrxvtExtModeMouse + CSI_EnableSgrExtModeMouse;
+
+	/// <summary>
+	/// Control sequence for disabling mouse events.
+	/// </summary>
+	public static string CSI_DisableMouseEvents { get; set; } =
+		CSI_DisableAnyEventMouse + CSI_DisableUrxvtExtModeMouse + CSI_DisableSgrExtModeMouse;
 
 	/// <summary>
 	/// ESC [ x J - Clears part of the screen. See <see cref="ClearScreenOptions"/>.
@@ -139,215 +154,6 @@ public static class EscSeqUtils {
 	/// <returns></returns>
 	public static string CSI_ClearScreen (ClearScreenOptions option) => $"{CSI}{(int)option}J";
 
-	#region Cursor
-	//ESC [ M - RI Reverse Index – Performs the reverse operation of \n, moves cursor up one line, maintains horizontal position, scrolls buffer if necessary*
-
-	/// <summary>
-	/// ESC [ 7 - Save Cursor Position in Memory**
-	/// </summary>
-	public static readonly string CSI_SaveCursorPosition = CSI + "7";
-
-	/// <summary>
-	/// ESC [ 8 - DECSR Restore Cursor Position from Memory**
-	/// </summary>
-	public static readonly string CSI_RestoreCursorPosition = CSI + "8";
-
-	/// <summary>
-	/// ESC [ 8 ; height ; width t - Set Terminal Window Size
-	/// https://terminalguide.namepad.de/seq/csi_st-8/
-	/// </summary>
-	public static string CSI_SetTerminalWindowSize (int height, int width) => $"{CSI}8;{height};{width}t";
-
-	//ESC [ < n > A - CUU - Cursor Up       Cursor up by < n >
-	//ESC [ < n > B - CUD - Cursor Down     Cursor down by < n >
-	//ESC [ < n > C - CUF - Cursor Forward  Cursor forward (Right) by < n >
-	//ESC [ < n > D - CUB - Cursor Backward Cursor backward (Left) by < n >
-	//ESC [ < n > E - CNL - Cursor Next Line - Cursor down < n > lines from current position
-	//ESC [ < n > F - CPL - Cursor Previous Line    Cursor up < n > lines from current position
-	//ESC [ < n > G - CHA - Cursor Horizontal Absolute      Cursor moves to < n > th position horizontally in the current line
-	//ESC [ < n > d - VPA - Vertical Line Position Absolute Cursor moves to the < n > th position vertically in the current column
-
-	/// <summary>
-	/// ESC [ y ; x H - CUP Cursor Position - Cursor moves to x ; y coordinate within the viewport, where x is the column of the y line
-	/// </summary>
-	/// <param name="row">Origin is (1,1).</param>
-	/// <param name="col">Origin is (1,1).</param>
-	/// <returns></returns>
-	public static string CSI_SetCursorPosition (int row, int col) => $"{CSI}{row};{col}H";
-
-
-	//ESC [ <y> ; <x> f - HVP     Horizontal Vertical Position* Cursor moves to<x>; <y> coordinate within the viewport, where <x> is the column of the<y> line
-	//ESC [ s - ANSISYSSC       Save Cursor – Ansi.sys emulation	**With no parameters, performs a save cursor operation like DECSC
-	//ESC [ u - ANSISYSRC       Restore Cursor – Ansi.sys emulation	**With no parameters, performs a restore cursor operation like DECRC
-	//ESC [ ? 12 h - ATT160  Text Cursor Enable Blinking     Start the cursor blinking
-	//ESC [ ? 12 l - ATT160  Text Cursor Disable Blinking    Stop blinking the cursor
-	/// <summary>
-	/// ESC [ ? 25 h - DECTCEM Text Cursor Enable Mode Show    Show the cursor
-	/// </summary>
-	public static readonly string CSI_ShowCursor = CSI + "?25h";
-
-	/// <summary>
-	/// ESC [ ? 25 l - DECTCEM Text Cursor Enable Mode Hide    Hide the cursor
-	/// </summary>
-	public static readonly string CSI_HideCursor = CSI + "?25l";
-	//ESC [ ? 12 h - ATT160  Text Cursor Enable Blinking     Start the cursor blinking
-	//ESC [ ? 12 l - ATT160  Text Cursor Disable Blinking    Stop blinking the cursor
-	//ESC [ ? 25 h - DECTCEM Text Cursor Enable Mode Show    Show the cursor
-	//ESC [ ? 25 l - DECTCEM Text Cursor Enable Mode Hide    Hide the cursor
-
-	/// <summary>
-	/// Styles for ANSI ESC "[x q" - Set Cursor Style
-	/// </summary>
-	public enum DECSCUSR_Style {
-		/// <summary>
-		/// DECSCUSR - User Shape - Default cursor shape configured by the user
-		/// </summary>
-		UserShape = 0,
-		/// <summary>
-		/// DECSCUSR - Blinking Block - Blinking block cursor shape
-		/// </summary>
-		BlinkingBlock = 1,
-		/// <summary>
-		/// DECSCUSR - Steady Block - Steady block cursor shape
-		/// </summary>
-		SteadyBlock = 2,
-		/// <summary>
-		/// DECSCUSR - Blinking Underline - Blinking underline cursor shape
-		/// </summary>
-		BlinkingUnderline = 3,
-		/// <summary>
-		/// DECSCUSR - Steady Underline - Steady underline cursor shape
-		/// </summary>
-		SteadyUnderline = 4,
-		/// <summary>
-		/// DECSCUSR - Blinking Bar - Blinking bar cursor shape
-		/// </summary>
-		BlinkingBar = 5,
-		/// <summary>
-		/// DECSCUSR - Steady Bar - Steady bar cursor shape
-		/// </summary>
-		SteadyBar = 6
-	}
-
-	/// <summary>
-	/// ESC [ n SP q - Select Cursor Style (DECSCUSR)
-	/// https://terminalguide.namepad.de/seq/csi_sq_t_space/ 
-	/// </summary>
-	/// <param name="style"></param>
-	/// <returns></returns>
-	public static string CSI_SetCursorStyle (DECSCUSR_Style style) => $"{CSI}{(int)style} q";
-
-	#endregion
-
-	#region Colors
-	/// <summary>
-	/// ESC [ (n) m - SGR - Set Graphics Rendition - Set the format of the screen and text as specified by (n)
-	/// This command is special in that the (n) position can accept between 0 and 16 parameters separated by semicolons.
-	/// When no parameters are specified, it is treated the same as a single 0 parameter.
-	/// https://terminalguide.namepad.de/seq/csi_sm/
-	/// </summary>
-	public static string CSI_SetGraphicsRendition (params int [] parameters) => $"{CSI}{string.Join (";", parameters)}m";
-
-	/// <summary>
-	/// ESC [ (n) m - Uses <see cref="CSI_SetGraphicsRendition(int[])" /> to set the foreground color.
-	/// </summary>
-	/// <param name="code">One of the 16 color codes.</param>
-	/// <returns></returns>
-	public static string CSI_SetForegroundColor (AnsiColorCode code) => CSI_SetGraphicsRendition ((int)code);
-
-	/// <summary>
-	/// ESC [ (n) m - Uses <see cref="CSI_SetGraphicsRendition(int[])" /> to set the background color.
-	/// </summary>
-	/// <param name="code">One of the 16 color codes.</param>
-	/// <returns></returns>
-	public static string CSI_SetBackgroundColor (AnsiColorCode code) => CSI_SetGraphicsRendition ((int)code+10);
-
-	/// <summary>
-	/// ESC[38;5;{id}m - Set foreground color (256 colors)
-	/// </summary>
-	public static string CSI_SetForegroundColor256 (int color) => $"{CSI}38;5;{color}m";
-
-	/// <summary>
-	/// ESC[48;5;{id}m - Set background color (256 colors)
-	/// </summary>
-	public static string CSI_SetBackgroundColor256 (int color) => $"{CSI}48;5;{color}m";
-
-	/// <summary>
-	/// ESC[38;2;{r};{g};{b}m	Set foreground color as RGB.
-	/// </summary>
-	public static string CSI_SetForegroundColorRGB (int r, int g, int b) => $"{CSI}38;2;{r};{g};{b}m";
-
-	/// <summary>
-	/// ESC[48;2;{r};{g};{b}m	Set background color as RGB.
-	/// </summary>
-	public static string CSI_SetBackgroundColorRGB (int r, int g, int b) => $"{CSI}48;2;{r};{g};{b}m";
-
-	#endregion
-
-	#region Requests
-	/// <summary>
-	/// ESC [ ? 6 n - Request Cursor Position Report (?) (DECXCPR)
-	/// https://terminalguide.namepad.de/seq/csi_sn__p-6/
-	/// </summary>
-	public static readonly string CSI_RequestCursorPositionReport = CSI + "?6n";
-
-	/// <summary>
-	/// The terminal reply to <see cref="CSI_RequestCursorPositionReport"/>. ESC [ ? (y) ; (x) R
-	/// </summary>
-	public const string CSI_RequestCursorPositionReport_Terminator = "R";
-
-	/// <summary>
-	/// ESC [ 0 c - Send Device Attributes (Primary DA)
-	///
-	/// https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Application-Program-Command-functions
-	/// https://www.xfree86.org/current/ctlseqs.html
-	/// Windows Terminal v1.17 and below emits “\x1b[?1;0c”, indicating "VT101 with No Options".
-	/// Windows Terminal v1.18+ emits: \x1b[?61;6;7;22;23;24;28;32;42c"
-	/// See https://github.com/microsoft/terminal/pull/14906
-	///
-	/// 61 - The device conforms to level 1 of the character cell display architecture
-	/// (See https://github.com/microsoft/terminal/issues/15693#issuecomment-1633304497)
-	/// 6 = Selective erase
-	/// 7 = Soft fonts
-	/// 22 = Color text
-	/// 23 = Greek character sets
-	/// 24 = Turkish character sets
-	/// 28 = Rectangular area operations
-	/// 32 = Text macros
-	/// 42 = ISO Latin-2 character set
-	/// 
-	/// </summary>
-	public static readonly string CSI_SendDeviceAttributes = CSI + "0c";
-
-	/// <summary>
-	/// ESC [ > 0 c - Send Device Attributes (Secondary DA)
-	/// Windows Terminal v1.18+ emits: "\x1b[>0;10;1c" (vt100, firmware version 1.0, vt220)
-	/// </summary>
-	public static readonly string CSI_SendDeviceAttributes2 = CSI + ">0c";
-
-	/// <summary>
-	/// The terminator indicating a reply to <see cref="CSI_SendDeviceAttributes"/> or <see cref="CSI_SendDeviceAttributes2"/>
-	/// 
-	/// </summary>
-	public const string CSI_ReportDeviceAttributes_Terminator = "c";
-
-	/// <summary>
-	/// CSI 1 8 t  | yes | yes |  yes  | report window size in chars
-	/// https://terminalguide.namepad.de/seq/csi_st-18/
-	/// </summary>
-	public static readonly string CSI_ReportTerminalSizeInChars = CSI + "18t";
-
-	/// <summary>
-	/// The terminator indicating a reply to <see cref="CSI_ReportTerminalSizeInChars"/> : ESC [ 8 ; height ; width t
-	/// </summary>
-	public const string CSI_ReportTerminalSizeInChars_Terminator = "t";
-
-	/// <summary>
-	/// The value of the response to <see cref="CSI_ReportTerminalSizeInChars"/> indicating value 1 and 2 are the terminal size in chars.
-	/// </summary>
-	public const string CSI_ReportTerminalSizeInChars_ResponseValue = "8";
-	#endregion
-
 	/// <summary>
 	/// Ensures a console key is mapped to one that works correctly with ANSI escape sequences.
 	/// </summary>
@@ -355,12 +161,13 @@ public static class EscSeqUtils {
 	/// <returns>The <see cref="ConsoleKeyInfo"/> modified.</returns>
 	public static ConsoleKeyInfo MapConsoleKeyInfo (ConsoleKeyInfo consoleKeyInfo)
 	{
-		ConsoleKeyInfo newConsoleKeyInfo = consoleKeyInfo;
+		var newConsoleKeyInfo = consoleKeyInfo;
 		ConsoleKey key;
 		var keyChar = consoleKeyInfo.KeyChar;
 		switch ((uint)keyChar) {
 		case 0:
-			if (consoleKeyInfo.Key == (ConsoleKey)64) {    // Ctrl+Space in Windows.
+			if (consoleKeyInfo.Key == (ConsoleKey)64) {
+				// Ctrl+Space in Windows.
 				newConsoleKeyInfo = new ConsoleKeyInfo (' ', ConsoleKey.Spacebar,
 					(consoleKeyInfo.Modifiers & ConsoleModifiers.Shift) != 0,
 					(consoleKeyInfo.Modifiers & ConsoleModifiers.Alt) != 0,
@@ -430,10 +237,10 @@ public static class EscSeqUtils {
 	/// <param name="continuousButtonPressedHandler">The handler that will process the event.</param>
 	public static void DecodeEscSeq (EscSeqRequests escSeqRequests, ref ConsoleKeyInfo newConsoleKeyInfo, ref ConsoleKey key, ConsoleKeyInfo [] cki, ref ConsoleModifiers mod, out string c1Control, out string code, out string [] values, out string terminator, out bool isMouse, out List<MouseFlags> buttonState, out Point pos, out bool isResponse, Action<MouseFlags, Point> continuousButtonPressedHandler)
 	{
-		char [] kChars = GetKeyCharArray (cki);
+		var kChars = GetKeyCharArray (cki);
 		(c1Control, code, values, terminator) = GetEscapeResult (kChars);
 		isMouse = false;
-		buttonState = new List<MouseFlags> () { 0 };
+		buttonState = new List<MouseFlags> { 0 };
 		pos = default;
 		isResponse = false;
 		switch (c1Control) {
@@ -477,7 +284,8 @@ public static class EscSeqUtils {
 				GetMouse (cki, out buttonState, out pos, continuousButtonPressedHandler);
 				isMouse = true;
 				return;
-			} else if (escSeqRequests != null && escSeqRequests.HasResponse (terminator)) {
+			}
+			if (escSeqRequests != null && escSeqRequests.HasResponse (terminator)) {
 				isResponse = true;
 				escSeqRequests.Remove (terminator);
 				return;
@@ -495,7 +303,7 @@ public static class EscSeqUtils {
 			} else {
 				// BUGBUG: See https://github.com/gui-cs/Terminal.Gui/issues/2803
 				// This is caused by NetDriver depending on Console.KeyAvailable?
-				throw new InvalidOperationException ($"CSI response, but there's no terminator");
+				throw new InvalidOperationException ("CSI response, but there's no terminator");
 				//newConsoleKeyInfo = new ConsoleKeyInfo ('\0',
 				//	key,
 				//	(mod & ConsoleModifiers.Shift) != 0,
@@ -527,13 +335,13 @@ public static class EscSeqUtils {
 		if (kChar.Length == 2) {
 			return ("ESC", null, null, kChar [1].ToString ());
 		}
-		string c1Control = GetC1ControlChar (kChar [1]);
+		var c1Control = GetC1ControlChar (kChar [1]);
 		string code = null;
-		int nSep = kChar.Count (x => x == ';') + 1;
-		string [] values = new string [nSep];
-		int valueIdx = 0;
-		string terminating = "";
-		for (int i = 2; i < kChar.Length; i++) {
+		var nSep = kChar.Count (x => x == ';') + 1;
+		var values = new string [nSep];
+		var valueIdx = 0;
+		var terminating = "";
+		for (var i = 2; i < kChar.Length; i++) {
 			var c = kChar [i];
 			if (char.IsDigit (c)) {
 				values [valueIdx] += c.ToString ();
@@ -625,7 +433,10 @@ public static class EscSeqUtils {
 	/// <summary>
 	/// Gets the <see cref="ConsoleKey"/> depending on terminating and value.
 	/// </summary>
-	/// <param name="terminator">The terminator indicating a reply to <see cref="CSI_SendDeviceAttributes"/> or <see cref="CSI_SendDeviceAttributes2"/>.</param>
+	/// <param name="terminator">
+	/// The terminator indicating a reply to <see cref="CSI_SendDeviceAttributes"/> or
+	/// <see cref="CSI_SendDeviceAttributes2"/>.
+	/// </param>
 	/// <param name="value">The value.</param>
 	/// <param name="mod">The <see cref="ConsoleModifiers"/> which may changes.</param>
 	/// <returns>The <see cref="ConsoleKey"/> and probably the <see cref="ConsoleModifiers"/>.</returns>
@@ -725,7 +536,7 @@ public static class EscSeqUtils {
 	/// <returns>The char array of the escape sequence.</returns>
 	public static char [] GetKeyCharArray (ConsoleKeyInfo [] cki)
 	{
-		char [] kChar = new char [] { };
+		char [] kChar = { };
 		var length = 0;
 		foreach (var kc in cki) {
 			length++;
@@ -735,15 +546,6 @@ public static class EscSeqUtils {
 
 		return kChar;
 	}
-
-	private static MouseFlags? lastMouseButtonPressed;
-	//private static MouseFlags? lastMouseButtonReleased;
-	private static bool isButtonPressed;
-	//private static bool isButtonReleased;
-	private static bool isButtonClicked;
-	private static bool isButtonDoubleClicked;
-	private static bool isButtonTripleClicked;
-	private static Point point;
 
 	/// <summary>
 	/// Gets the <see cref="MouseFlags"/> mouse button flags and the position.
@@ -756,13 +558,13 @@ public static class EscSeqUtils {
 	{
 		MouseFlags buttonState = 0;
 		pos = new Point ();
-		int buttonCode = 0;
-		bool foundButtonCode = false;
-		int foundPoint = 0;
-		string value = "";
+		var buttonCode = 0;
+		var foundButtonCode = false;
+		var foundPoint = 0;
+		var value = "";
 		var kChar = GetKeyCharArray (cki);
 		//System.Diagnostics.Debug.WriteLine ($"kChar: {new string (kChar)}");
-		for (int i = 0; i < kChar.Length; i++) {
+		for (var i = 0; i < kChar.Length; i++) {
 			var c = kChar [i];
 			if (c == '<') {
 				foundButtonCode = true;
@@ -869,12 +671,12 @@ public static class EscSeqUtils {
 				case 68:
 				case 72:
 				case 80:
-					buttonState = MouseFlags.WheeledLeft;       // Shift/Ctrl+WheeledUp
+					buttonState = MouseFlags.WheeledLeft; // Shift/Ctrl+WheeledUp
 					break;
 				case 69:
 				case 73:
 				case 81:
-					buttonState = MouseFlags.WheeledRight;      // Shift/Ctrl+WheeledDown
+					buttonState = MouseFlags.WheeledRight; // Shift/Ctrl+WheeledDown
 					break;
 				}
 				// Modifiers.
@@ -954,28 +756,28 @@ public static class EscSeqUtils {
 			}
 		}
 
-		mouseFlags = new List<MouseFlags> () { MouseFlags.AllEvents };
+		mouseFlags = new List<MouseFlags> { MouseFlags.AllEvents };
 
 		if (lastMouseButtonPressed != null && !isButtonPressed && !buttonState.HasFlag (MouseFlags.ReportMousePosition)
-			&& !buttonState.HasFlag (MouseFlags.Button1Released)
-			&& !buttonState.HasFlag (MouseFlags.Button2Released)
-			&& !buttonState.HasFlag (MouseFlags.Button3Released)
-			&& !buttonState.HasFlag (MouseFlags.Button4Released)) {
+		    && !buttonState.HasFlag (MouseFlags.Button1Released)
+		    && !buttonState.HasFlag (MouseFlags.Button2Released)
+		    && !buttonState.HasFlag (MouseFlags.Button3Released)
+		    && !buttonState.HasFlag (MouseFlags.Button4Released)) {
 
 			lastMouseButtonPressed = null;
 			isButtonPressed = false;
 		}
 
-		if (!isButtonClicked && !isButtonDoubleClicked && ((buttonState == MouseFlags.Button1Pressed || buttonState == MouseFlags.Button2Pressed ||
-			  buttonState == MouseFlags.Button3Pressed || buttonState == MouseFlags.Button4Pressed) && lastMouseButtonPressed == null) ||
-			  isButtonPressed && lastMouseButtonPressed != null && buttonState.HasFlag (MouseFlags.ReportMousePosition)) {
+		if (!isButtonClicked && !isButtonDoubleClicked && (buttonState == MouseFlags.Button1Pressed || buttonState == MouseFlags.Button2Pressed ||
+		                                                   buttonState == MouseFlags.Button3Pressed || buttonState == MouseFlags.Button4Pressed) && lastMouseButtonPressed == null ||
+		    isButtonPressed && lastMouseButtonPressed != null && buttonState.HasFlag (MouseFlags.ReportMousePosition)) {
 
 			mouseFlags [0] = buttonState;
 			lastMouseButtonPressed = buttonState;
 			isButtonPressed = true;
 
 			if ((mouseFlags [0] & MouseFlags.ReportMousePosition) == 0) {
-				point = new Point () {
+				point = new Point {
 					X = pos.X,
 					Y = pos.Y
 				};
@@ -989,14 +791,14 @@ public static class EscSeqUtils {
 			}
 
 		} else if (isButtonDoubleClicked && (buttonState == MouseFlags.Button1Pressed || buttonState == MouseFlags.Button2Pressed ||
-			buttonState == MouseFlags.Button3Pressed || buttonState == MouseFlags.Button4Pressed)) {
+		                                     buttonState == MouseFlags.Button3Pressed || buttonState == MouseFlags.Button4Pressed)) {
 
 			mouseFlags [0] = GetButtonTripleClicked (buttonState);
 			isButtonDoubleClicked = false;
 			isButtonTripleClicked = true;
 
 		} else if (isButtonClicked && (buttonState == MouseFlags.Button1Pressed || buttonState == MouseFlags.Button2Pressed ||
-			buttonState == MouseFlags.Button3Pressed || buttonState == MouseFlags.Button4Pressed)) {
+		                               buttonState == MouseFlags.Button3Pressed || buttonState == MouseFlags.Button4Pressed)) {
 
 			mouseFlags [0] = GetButtonDoubleClicked (buttonState);
 			isButtonClicked = false;
@@ -1019,7 +821,7 @@ public static class EscSeqUtils {
 
 		//} 
 		else if (!isButtonClicked && !isButtonDoubleClicked && (buttonState == MouseFlags.Button1Released || buttonState == MouseFlags.Button2Released ||
-			  buttonState == MouseFlags.Button3Released || buttonState == MouseFlags.Button4Released)) {
+		                                                        buttonState == MouseFlags.Button3Released || buttonState == MouseFlags.Button4Released)) {
 
 			mouseFlags [0] = buttonState;
 			isButtonPressed = false;
@@ -1081,7 +883,7 @@ public static class EscSeqUtils {
 		//}
 	}
 
-	private static async Task ProcessContinuousButtonPressedAsync (MouseFlags mouseFlag, Action<MouseFlags, Point> continuousButtonPressedHandler)
+	async static Task ProcessContinuousButtonPressedAsync (MouseFlags mouseFlag, Action<MouseFlags, Point> continuousButtonPressedHandler)
 	{
 		while (isButtonPressed) {
 			await Task.Delay (100);
@@ -1092,27 +894,28 @@ public static class EscSeqUtils {
 			//};
 
 			var view = Application.WantContinuousButtonPressedView;
-			if (view == null)
+			if (view == null) {
 				break;
+			}
 			if (isButtonPressed && lastMouseButtonPressed != null && (mouseFlag & MouseFlags.ReportMousePosition) == 0) {
 				Application.Invoke (() => continuousButtonPressedHandler (mouseFlag, point));
 			}
 		}
 	}
 
-	private static async Task ProcessButtonClickedAsync ()
+	async static Task ProcessButtonClickedAsync ()
 	{
 		await Task.Delay (300);
 		isButtonClicked = false;
 	}
 
-	private static async Task ProcessButtonDoubleClickedAsync ()
+	async static Task ProcessButtonDoubleClickedAsync ()
 	{
 		await Task.Delay (300);
 		isButtonDoubleClicked = false;
 	}
 
-	private static MouseFlags GetButtonClicked (MouseFlags mouseFlag)
+	static MouseFlags GetButtonClicked (MouseFlags mouseFlag)
 	{
 		MouseFlags mf = default;
 		switch (mouseFlag) {
@@ -1131,7 +934,7 @@ public static class EscSeqUtils {
 		return mf;
 	}
 
-	private static MouseFlags GetButtonDoubleClicked (MouseFlags mouseFlag)
+	static MouseFlags GetButtonDoubleClicked (MouseFlags mouseFlag)
 	{
 		MouseFlags mf = default;
 		switch (mouseFlag) {
@@ -1150,7 +953,7 @@ public static class EscSeqUtils {
 		return mf;
 	}
 
-	private static MouseFlags GetButtonTripleClicked (MouseFlags mouseFlag)
+	static MouseFlags GetButtonTripleClicked (MouseFlags mouseFlag)
 	{
 		MouseFlags mf = default;
 		switch (mouseFlag) {
@@ -1169,16 +972,19 @@ public static class EscSeqUtils {
 		return mf;
 	}
 
-	private static MouseFlags SetControlKeyStates (MouseFlags buttonState, MouseFlags mouseFlag)
+	static MouseFlags SetControlKeyStates (MouseFlags buttonState, MouseFlags mouseFlag)
 	{
-		if ((buttonState & MouseFlags.ButtonCtrl) != 0 && (mouseFlag & MouseFlags.ButtonCtrl) == 0)
+		if ((buttonState & MouseFlags.ButtonCtrl) != 0 && (mouseFlag & MouseFlags.ButtonCtrl) == 0) {
 			mouseFlag |= MouseFlags.ButtonCtrl;
+		}
 
-		if ((buttonState & MouseFlags.ButtonShift) != 0 && (mouseFlag & MouseFlags.ButtonShift) == 0)
+		if ((buttonState & MouseFlags.ButtonShift) != 0 && (mouseFlag & MouseFlags.ButtonShift) == 0) {
 			mouseFlag |= MouseFlags.ButtonShift;
+		}
 
-		if ((buttonState & MouseFlags.ButtonAlt) != 0 && (mouseFlag & MouseFlags.ButtonAlt) == 0)
+		if ((buttonState & MouseFlags.ButtonAlt) != 0 && (mouseFlag & MouseFlags.ButtonAlt) == 0) {
 			mouseFlag |= MouseFlags.ButtonAlt;
+		}
 		return mouseFlag;
 	}
 
@@ -1194,18 +1000,232 @@ public static class EscSeqUtils {
 			return null;
 		}
 
-		string query = "SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = " + process.Id;
-		using (ManagementObjectSearcher mos = new ManagementObjectSearcher (query)) {
+		var query = "SELECT ParentProcessId FROM Win32_Process WHERE ProcessId = " + process.Id;
+		using (var mos = new ManagementObjectSearcher (query)) {
 			foreach (ManagementObject mo in mos.Get ()) {
 				if (mo ["ParentProcessId"] != null) {
 					try {
 						var id = Convert.ToInt32 (mo ["ParentProcessId"]);
 						return Process.GetProcessById (id);
-					} catch {
-					}
+					} catch { }
 				}
 			}
 		}
 		return null;
 	}
+
+	#region Cursor
+	//ESC [ M - RI Reverse Index – Performs the reverse operation of \n, moves cursor up one line, maintains horizontal position, scrolls buffer if necessary*
+
+	/// <summary>
+	/// ESC [ 7 - Save Cursor Position in Memory**
+	/// </summary>
+	public static readonly string CSI_SaveCursorPosition = CSI + "7";
+
+	/// <summary>
+	/// ESC [ 8 - DECSR Restore Cursor Position from Memory**
+	/// </summary>
+	public static readonly string CSI_RestoreCursorPosition = CSI + "8";
+
+	/// <summary>
+	/// ESC [ 8 ; height ; width t - Set Terminal Window Size
+	/// https://terminalguide.namepad.de/seq/csi_st-8/
+	/// </summary>
+	public static string CSI_SetTerminalWindowSize (int height, int width) => $"{CSI}8;{height};{width}t";
+
+	//ESC [ < n > A - CUU - Cursor Up       Cursor up by < n >
+	//ESC [ < n > B - CUD - Cursor Down     Cursor down by < n >
+	//ESC [ < n > C - CUF - Cursor Forward  Cursor forward (Right) by < n >
+	//ESC [ < n > D - CUB - Cursor Backward Cursor backward (Left) by < n >
+	//ESC [ < n > E - CNL - Cursor Next Line - Cursor down < n > lines from current position
+	//ESC [ < n > F - CPL - Cursor Previous Line    Cursor up < n > lines from current position
+	//ESC [ < n > G - CHA - Cursor Horizontal Absolute      Cursor moves to < n > th position horizontally in the current line
+	//ESC [ < n > d - VPA - Vertical Line Position Absolute Cursor moves to the < n > th position vertically in the current column
+
+	/// <summary>
+	/// ESC [ y ; x H - CUP Cursor Position - Cursor moves to x ; y coordinate within the viewport, where x is the column of
+	/// the y line
+	/// </summary>
+	/// <param name="row">Origin is (1,1).</param>
+	/// <param name="col">Origin is (1,1).</param>
+	/// <returns></returns>
+	public static string CSI_SetCursorPosition (int row, int col) => $"{CSI}{row};{col}H";
+
+
+	//ESC [ <y> ; <x> f - HVP     Horizontal Vertical Position* Cursor moves to<x>; <y> coordinate within the viewport, where <x> is the column of the<y> line
+	//ESC [ s - ANSISYSSC       Save Cursor – Ansi.sys emulation	**With no parameters, performs a save cursor operation like DECSC
+	//ESC [ u - ANSISYSRC       Restore Cursor – Ansi.sys emulation	**With no parameters, performs a restore cursor operation like DECRC
+	//ESC [ ? 12 h - ATT160  Text Cursor Enable Blinking     Start the cursor blinking
+	//ESC [ ? 12 l - ATT160  Text Cursor Disable Blinking    Stop blinking the cursor
+	/// <summary>
+	/// ESC [ ? 25 h - DECTCEM Text Cursor Enable Mode Show    Show the cursor
+	/// </summary>
+	public static readonly string CSI_ShowCursor = CSI + "?25h";
+
+	/// <summary>
+	/// ESC [ ? 25 l - DECTCEM Text Cursor Enable Mode Hide    Hide the cursor
+	/// </summary>
+	public static readonly string CSI_HideCursor = CSI + "?25l";
+	//ESC [ ? 12 h - ATT160  Text Cursor Enable Blinking     Start the cursor blinking
+	//ESC [ ? 12 l - ATT160  Text Cursor Disable Blinking    Stop blinking the cursor
+	//ESC [ ? 25 h - DECTCEM Text Cursor Enable Mode Show    Show the cursor
+	//ESC [ ? 25 l - DECTCEM Text Cursor Enable Mode Hide    Hide the cursor
+
+	/// <summary>
+	/// Styles for ANSI ESC "[x q" - Set Cursor Style
+	/// </summary>
+	public enum DECSCUSR_Style {
+		/// <summary>
+		/// DECSCUSR - User Shape - Default cursor shape configured by the user
+		/// </summary>
+		UserShape = 0,
+
+		/// <summary>
+		/// DECSCUSR - Blinking Block - Blinking block cursor shape
+		/// </summary>
+		BlinkingBlock = 1,
+
+		/// <summary>
+		/// DECSCUSR - Steady Block - Steady block cursor shape
+		/// </summary>
+		SteadyBlock = 2,
+
+		/// <summary>
+		/// DECSCUSR - Blinking Underline - Blinking underline cursor shape
+		/// </summary>
+		BlinkingUnderline = 3,
+
+		/// <summary>
+		/// DECSCUSR - Steady Underline - Steady underline cursor shape
+		/// </summary>
+		SteadyUnderline = 4,
+
+		/// <summary>
+		/// DECSCUSR - Blinking Bar - Blinking bar cursor shape
+		/// </summary>
+		BlinkingBar = 5,
+
+		/// <summary>
+		/// DECSCUSR - Steady Bar - Steady bar cursor shape
+		/// </summary>
+		SteadyBar = 6
+	}
+
+	/// <summary>
+	/// ESC [ n SP q - Select Cursor Style (DECSCUSR)
+	/// https://terminalguide.namepad.de/seq/csi_sq_t_space/
+	/// </summary>
+	/// <param name="style"></param>
+	/// <returns></returns>
+	public static string CSI_SetCursorStyle (DECSCUSR_Style style) => $"{CSI}{(int)style} q";
+	#endregion
+
+	#region Colors
+	/// <summary>
+	/// ESC [ (n) m - SGR - Set Graphics Rendition - Set the format of the screen and text as specified by (n)
+	/// This command is special in that the (n) position can accept between 0 and 16 parameters separated by semicolons.
+	/// When no parameters are specified, it is treated the same as a single 0 parameter.
+	/// https://terminalguide.namepad.de/seq/csi_sm/
+	/// </summary>
+	public static string CSI_SetGraphicsRendition (params int [] parameters) => $"{CSI}{string.Join (";", parameters)}m";
+
+	/// <summary>
+	/// ESC [ (n) m - Uses <see cref="CSI_SetGraphicsRendition(int[])"/> to set the foreground color.
+	/// </summary>
+	/// <param name="code">One of the 16 color codes.</param>
+	/// <returns></returns>
+	public static string CSI_SetForegroundColor (AnsiColorCode code) => CSI_SetGraphicsRendition ((int)code);
+
+	/// <summary>
+	/// ESC [ (n) m - Uses <see cref="CSI_SetGraphicsRendition(int[])"/> to set the background color.
+	/// </summary>
+	/// <param name="code">One of the 16 color codes.</param>
+	/// <returns></returns>
+	public static string CSI_SetBackgroundColor (AnsiColorCode code) => CSI_SetGraphicsRendition ((int)code + 10);
+
+	/// <summary>
+	/// ESC[38;5;{id}m - Set foreground color (256 colors)
+	/// </summary>
+	public static string CSI_SetForegroundColor256 (int color) => $"{CSI}38;5;{color}m";
+
+	/// <summary>
+	/// ESC[48;5;{id}m - Set background color (256 colors)
+	/// </summary>
+	public static string CSI_SetBackgroundColor256 (int color) => $"{CSI}48;5;{color}m";
+
+	/// <summary>
+	/// ESC[38;2;{r};{g};{b}m	Set foreground color as RGB.
+	/// </summary>
+	public static string CSI_SetForegroundColorRGB (int r, int g, int b) => $"{CSI}38;2;{r};{g};{b}m";
+
+	/// <summary>
+	/// ESC[48;2;{r};{g};{b}m	Set background color as RGB.
+	/// </summary>
+	public static string CSI_SetBackgroundColorRGB (int r, int g, int b) => $"{CSI}48;2;{r};{g};{b}m";
+	#endregion
+
+	#region Requests
+	/// <summary>
+	/// ESC [ ? 6 n - Request Cursor Position Report (?) (DECXCPR)
+	/// https://terminalguide.namepad.de/seq/csi_sn__p-6/
+	/// </summary>
+	public static readonly string CSI_RequestCursorPositionReport = CSI + "?6n";
+
+	/// <summary>
+	/// The terminal reply to <see cref="CSI_RequestCursorPositionReport"/>. ESC [ ? (y) ; (x) R
+	/// </summary>
+	public const string CSI_RequestCursorPositionReport_Terminator = "R";
+
+	/// <summary>
+	/// ESC [ 0 c - Send Device Attributes (Primary DA)
+	///
+	/// https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h3-Application-Program-Command-functions
+	/// https://www.xfree86.org/current/ctlseqs.html
+	/// Windows Terminal v1.17 and below emits “\x1b[?1;0c”, indicating "VT101 with No Options".
+	/// Windows Terminal v1.18+ emits: \x1b[?61;6;7;22;23;24;28;32;42c"
+	/// See https://github.com/microsoft/terminal/pull/14906
+	///
+	/// 61 - The device conforms to level 1 of the character cell display architecture
+	/// (See https://github.com/microsoft/terminal/issues/15693#issuecomment-1633304497)
+	/// 6 = Selective erase
+	/// 7 = Soft fonts
+	/// 22 = Color text
+	/// 23 = Greek character sets
+	/// 24 = Turkish character sets
+	/// 28 = Rectangular area operations
+	/// 32 = Text macros
+	/// 42 = ISO Latin-2 character set
+	/// 
+	/// </summary>
+	public static readonly string CSI_SendDeviceAttributes = CSI + "0c";
+
+	/// <summary>
+	/// ESC [ > 0 c - Send Device Attributes (Secondary DA)
+	/// Windows Terminal v1.18+ emits: "\x1b[>0;10;1c" (vt100, firmware version 1.0, vt220)
+	/// </summary>
+	public static readonly string CSI_SendDeviceAttributes2 = CSI + ">0c";
+
+	/// <summary>
+	/// The terminator indicating a reply to <see cref="CSI_SendDeviceAttributes"/> or <see cref="CSI_SendDeviceAttributes2"/>
+	/// 
+	/// </summary>
+	public const string CSI_ReportDeviceAttributes_Terminator = "c";
+
+	/// <summary>
+	/// CSI 1 8 t  | yes | yes |  yes  | report window size in chars
+	/// https://terminalguide.namepad.de/seq/csi_st-18/
+	/// </summary>
+	public static readonly string CSI_ReportTerminalSizeInChars = CSI + "18t";
+
+	/// <summary>
+	/// The terminator indicating a reply to <see cref="CSI_ReportTerminalSizeInChars"/> : ESC [ 8 ; height ; width t
+	/// </summary>
+	public const string CSI_ReportTerminalSizeInChars_Terminator = "t";
+
+	/// <summary>
+	/// The value of the response to <see cref="CSI_ReportTerminalSizeInChars"/> indicating value 1 and 2 are the terminal size
+	/// in chars.
+	/// </summary>
+	public const string CSI_ReportTerminalSizeInChars_ResponseValue = "8";
+	#endregion
 }

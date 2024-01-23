@@ -6,353 +6,356 @@ using System.Text;
 using System.Threading.Tasks;
 using Terminal.Gui;
 
-namespace UICatalog.Scenarios {
-	[ScenarioMetadata (Name: "Snake", Description: "The game of apple eating.")]
-	[ScenarioCategory ("Colors")]
-	[ScenarioCategory ("Drawing")]
-	public class Snake : Scenario {
-		private bool isDisposed;
+namespace UICatalog.Scenarios; 
 
-		public override void Setup ()
+[ScenarioMetadata ("Snake", "The game of apple eating.")]
+[ScenarioCategory ("Colors")]
+[ScenarioCategory ("Drawing")]
+public class Snake : Scenario {
+	bool isDisposed;
+
+	public override void Setup ()
+	{
+		base.Setup ();
+
+		var state = new SnakeState ();
+
+		state.Reset (60, 20);
+
+		var snakeView = new SnakeView (state) {
+			Width = state.Width,
+			Height = state.Height
+		};
+
+		Win.Add (snakeView);
+
+		var sw = new Stopwatch ();
+
+		Task.Run (() => {
+			while (!isDisposed) {
+
+				sw.Restart ();
+
+				if (state.AdvanceState ()) {
+
+					// When updating from a Thread/Task always use Invoke
+					Application.Invoke (() => {
+						snakeView.SetNeedsDisplay ();
+					});
+				}
+
+				var wait = state.SleepAfterAdvancingState - sw.ElapsedMilliseconds;
+
+				if (wait > 0) {
+					Task.Delay ((int)wait).Wait ();
+				}
+			}
+		});
+	}
+
+	protected override void Dispose (bool disposing)
+	{
+		isDisposed = true;
+		base.Dispose (disposing);
+	}
+
+	class SnakeView : View {
+		readonly Rune _appleRune;
+		readonly Attribute red = new (Color.Red, Color.Black);
+		readonly Attribute white = new (Color.White, Color.Black);
+
+		public SnakeView (SnakeState state)
 		{
-			base.Setup ();
+			_appleRune = CM.Glyphs.Apple;
+			if (!Driver.IsRuneSupported (_appleRune)) {
+				_appleRune = CM.Glyphs.AppleBMP;
+			}
 
-			var state = new SnakeState ();
+			State = state;
+			CanFocus = true;
 
-			state.Reset (60, 20);
-
-			var snakeView = new SnakeView (state) {
-				Width = state.Width,
-				Height = state.Height
+			ColorScheme = new ColorScheme {
+				Normal = white,
+				Focus = white,
+				HotNormal = white,
+				HotFocus = white,
+				Disabled = white
 			};
-
-			Win.Add (snakeView);
-
-			Stopwatch sw = new Stopwatch ();
-
-			Task.Run (() => {
-				while (!isDisposed) {
-
-					sw.Restart ();
-
-					if (state.AdvanceState ()) {
-
-						// When updating from a Thread/Task always use Invoke
-						Application.Invoke (() => {
-							snakeView.SetNeedsDisplay ();
-						});
-					}
-
-					var wait = state.SleepAfterAdvancingState - sw.ElapsedMilliseconds;
-
-					if (wait > 0) {
-						Task.Delay ((int)wait).Wait ();
-					}
-				}
-			});
 		}
 
-		protected override void Dispose (bool disposing)
+		public SnakeState State { get; }
+
+		public override void OnDrawContent (Rect contentArea)
 		{
-			isDisposed = true;
-			base.Dispose (disposing);
+			base.OnDrawContent (contentArea);
+
+			Driver.SetAttribute (white);
+			Clear ();
+
+			var canvas = new LineCanvas ();
+
+			canvas.AddLine (new Point (0, 0), State.Width, Orientation.Horizontal, LineStyle.Double);
+			canvas.AddLine (new Point (0, 0), State.Height, Orientation.Vertical, LineStyle.Double);
+			canvas.AddLine (new Point (0, State.Height - 1), State.Width, Orientation.Horizontal, LineStyle.Double);
+			canvas.AddLine (new Point (State.Width - 1, 0), State.Height, Orientation.Vertical, LineStyle.Double);
+
+			for (var i = 1; i < State.Snake.Count; i++) {
+
+				var pt1 = State.Snake [i - 1];
+				var pt2 = State.Snake [i];
+
+				var orientation = pt1.X == pt2.X ? Orientation.Vertical : Orientation.Horizontal;
+				var length = orientation == Orientation.Horizontal
+					? pt1.X > pt2.X ? 2 : -2
+					: pt1.Y > pt2.Y ? 2 : -2;
+
+				canvas.AddLine (
+					pt2,
+					length,
+					orientation,
+					LineStyle.Single);
+
+			}
+
+			foreach (var p in canvas.GetMap (Bounds)) {
+				AddRune (p.Key.X, p.Key.Y, p.Value);
+			}
+
+			Driver.SetAttribute (red);
+			AddRune (State.Apple.X, State.Apple.Y, _appleRune);
+			Driver.SetAttribute (white);
 		}
 
-		private class SnakeView : View {
-			Rune _appleRune;
-			private Attribute red = new Terminal.Gui.Attribute (Color.Red, Color.Black);
-			private Attribute white = new Terminal.Gui.Attribute (Color.White, Color.Black);
-
-			public SnakeState State { get; }
-
-			public SnakeView (SnakeState state)
-			{
-				_appleRune = CM.Glyphs.Apple;
-				if (!Driver.IsRuneSupported (_appleRune)) {
-					_appleRune = CM.Glyphs.AppleBMP;
-				}
-
-				State = state;
-				CanFocus = true;
-
-				ColorScheme = new ColorScheme {
-					Normal = white,
-					Focus = white,
-					HotNormal = white,
-					HotFocus = white,
-					Disabled = white
-				};
+		// BUGBUG: Should (can) this use key bindings instead.
+		public override bool OnKeyDown (Key keyEvent)
+		{
+			if (keyEvent.KeyCode == KeyCode.CursorUp) {
+				State.PlannedDirection = Direction.Up;
+				return true;
 			}
-
-			public override void OnDrawContent (Rect contentArea)
-			{
-				base.OnDrawContent (contentArea);
-
-				Driver.SetAttribute (white);
-				Clear ();
-
-				var canvas = new LineCanvas ();
-
-				canvas.AddLine (new Point (0, 0), State.Width, Orientation.Horizontal, LineStyle.Double);
-				canvas.AddLine (new Point (0, 0), State.Height, Orientation.Vertical, LineStyle.Double);
-				canvas.AddLine (new Point (0, State.Height - 1), State.Width, Orientation.Horizontal, LineStyle.Double);
-				canvas.AddLine (new Point (State.Width - 1, 0), State.Height, Orientation.Vertical, LineStyle.Double);
-
-				for (int i = 1; i < State.Snake.Count; i++) {
-
-					var pt1 = State.Snake [i - 1];
-					var pt2 = State.Snake [i];
-
-					var orientation = pt1.X == pt2.X ? Orientation.Vertical : Orientation.Horizontal;
-					var length = orientation == Orientation.Horizontal
-						? pt1.X > pt2.X ? 2 : -2
-						: pt1.Y > pt2.Y ? 2 : -2;
-
-					canvas.AddLine (
-						pt2,
-						length,
-						orientation,
-						LineStyle.Single);
-
-				}
-
-				foreach (var p in canvas.GetMap (Bounds)) {
-					AddRune (p.Key.X, p.Key.Y, p.Value);
-				}
-
-				Driver.SetAttribute (red);
-				AddRune (State.Apple.X, State.Apple.Y, _appleRune);
-				Driver.SetAttribute (white);
+			if (keyEvent.KeyCode == KeyCode.CursorDown) {
+				State.PlannedDirection = Direction.Down;
+				return true;
 			}
-			
-			// BUGBUG: Should (can) this use key bindings instead.
-			public override bool OnKeyDown (Key keyEvent)
-			{
-				if (keyEvent.KeyCode == KeyCode.CursorUp) {
-					State.PlannedDirection = Direction.Up;
-					return true;
-				}
-				if (keyEvent.KeyCode == KeyCode.CursorDown) {
-					State.PlannedDirection = Direction.Down;
-					return true;
-				}
-				if (keyEvent.KeyCode == KeyCode.CursorLeft) {
-					State.PlannedDirection = Direction.Left;
-					return true;
-				}
-				if (keyEvent.KeyCode == KeyCode.CursorRight) {
-					State.PlannedDirection = Direction.Right;
-					return true;
-				}
-
-				return false;
+			if (keyEvent.KeyCode == KeyCode.CursorLeft) {
+				State.PlannedDirection = Direction.Left;
+				return true;
 			}
-		}
-		private class SnakeState {
-
-			public const int StartingLength = 10;
-			public const int AppleGrowRate = 5;
-			public const int StartingSpeed = 50;
-			public const int MaxSpeed = 20;
-
-			public int Width { get; private set; }
-			public int Height { get; private set; }
-
-			/// <summary>
-			/// Position of the snakes head
-			/// </summary>
-			public Point Head => Snake.Last ();
-
-			/// <summary>
-			/// Current position of the Apple that the snake has to eat.
-			/// </summary>
-			public Point Apple { get; private set; }
-
-			public Direction CurrentDirection { get; private set; }
-			public Direction PlannedDirection { get; set; }
-
-			public List<Point> Snake { get; private set; }
-
-			public int SleepAfterAdvancingState { get; private set; } = StartingSpeed;
-
-			int step;
-
-			internal bool AdvanceState ()
-			{
-				step++;
-
-				if (step < GetStepVelocity ()) {
-					return false;
-				}
-
-				step = 0;
-
-				UpdateDirection ();
-
-				var newHead = GetNewHeadPoint ();
-
-				Snake.RemoveAt (0);
-				Snake.Add (newHead);
-
-				if (IsDeath (newHead)) {
-					GameOver ();
-				}
-
-				if (newHead == Apple) {
-					GrowSnake (AppleGrowRate);
-					Apple = GetNewRandomApplePoint ();
-
-					var delta = 5;
-					if (SleepAfterAdvancingState < 40) {
-						delta = 3;
-					}
-					if (SleepAfterAdvancingState < 30) {
-						delta = 2;
-					}
-					SleepAfterAdvancingState = Math.Max (MaxSpeed, SleepAfterAdvancingState - delta);
-				}
-
+			if (keyEvent.KeyCode == KeyCode.CursorRight) {
+				State.PlannedDirection = Direction.Right;
 				return true;
 			}
 
-			private int GetStepVelocity ()
-			{
-				if (CurrentDirection == Direction.Left || CurrentDirection == Direction.Right) {
-					return 1;
-				}
+			return false;
+		}
+	}
 
-				return 2;
-			}
+	class SnakeState {
 
-			public void GrowSnake ()
-			{
-				var tail = Snake.First ();
-				Snake.Insert (0, tail);
-			}
-			public void GrowSnake (int amount)
-			{
-				for (int i = 0; i < amount; i++) {
-					GrowSnake ();
-				}
-			}
+		public const int StartingLength = 10;
+		public const int AppleGrowRate = 5;
+		public const int StartingSpeed = 50;
+		public const int MaxSpeed = 20;
 
-			private void UpdateDirection ()
-			{
-				if (!AreOpposites (CurrentDirection, PlannedDirection)) {
-					CurrentDirection = PlannedDirection;
-				}
-			}
+		int step;
 
-			private bool AreOpposites (Direction a, Direction b)
-			{
-				switch (a) {
-				case Direction.Left: return b == Direction.Right;
-				case Direction.Right: return b == Direction.Left;
-				case Direction.Up: return b == Direction.Down;
-				case Direction.Down: return b == Direction.Up;
-				}
+		public int Width { get; private set; }
 
+		public int Height { get; private set; }
+
+		/// <summary>
+		/// Position of the snakes head
+		/// </summary>
+		public Point Head => Snake.Last ();
+
+		/// <summary>
+		/// Current position of the Apple that the snake has to eat.
+		/// </summary>
+		public Point Apple { get; private set; }
+
+		public Direction CurrentDirection { get; private set; }
+
+		public Direction PlannedDirection { get; set; }
+
+		public List<Point> Snake { get; private set; }
+
+		public int SleepAfterAdvancingState { get; private set; } = StartingSpeed;
+
+		internal bool AdvanceState ()
+		{
+			step++;
+
+			if (step < GetStepVelocity ()) {
 				return false;
 			}
 
-			private void GameOver ()
-			{
-				Reset (Width, Height);
+			step = 0;
+
+			UpdateDirection ();
+
+			var newHead = GetNewHeadPoint ();
+
+			Snake.RemoveAt (0);
+			Snake.Add (newHead);
+
+			if (IsDeath (newHead)) {
+				GameOver ();
 			}
 
-			private Point GetNewHeadPoint ()
-			{
-				switch (CurrentDirection) {
-				case Direction.Left:
-					return new Point (Head.X - 1, Head.Y);
-
-				case Direction.Right:
-					return new Point (Head.X + 1, Head.Y);
-
-				case Direction.Up:
-					return new Point (Head.X, Head.Y - 1);
-
-				case Direction.Down:
-					return new Point (Head.X, Head.Y + 1);
-				}
-
-				throw new Exception ("Unknown direction");
-			}
-
-			/// <summary>
-			/// Restarts the game with the given canvas size
-			/// </summary>
-			/// <param name="width"></param>
-			/// <param name="height"></param>
-			internal void Reset (int width, int height)
-			{
-				if (width < 5 || height < 5) {
-					return;
-				}
-
-				Width = width;
-				Height = height;
-
-				var middle = new Point (width / 2, height / 2);
-
-				// Start snake with a length of 2
-				Snake = new List<Point> { middle, middle };
+			if (newHead == Apple) {
+				GrowSnake (AppleGrowRate);
 				Apple = GetNewRandomApplePoint ();
 
-				SleepAfterAdvancingState = StartingSpeed;
-
-				GrowSnake (StartingLength);
+				var delta = 5;
+				if (SleepAfterAdvancingState < 40) {
+					delta = 3;
+				}
+				if (SleepAfterAdvancingState < 30) {
+					delta = 2;
+				}
+				SleepAfterAdvancingState = Math.Max (MaxSpeed, SleepAfterAdvancingState - delta);
 			}
 
-			private Point GetNewRandomApplePoint ()
-			{
-				Random r = new Random ();
+			return true;
+		}
 
-				for (int i = 0; i < 1000; i++) {
-					var x = r.Next (0, Width);
-					var y = r.Next (0, Height);
-
-					var p = new Point (x, y);
-
-					if (p == Head) {
-						continue;
-					}
-
-					if (IsDeath (p)) {
-						continue;
-					}
-
-					return p;
-				}
-
-				// Game is won or we are unable to generate a valid apple
-				// point after 1000 attempts.  Maybe screen size is very small
-				// or something.  Either way restart the game.
-				Reset (Width, Height);
-				return Apple;
+		int GetStepVelocity ()
+		{
+			if (CurrentDirection == Direction.Left || CurrentDirection == Direction.Right) {
+				return 1;
 			}
 
-			private bool IsDeath (Point p)
-			{
-				if (p.X <= 0 || p.X >= Width - 1) {
-					return true;
-				}
+			return 2;
+		}
 
-				if (p.Y <= 0 || p.Y >= Height - 1) {
-					return true;
-				}
+		public void GrowSnake ()
+		{
+			var tail = Snake.First ();
+			Snake.Insert (0, tail);
+		}
 
-				if (Snake.Take (Snake.Count - 1).Contains (p))
-					return true;
-
-				return false;
+		public void GrowSnake (int amount)
+		{
+			for (var i = 0; i < amount; i++) {
+				GrowSnake ();
 			}
 		}
-		private enum Direction {
-			Up,
-			Down,
-			Left,
-			Right
+
+		void UpdateDirection ()
+		{
+			if (!AreOpposites (CurrentDirection, PlannedDirection)) {
+				CurrentDirection = PlannedDirection;
+			}
 		}
+
+		bool AreOpposites (Direction a, Direction b)
+		{
+			switch (a) {
+			case Direction.Left: return b == Direction.Right;
+			case Direction.Right: return b == Direction.Left;
+			case Direction.Up: return b == Direction.Down;
+			case Direction.Down: return b == Direction.Up;
+			}
+
+			return false;
+		}
+
+		void GameOver () => Reset (Width, Height);
+
+		Point GetNewHeadPoint ()
+		{
+			switch (CurrentDirection) {
+			case Direction.Left:
+				return new Point (Head.X - 1, Head.Y);
+
+			case Direction.Right:
+				return new Point (Head.X + 1, Head.Y);
+
+			case Direction.Up:
+				return new Point (Head.X, Head.Y - 1);
+
+			case Direction.Down:
+				return new Point (Head.X, Head.Y + 1);
+			}
+
+			throw new Exception ("Unknown direction");
+		}
+
+		/// <summary>
+		/// Restarts the game with the given canvas size
+		/// </summary>
+		/// <param name="width"></param>
+		/// <param name="height"></param>
+		internal void Reset (int width, int height)
+		{
+			if (width < 5 || height < 5) {
+				return;
+			}
+
+			Width = width;
+			Height = height;
+
+			var middle = new Point (width / 2, height / 2);
+
+			// Start snake with a length of 2
+			Snake = new List<Point> { middle, middle };
+			Apple = GetNewRandomApplePoint ();
+
+			SleepAfterAdvancingState = StartingSpeed;
+
+			GrowSnake (StartingLength);
+		}
+
+		Point GetNewRandomApplePoint ()
+		{
+			var r = new Random ();
+
+			for (var i = 0; i < 1000; i++) {
+				var x = r.Next (0, Width);
+				var y = r.Next (0, Height);
+
+				var p = new Point (x, y);
+
+				if (p == Head) {
+					continue;
+				}
+
+				if (IsDeath (p)) {
+					continue;
+				}
+
+				return p;
+			}
+
+			// Game is won or we are unable to generate a valid apple
+			// point after 1000 attempts.  Maybe screen size is very small
+			// or something.  Either way restart the game.
+			Reset (Width, Height);
+			return Apple;
+		}
+
+		bool IsDeath (Point p)
+		{
+			if (p.X <= 0 || p.X >= Width - 1) {
+				return true;
+			}
+
+			if (p.Y <= 0 || p.Y >= Height - 1) {
+				return true;
+			}
+
+			if (Snake.Take (Snake.Count - 1).Contains (p)) {
+				return true;
+			}
+
+			return false;
+		}
+	}
+
+	enum Direction {
+		Up,
+		Down,
+		Left,
+		Right
 	}
 }

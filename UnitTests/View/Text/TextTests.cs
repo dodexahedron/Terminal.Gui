@@ -543,20 +543,20 @@ public class TextTests {
 	[AutoInitShutdown]
 	public void AutoSize_False_Width_Height_SetMinWidthHeight_Narrow_Wide_Runes ()
 	{
-		string text = $"First line{Environment.NewLine}Second line";
-		var horizontalView = new View () {
+		var text = $"First line{Environment.NewLine}Second line";
+		var horizontalView = new View {
 			Width = 20,
 			Height = 1,
 			Text = text
 		};
-		var verticalView = new View () {
+		var verticalView = new View {
 			Y = 3,
 			Height = 20,
 			Width = 1,
 			Text = text,
 			TextDirection = TextDirection.TopBottom_LeftRight
 		};
-		var win = new Window () {
+		var win = new Window {
 			Width = Dim.Fill (),
 			Height = Dim.Fill (),
 			Text = "Window"
@@ -570,7 +570,7 @@ public class TextTests {
 		Assert.False (verticalView.AutoSize);
 		Assert.Equal (new Rect (0, 0, 20, 1), horizontalView.Frame);
 		Assert.Equal (new Rect (0, 3, 1, 20), verticalView.Frame);
-		string expected = @"
+		var expected = @"
 ┌──────────────────────────────┐
 │First line Second li          │
 │                              │

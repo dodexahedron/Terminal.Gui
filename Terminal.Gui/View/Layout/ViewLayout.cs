@@ -100,7 +100,8 @@ public partial class View {
 	/// </summary>
 	/// <remarks>
 	///         <para>
-	///         The adornments (<see cref="Margin"/>, <see cref="Border"/>, and <see cref="Padding"/>) are not part of the View's
+	///         The adornments (<see cref="Margin"/>, <see cref="Border"/>, and <see cref="Padding"/>) are not part of the
+	///         View's
 	///         content and are not clipped by the View's Clip Area.
 	///         </para>
 	///         <para>
@@ -112,7 +113,8 @@ public partial class View {
 	public Margin Margin { get; private set; }
 
 	/// <summary>
-	/// The adornment (specified as a <see cref="Thickness"/>) inside of the view that offsets the <see cref="Bounds"/> from the
+	/// The adornment (specified as a <see cref="Thickness"/>) inside of the view that offsets the <see cref="Bounds"/> from
+	/// the
 	/// <see cref="Margin"/>.
 	/// The Border provides the space for a visual border (drawn using line-drawing glyphs) and the Title.
 	/// The Border expands inward; in other words if `Border.Thickness.Top == 2` the border and
@@ -123,7 +125,8 @@ public partial class View {
 	///         <see cref="BorderStyle"/> provides a simple helper for turning a simple border frame on or off.
 	///         </para>
 	///         <para>
-	///         The adornments (<see cref="Margin"/>, <see cref="Border"/>, and <see cref="Padding"/>) are not part of the View's
+	///         The adornments (<see cref="Margin"/>, <see cref="Border"/>, and <see cref="Padding"/>) are not part of the
+	///         View's
 	///         content and are not clipped by the View's Clip Area.
 	///         </para>
 	///         <para>
@@ -174,7 +177,8 @@ public partial class View {
 	/// </summary>
 	/// <remarks>
 	///         <para>
-	///         The adornments (<see cref="Margin"/>, <see cref="Border"/>, and <see cref="Padding"/>) are not part of the View's
+	///         The adornments (<see cref="Margin"/>, <see cref="Border"/>, and <see cref="Padding"/>) are not part of the
+	///         View's
 	///         content and are not clipped by the View's Clip Area.
 	///         </para>
 	///         <para>
@@ -187,69 +191,26 @@ public partial class View {
 	public Padding Padding { get; private set; }
 
 	/// <summary>
-	///         <para>
-	///         Gets the thickness describing the sum of the Adornments' thicknesses.
-	///         </para>
-	/// </summary>
-	/// <returns>A thickness that describes the sum of the Adornments' thicknesses.</returns>
-	public Thickness GetAdornmentsThickness ()
-	{
-		int left = Margin.Thickness.Left + Border.Thickness.Left + Padding.Thickness.Left;
-		int top = Margin.Thickness.Top + Border.Thickness.Top + Padding.Thickness.Top;
-		int right = Margin.Thickness.Right + Border.Thickness.Right + Padding.Thickness.Right;
-		int bottom = Margin.Thickness.Bottom + Border.Thickness.Bottom + Padding.Thickness.Bottom;
-		return new Thickness (left, top, right, bottom);
-	}
-
-	/// <summary>
-	/// Helper to get the X and Y offset of the Bounds from the Frame. This is the sum of the Left and Top properties of
-	/// <see cref="Margin"/>, <see cref="Border"/> and <see cref="Padding"/>.
-	/// </summary>
-	public Point GetBoundsOffset () => new (Padding?.Thickness.GetInside (Padding.Frame).X ?? 0, Padding?.Thickness.GetInside (Padding.Frame).Y ?? 0);
-
-	/// <summary>
-	/// This internal method is overridden by Adornment to do nothing to prevent recursion during View construction.
-	/// And, because Adornments don't have Adornments. It's internal to support unit tests.
-	/// </summary>
-	/// <param name="adornmentType"></param>
-	/// <exception cref="ArgumentNullException"></exception>
-	/// <exception cref="ArgumentException"></exception>
-	internal virtual Adornment CreateAdornment (Type adornmentType)
-	{
-		void ThicknessChangedHandler (object sender, EventArgs e)
-		{
-			if (IsInitialized) {
-				LayoutAdornments ();
-			}
-			SetNeedsLayout ();
-			SetNeedsDisplay ();
-		}
-
-		Adornment adornment;
-
-		adornment = Activator.CreateInstance (adornmentType, this) as Adornment;
-		adornment.ThicknessChanged += ThicknessChangedHandler;
-
-		return adornment;
-	}
-
-	/// <summary>
 	/// Controls how the View's <see cref="Frame"/> is computed during <see cref="LayoutSubviews"/>. If the style is set to
 	/// <see cref="LayoutStyle.Absolute"/>, LayoutSubviews does not change the <see cref="Frame"/>.
 	/// If the style is <see cref="LayoutStyle.Computed"/> the <see cref="Frame"/> is updated using
 	/// the <see cref="X"/>, <see cref="Y"/>, <see cref="Width"/>, and <see cref="Height"/> properties.
 	/// </summary>
 	/// <remarks>
-	/// <para>
-	/// Setting this property to <see cref="LayoutStyle.Absolute"/> will cause <see cref="Frame"/> to determine the
-	/// size and position of the view. <see cref="X"/> and <see cref="Y"/> will be set to <see cref="Dim.DimAbsolute"/> using <see cref="Frame"/>.
-	/// </para>
-	/// <para>
-	/// Setting this property to <see cref="LayoutStyle.Computed"/> will cause the view to use the <see cref="LayoutSubviews"/> method to 
-	/// size and position of the view. If either of the <see cref="X"/> and <see cref="Y"/> properties are `null` they will be set to <see cref="Pos.PosAbsolute"/> using
-	/// the current value of <see cref="Frame"/>. 
-	/// If either of the <see cref="Width"/> and <see cref="Height"/> properties are `null` they will be set to <see cref="Dim.DimAbsolute"/> using <see cref="Frame"/>.
-	/// </para>
+	///         <para>
+	///         Setting this property to <see cref="LayoutStyle.Absolute"/> will cause <see cref="Frame"/> to determine the
+	///         size and position of the view. <see cref="X"/> and <see cref="Y"/> will be set to <see cref="Dim.DimAbsolute"/>
+	///         using <see cref="Frame"/>.
+	///         </para>
+	///         <para>
+	///         Setting this property to <see cref="LayoutStyle.Computed"/> will cause the view to use the
+	///         <see cref="LayoutSubviews"/> method to
+	///         size and position of the view. If either of the <see cref="X"/> and <see cref="Y"/> properties are `null` they
+	///         will be set to <see cref="Pos.PosAbsolute"/> using
+	///         the current value of <see cref="Frame"/>.
+	///         If either of the <see cref="Width"/> and <see cref="Height"/> properties are `null` they will be set to
+	///         <see cref="Dim.DimAbsolute"/> using <see cref="Frame"/>.
+	///         </para>
 	/// </remarks>
 	/// <value>The layout style.</value>
 	public LayoutStyle LayoutStyle {
@@ -326,12 +287,13 @@ public partial class View {
 	/// <remarks>
 	///         <para>
 	///         If set to a relative value (e.g. <see cref="Pos.Center"/>) the value is indeterminate until the
-	///         view has been initialized (<see cref="IsInitialized"/> is true) and <see cref="SetRelativeLayout(Rect)"/> has been
+	///         view has been initialized (<see cref="IsInitialized"/> is true) and <see cref="SetRelativeLayout(Rect)"/> has
+	///         been
 	///         called.
 	///         </para>
 	///         <para>
 	///         Changing this property will eventually (when the view is next drawn) cause the
-	///          <see cref="LayoutSubview(View, Rect)"/> and
+	///         <see cref="LayoutSubview(View, Rect)"/> and
 	///         <see cref="OnDrawContent(Rect)"/> methods to be called.
 	///         </para>
 	///         <para>
@@ -358,7 +320,8 @@ public partial class View {
 	/// <remarks>
 	///         <para>
 	///         If set to a relative value (e.g. <see cref="Pos.Center"/>) the value is indeterminate until the
-	///         view has been initialized (<see cref="IsInitialized"/> is true) and <see cref="SetRelativeLayout(Rect)"/> has been
+	///         view has been initialized (<see cref="IsInitialized"/> is true) and <see cref="SetRelativeLayout(Rect)"/> has
+	///         been
 	///         called.
 	///         </para>
 	///         <para>
@@ -390,7 +353,8 @@ public partial class View {
 	/// <remarks>
 	///         <para>
 	///         If set to a relative value (e.g. <see cref="Dim.Fill(int)"/>) the value is indeterminate until the
-	///         view has been initialized (<see cref="IsInitialized"/> is true) and <see cref="SetRelativeLayout(Rect)"/> has been
+	///         view has been initialized (<see cref="IsInitialized"/> is true) and <see cref="SetRelativeLayout(Rect)"/> has
+	///         been
 	///         called.
 	///         </para>
 	///         <para>
@@ -430,7 +394,8 @@ public partial class View {
 	/// <remarks>
 	///         <para>
 	///         If set to a relative value (e.g. <see cref="Dim.Fill(int)"/>) the value is indeterminate until the
-	///         view has been initialized (<see cref="IsInitialized"/> is true) and <see cref="SetRelativeLayout(Rect)"/> has been
+	///         view has been initialized (<see cref="IsInitialized"/> is true) and <see cref="SetRelativeLayout(Rect)"/> has
+	///         been
 	///         called.
 	///         </para>
 	///         <para>
@@ -517,6 +482,53 @@ public partial class View {
 	/// </summary>
 	public event EventHandler Initialized;
 
+	/// <summary>
+	///         <para>
+	///         Gets the thickness describing the sum of the Adornments' thicknesses.
+	///         </para>
+	/// </summary>
+	/// <returns>A thickness that describes the sum of the Adornments' thicknesses.</returns>
+	public Thickness GetAdornmentsThickness ()
+	{
+		var left = Margin.Thickness.Left + Border.Thickness.Left + Padding.Thickness.Left;
+		var top = Margin.Thickness.Top + Border.Thickness.Top + Padding.Thickness.Top;
+		var right = Margin.Thickness.Right + Border.Thickness.Right + Padding.Thickness.Right;
+		var bottom = Margin.Thickness.Bottom + Border.Thickness.Bottom + Padding.Thickness.Bottom;
+		return new Thickness (left, top, right, bottom);
+	}
+
+	/// <summary>
+	/// Helper to get the X and Y offset of the Bounds from the Frame. This is the sum of the Left and Top properties of
+	/// <see cref="Margin"/>, <see cref="Border"/> and <see cref="Padding"/>.
+	/// </summary>
+	public Point GetBoundsOffset () => new (Padding?.Thickness.GetInside (Padding.Frame).X ?? 0, Padding?.Thickness.GetInside (Padding.Frame).Y ?? 0);
+
+	/// <summary>
+	/// This internal method is overridden by Adornment to do nothing to prevent recursion during View construction.
+	/// And, because Adornments don't have Adornments. It's internal to support unit tests.
+	/// </summary>
+	/// <param name="adornmentType"></param>
+	/// <exception cref="ArgumentNullException"></exception>
+	/// <exception cref="ArgumentException"></exception>
+	internal virtual Adornment CreateAdornment (Type adornmentType)
+	{
+		void ThicknessChangedHandler (object sender, EventArgs e)
+		{
+			if (IsInitialized) {
+				LayoutAdornments ();
+			}
+			SetNeedsLayout ();
+			SetNeedsDisplay ();
+		}
+
+		Adornment adornment;
+
+		adornment = Activator.CreateInstance (adornmentType, this) as Adornment;
+		adornment.ThicknessChanged += ThicknessChangedHandler;
+
+		return adornment;
+	}
+
 
 
 	// Diagnostics to highlight when X or Y is read before the view has been initialized
@@ -548,7 +560,7 @@ public partial class View {
 	/// <remarks>
 	///         <para>
 	///         Determines the relative bounds of the <see cref="View"/> and its <see cref="Frame"/>s, and then calls
-	///         <see cref="SetRelativeLayout(Rect)"/> to update the view. 
+	///         <see cref="SetRelativeLayout(Rect)"/> to update the view.
 	///         </para>
 	/// </remarks>
 	internal void OnResizeNeeded ()
@@ -559,8 +571,8 @@ public partial class View {
 		// Finally, if none of those are valid, use int.MaxValue (for Unit tests).
 		var relativeBounds = SuperView is { IsInitialized: true } ? SuperView.Bounds :
 			Application.Top != null && Application.Top.IsInitialized ? Application.Top.Bounds :
-										   Application.Driver?.Bounds ??
-										   new Rect (0, 0, int.MaxValue, int.MaxValue);
+			Application.Driver?.Bounds ??
+			new Rect (0, 0, int.MaxValue, int.MaxValue);
 		SetRelativeLayout (relativeBounds);
 
 		// TODO: Determine what, if any of the below is actually needed here.

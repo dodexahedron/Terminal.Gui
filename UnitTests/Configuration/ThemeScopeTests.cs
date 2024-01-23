@@ -1,81 +1,76 @@
-﻿using Xunit;
-using Terminal.Gui;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Text.Json;
+using Xunit;
 using static Terminal.Gui.ConfigurationManager;
 
-namespace Terminal.Gui.ConfigurationTests {
-	public class ThemeScopeTests {
-		public static readonly JsonSerializerOptions _jsonOptions = new() {
-			Converters = {
-				//new AttributeJsonConverter (),
-				//new ColorJsonConverter ()
-				}
-		};
+namespace Terminal.Gui.ConfigurationTests; 
 
-		[Fact]
-		public void ThemeManager_ClassMethodsWork ()
-		{
-			ConfigurationManager.Reset ();
-			Assert.Equal (ThemeManager.Instance, ConfigurationManager.Themes);
-			Assert.NotEmpty (ThemeManager.Themes);
-
-			ThemeManager.SelectedTheme = "foo";
-			Assert.Equal ("foo", ThemeManager.SelectedTheme);
-			ThemeManager.Reset ();
-			Assert.Equal (string.Empty, ThemeManager.SelectedTheme);
-
-			Assert.Empty (ThemeManager.Themes);
+public class ThemeScopeTests {
+	public static readonly JsonSerializerOptions _jsonOptions = new () {
+		Converters = {
+			//new AttributeJsonConverter (),
+			//new ColorJsonConverter ()
 		}
+	};
 
-		[Fact]
-		public void AllThemesPresent()
-		{
-			ConfigurationManager.Reset ();
-			Assert.True (ConfigurationManager.Themes.ContainsKey ("Default"));
-			Assert.True (ConfigurationManager.Themes.ContainsKey ("Dark"));
-			Assert.True (ConfigurationManager.Themes.ContainsKey ("Light"));
-		}
+	[Fact]
+	public void ThemeManager_ClassMethodsWork ()
+	{
+		Reset ();
+		Assert.Equal (ThemeManager.Instance, Themes);
+		Assert.NotEmpty (ThemeManager.Themes);
 
-		[Fact]
-		public void GetHardCodedDefaults_ShouldSetProperties ()
-		{
-			ConfigurationManager.Reset ();
-			ConfigurationManager.GetHardCodedDefaults ();
-			Assert.NotEmpty (ConfigurationManager.Themes);
-			Assert.Equal ("Default", ConfigurationManager.Themes.Theme);
-		}
+		ThemeManager.SelectedTheme = "foo";
+		Assert.Equal ("foo", ThemeManager.SelectedTheme);
+		ThemeManager.Reset ();
+		Assert.Equal (string.Empty, ThemeManager.SelectedTheme);
 
-		[Fact, AutoInitShutdown]
-		public void Apply_ShouldApplyUpdatedProperties ()
-		{
-			ConfigurationManager.Reset ();
-			Assert.NotEmpty (ConfigurationManager.Themes);
-			Assert.Equal (Dialog.ButtonAlignments.Center, Dialog.DefaultButtonAlignment);
+		Assert.Empty (ThemeManager.Themes);
+	}
 
-			ConfigurationManager.Themes ["Default"] ["Dialog.DefaultButtonAlignment"].PropertyValue = Dialog.ButtonAlignments.Right;
+	[Fact]
+	public void AllThemesPresent ()
+	{
+		Reset ();
+		Assert.True (Themes.ContainsKey ("Default"));
+		Assert.True (Themes.ContainsKey ("Dark"));
+		Assert.True (Themes.ContainsKey ("Light"));
+	}
 
-			ThemeManager.Themes! [ThemeManager.SelectedTheme]!.Apply ();
-			Assert.Equal (Dialog.ButtonAlignments.Right, Dialog.DefaultButtonAlignment);
-		}
-		
+	[Fact]
+	public void GetHardCodedDefaults_ShouldSetProperties ()
+	{
+		Reset ();
+		GetHardCodedDefaults ();
+		Assert.NotEmpty (Themes);
+		Assert.Equal ("Default", Themes.Theme);
+	}
 
-		[Fact]
-		public void TestSerialize_RoundTrip ()
-		{
-			ConfigurationManager.Reset ();
+	[Fact] [AutoInitShutdown]
+	public void Apply_ShouldApplyUpdatedProperties ()
+	{
+		Reset ();
+		Assert.NotEmpty (Themes);
+		Assert.Equal (Dialog.ButtonAlignments.Center, Dialog.DefaultButtonAlignment);
 
-			var initial = ThemeManager.Themes;
-			
-			var serialized = JsonSerializer.Serialize<IDictionary<string, ThemeScope>> (ConfigurationManager.Themes, _jsonOptions);
-			var deserialized = JsonSerializer.Deserialize<IDictionary<string, ThemeScope>> (serialized, _jsonOptions);
+		Themes ["Default"] ["Dialog.DefaultButtonAlignment"].PropertyValue = Dialog.ButtonAlignments.Right;
 
-			Assert.NotEqual (initial, deserialized);
-			Assert.Equal (deserialized.Count, initial.Count);
-		}
+		ThemeManager.Themes! [ThemeManager.SelectedTheme]!.Apply ();
+		Assert.Equal (Dialog.ButtonAlignments.Right, Dialog.DefaultButtonAlignment);
+	}
+
+
+	[Fact]
+	public void TestSerialize_RoundTrip ()
+	{
+		Reset ();
+
+		var initial = ThemeManager.Themes;
+
+		var serialized = JsonSerializer.Serialize<IDictionary<string, ThemeScope>> (Themes, _jsonOptions);
+		var deserialized = JsonSerializer.Deserialize<IDictionary<string, ThemeScope>> (serialized, _jsonOptions);
+
+		Assert.NotEqual (initial, deserialized);
+		Assert.Equal (deserialized.Count, initial.Count);
 	}
 }

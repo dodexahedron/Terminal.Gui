@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Text;
 
@@ -11,29 +10,33 @@ namespace Terminal.Gui;
 /// </summary>
 /// <typeparam name="T"></typeparam>
 public class TreeTableSource<T> : IEnumerableTableSource<T>, IDisposable where T : class {
-	
-	private TreeView<T> _tree;
-	private string [] _cols;
-	private Dictionary<string, Func<T, object>> _lamdas;
-	private TableView _tableView;
+	readonly Dictionary<string, Func<T, object>> _lamdas;
+	readonly TableView _tableView;
+
+	readonly TreeView<T> _tree;
 
 	/// <summary>
 	/// Creates a new instance of <see cref="TreeTableSource{T}"/> presenting the given
 	/// <paramref name="tree"/>. This source should only be used with <paramref name="table"/>.
 	/// </summary>
 	/// <param name="table">The table this source will provide data for.</param>
-	/// <param name="firstColumnName">Column name to use for the first column of the table (where
-	/// the tree branches/leaves will be rendered.</param>
-	/// <param name="tree">The tree data to render. This should be a new view and not used
-	/// elsewhere (e.g. via <see cref="View.Add(View)"/>).</param>
+	/// <param name="firstColumnName">
+	/// Column name to use for the first column of the table (where
+	/// the tree branches/leaves will be rendered.
+	/// </param>
+	/// <param name="tree">
+	/// The tree data to render. This should be a new view and not used
+	/// elsewhere (e.g. via <see cref="View.Add(View)"/>).
+	/// </param>
 	/// <param name="subsequentColumns">
 	/// Getter methods for each additional property you want to present in the table. For example:
 	/// <code>
-	/// new () {
-	///    { "Colname1", (t)=>t.SomeField},
-	///    { "Colname2", (t)=>t.SomeOtherField}
-	///}
-	/// </code></param>
+	///  new () {
+	///     { "Colname1", (t)=>t.SomeField},
+	///     { "Colname2", (t)=>t.SomeOtherField}
+	/// }
+	///  </code>
+	/// </param>
 	public TreeTableSource (TableView table, string firstColumnName, TreeView<T> tree, Dictionary<string, Func<T, object>> subsequentColumns)
 	{
 		_tableView = table;
@@ -44,26 +47,11 @@ public class TreeTableSource<T> : IEnumerableTableSource<T>, IDisposable where T
 		var colList = subsequentColumns.Keys.ToList ();
 		colList.Insert (0, firstColumnName);
 
-		_cols = colList.ToArray ();
+		ColumnNames = colList.ToArray ();
 
 
 		_lamdas = subsequentColumns;
 	}
-
-
-	/// <inheritdoc/>
-	public object this [int row, int col] =>
-		col == 0 ? GetColumnZeroRepresentationFromTree (row) :
-		_lamdas [ColumnNames [col]] (RowToObject (row));
-
-	/// <inheritdoc/>
-	public int Rows => _tree.BuildLineMap ().Count;
-
-	/// <inheritdoc/>
-	public int Columns => _lamdas.Count + 1;
-
-	/// <inheritdoc/>
-	public string [] ColumnNames => _cols;
 
 	/// <inheritdoc/>
 	public void Dispose ()
@@ -73,26 +61,44 @@ public class TreeTableSource<T> : IEnumerableTableSource<T>, IDisposable where T
 		_tree.Dispose ();
 	}
 
+
+	/// <inheritdoc/>
+	public object this [int row, int col] =>
+		col == 0 ? GetColumnZeroRepresentationFromTree (row) :
+			_lamdas [ColumnNames [col]] (RowToObject (row));
+
+	/// <inheritdoc/>
+	public int Rows => _tree.BuildLineMap ().Count;
+
+	/// <inheritdoc/>
+	public int Columns => _lamdas.Count + 1;
+
+	/// <inheritdoc/>
+	public string [] ColumnNames { get; }
+
+	/// <inheritdoc/>
+	public T GetObjectOnRow (int row) => RowToObject (row);
+
+	/// <inheritdoc/>
+	public IEnumerable<T> GetAllObjects () => _tree.BuildLineMap ().Select (b => b.Model);
+
 	/// <summary>
 	/// Returns the tree model object rendering on the given <paramref name="row"/>
 	/// of the table.
 	/// </summary>
 	/// <param name="row">Row in table.</param>
 	/// <returns></returns>
-	public T RowToObject (int row)
-	{
-		return _tree.BuildLineMap ().ElementAt (row).Model;
-	}
+	public T RowToObject (int row) => _tree.BuildLineMap ().ElementAt (row).Model;
 
 
-	private string GetColumnZeroRepresentationFromTree (int row)
+	string GetColumnZeroRepresentationFromTree (int row)
 	{
 		var branch = RowToBranch (row);
 
 		// Everything on line before the expansion run and branch text
-		Rune [] prefix = branch.GetLinePrefix (Application.Driver).ToArray ();
-		Rune expansion = branch.GetExpandableSymbol (Application.Driver);
-		string lineBody = _tree.AspectGetter (branch.Model) ?? "";
+		var prefix = branch.GetLinePrefix (Application.Driver).ToArray ();
+		var expansion = branch.GetExpandableSymbol (Application.Driver);
+		var lineBody = _tree.AspectGetter (branch.Model) ?? "";
 
 		var sb = new StringBuilder ();
 
@@ -106,7 +112,7 @@ public class TreeTableSource<T> : IEnumerableTableSource<T>, IDisposable where T
 		return sb.ToString ();
 	}
 
-	private void Table_KeyPress (object sender, Key e)
+	void Table_KeyPress (object sender, Key e)
 	{
 		if (!IsInTreeColumn (_tableView.SelectedColumn, true)) {
 			return;
@@ -137,7 +143,7 @@ public class TreeTableSource<T> : IEnumerableTableSource<T>, IDisposable where T
 		}
 	}
 
-	private void Table_MouseClick (object sender, MouseEventEventArgs e)
+	void Table_MouseClick (object sender, MouseEventEventArgs e)
 	{
 		var hit = _tableView.ScreenToCell (e.MouseEvent.X, e.MouseEvent.Y, out var headerIfAny, out var offsetX);
 
@@ -167,12 +173,9 @@ public class TreeTableSource<T> : IEnumerableTableSource<T>, IDisposable where T
 		}
 	}
 
-	private Branch<T> RowToBranch (int row)
-	{
-		return _tree.BuildLineMap ().ElementAt (row);
-	}
+	Branch<T> RowToBranch (int row) => _tree.BuildLineMap ().ElementAt (row);
 
-	private bool IsInTreeColumn (int column, bool isKeyboard)
+	bool IsInTreeColumn (int column, bool isKeyboard)
 	{
 		var colNames = _tableView.Table.ColumnNames;
 
@@ -188,18 +191,6 @@ public class TreeTableSource<T> : IEnumerableTableSource<T>, IDisposable where T
 
 		// we cannot just check that SelectedColumn is 0 because source may
 		// be wrapped e.g. with a CheckBoxTableSourceWrapperBase
-		return colNames [column] == _cols [0];
-	}
-
-	/// <inheritdoc/>
-	public T GetObjectOnRow (int row)
-	{
-		return RowToObject (row);
-	}
-
-	/// <inheritdoc/>
-	public IEnumerable<T> GetAllObjects ()
-	{
-		return _tree.BuildLineMap ().Select (b => b.Model);
+		return colNames [column] == ColumnNames [0];
 	}
 }

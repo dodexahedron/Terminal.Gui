@@ -1,10 +1,20 @@
-﻿namespace Terminal.Gui; 
+﻿namespace Terminal.Gui;
 
 /// <summary>
 /// Arguments for a <see cref="CellColorGetterDelegate"/>.  Describes a cell for which a rendering
 /// <see cref="ColorScheme"/> is being sought
 /// </summary>
 public class CellColorGetterArgs {
+
+	internal CellColorGetterArgs (ITableSource table, int rowIdx, int colIdx, object cellValue, string representation, ColorScheme rowScheme)
+	{
+		Table = table;
+		RowIndex = rowIdx;
+		ColIdex = colIdx;
+		CellValue = cellValue;
+		Representation = representation;
+		RowScheme = rowScheme;
+	}
 
 	/// <summary>
 	/// The data table hosted by the <see cref="TableView"/> control.
@@ -35,15 +45,4 @@ public class CellColorGetterArgs {
 	/// the color scheme that is going to be used to render the cell if no cell specific color scheme is returned
 	/// </summary>
 	public ColorScheme RowScheme { get; }
-
-	internal CellColorGetterArgs (ITableSource table, int rowIdx, int colIdx, object cellValue, string representation, ColorScheme rowScheme)
-	{
-		Table = table;
-		RowIndex = rowIdx;
-		ColIdex = colIdx;
-		CellValue = cellValue;
-		Representation = representation;
-		RowScheme = rowScheme;
-	}
-
 }

@@ -1,13 +1,11 @@
 using System;
-using System.Diagnostics;
-using System.Text;
 using System.Linq;
-using System.Reflection.Metadata;
+using System.Text;
 
 namespace Terminal.Gui;
 
 /// <summary>
-/// Specifies how a <see cref="MenuItem"/> shows selection state. 
+/// Specifies how a <see cref="MenuItem"/> shows selection state.
 /// </summary>
 [Flags]
 public enum MenuItemCheckStyle {
@@ -25,25 +23,17 @@ public enum MenuItemCheckStyle {
 	/// The menu item is part of a menu radio group (see <see cref="Checked"/>) and will indicate selected state.
 	/// </summary>
 	Radio = 0b_0000_0010
-};
+}
 
 /// <summary>
-/// A <see cref="MenuItem"/> has title, an associated help text, and an action to execute on activation. 
+/// A <see cref="MenuItem"/> has title, an associated help text, and an action to execute on activation.
 /// MenuItems can also have a checked indicator (see <see cref="Checked"/>).
 /// </summary>
 public class MenuItem {
-	string _title;
-	ShortcutHelper _shortcutHelper;
 	bool _allowNullChecked;
 	MenuItemCheckStyle _checkType;
-
-	internal int TitleLength => GetMenuBarItemLength (Title);
-
-	/// <summary>
-	/// Gets or sets arbitrary data for the menu item.
-	/// </summary>
-	/// <remarks>This property is not used internally.</remarks>
-	public object Data { get; set; }
+	readonly ShortcutHelper _shortcutHelper;
+	string _title;
 
 	// TODO: Update to use Key instead of KeyCode
 	/// <summary>
@@ -74,67 +64,13 @@ public class MenuItem {
 		}
 	}
 
-	#region Keyboard Handling
-
-	// TODO: Update to use Key instead of Rune
-	/// <summary>
-	/// The HotKey is used to activate a <see cref="MenuItem"/> with the keyboard. HotKeys are defined by prefixing the <see cref="Title"/>
-	/// of a MenuItem with an underscore ('_'). 
-	/// <para>
-	/// Pressing Alt-Hotkey for a <see cref="MenuBarItem"/> (menu items on the menu bar) works even if the menu is not active). 
-	/// Once a menu has focus and is active, pressing just the HotKey will activate the MenuItem.
-	/// </para>
-	/// <para>
-	/// For example for a MenuBar with a "_File" MenuBarItem that contains a "_New" MenuItem, Alt-F will open the File menu.
-	/// Pressing the N key will then activate the New MenuItem.
-	/// </para>
-	/// <para>
-	/// See also <see cref="Shortcut"/> which enable global key-bindings to menu items.
-	/// </para>
-	/// </summary>
-	public Rune HotKey { get; set; }
-
-	void GetHotKey ()
-	{
-		bool nextIsHot = false;
-		foreach (char x in _title) {
-			if (x == MenuBar.HotKeySpecifier.Value) {
-				nextIsHot = true;
-			} else {
-				if (nextIsHot) {
-					HotKey = (Rune)char.ToUpper (x);
-					break;
-				}
-				nextIsHot = false;
-				HotKey = default;
-			}
-		}
-	}
-
-
-	// TODO: Update to use Key instead of KeyCode
-	/// <summary>
-	/// Shortcut defines a key binding to the MenuItem that will invoke the MenuItem's action globally for the <see cref="View"/> that is
-	/// the parent of the <see cref="MenuBar"/> or <see cref="ContextMenu"/> this <see cref="MenuItem"/>.
-	/// <para>
-	/// The <see cref="KeyCode"/> will be drawn on the MenuItem to the right of the <see cref="Title"/> and <see cref="Help"/> text. See <see cref="ShortcutTag"/>.
-	/// </para>
-	/// </summary>
-	public KeyCode Shortcut {
-		get => _shortcutHelper.Shortcut;
-		set {
-
-			if (_shortcutHelper.Shortcut != value && (ShortcutHelper.PostShortcutValidation (value) || value == KeyCode.Null)) {
-				_shortcutHelper.Shortcut = value;
-			}
-		}
-	}
+	internal int TitleLength => GetMenuBarItemLength (Title);
 
 	/// <summary>
-	/// Gets the text describing the keystroke combination defined by <see cref="Shortcut"/>.
+	/// Gets or sets arbitrary data for the menu item.
 	/// </summary>
-	public string ShortcutTag => _shortcutHelper.Shortcut == KeyCode.Null ? string.Empty : Key.ToString (_shortcutHelper.Shortcut, MenuBar.ShortcutDelimiter);
-	#endregion Keyboard Handling
+	/// <remarks>This property is not used internally.</remarks>
+	public object Data { get; set; }
 
 	/// <summary>
 	/// Gets or sets the title of the menu item .
@@ -163,19 +99,12 @@ public class MenuItem {
 	public Action Action { get; set; }
 
 	/// <summary>
-	/// Gets or sets the action to be invoked to determine if the menu can be triggered. If <see cref="CanExecute"/> returns <see langword="true"/>
-	/// the menu item will be enabled. Otherwise, it will be disabled. 
+	/// Gets or sets the action to be invoked to determine if the menu can be triggered. If <see cref="CanExecute"/> returns
+	/// <see langword="true"/>
+	/// the menu item will be enabled. Otherwise, it will be disabled.
 	/// </summary>
 	/// <value>Function to determine if the action is can be executed or not.</value>
 	public Func<bool> CanExecute { get; set; }
-
-	/// <summary>
-	/// Returns <see langword="true"/> if the menu item is enabled. This method is a wrapper around <see cref="CanExecute"/>.
-	/// </summary>
-	public bool IsEnabled ()
-	{
-		return CanExecute == null ? true : CanExecute ();
-	}
 
 	// 
 	// ┌─────────────────────────────┐
@@ -186,11 +115,11 @@ public class MenuItem {
 	// └─────────────────┘
 	// TODO: Replace the `2` literals with named constants 
 	internal int Width => 1 + // space before Title
-				TitleLength +
-				2 + // space after Title - BUGBUG: This should be 1 
-				(Checked == true || CheckType.HasFlag (MenuItemCheckStyle.Checked) || CheckType.HasFlag (MenuItemCheckStyle.Radio) ? 2 : 0) + // check glyph + space 
-				(Help.GetColumns () > 0 ? 2 + Help.GetColumns () : 0) + // Two spaces before Help
-				(ShortcutTag.GetColumns () > 0 ? 2 + ShortcutTag.GetColumns () : 0); // Pad two spaces before shortcut tag (which are also aligned right)
+	                      TitleLength +
+	                      2 + // space after Title - BUGBUG: This should be 1 
+	                      (Checked == true || CheckType.HasFlag (MenuItemCheckStyle.Checked) || CheckType.HasFlag (MenuItemCheckStyle.Radio) ? 2 : 0) + // check glyph + space 
+	                      (Help.GetColumns () > 0 ? 2 + Help.GetColumns () : 0) + // Two spaces before Help
+	                      (ShortcutTag.GetColumns () > 0 ? 2 + ShortcutTag.GetColumns () : 0); // Pad two spaces before shortcut tag (which are also aligned right)
 
 	/// <summary>
 	/// Sets or gets whether the <see cref="MenuItem"/> shows a check indicator or not. See <see cref="MenuItemCheckStyle"/>.
@@ -213,7 +142,8 @@ public class MenuItem {
 	}
 
 	/// <summary>
-	/// Sets or gets the <see cref="MenuItemCheckStyle"/> of a menu item where <see cref="Checked"/> is set to <see langword="true"/>.
+	/// Sets or gets the <see cref="MenuItemCheckStyle"/> of a menu item where <see cref="Checked"/> is set to
+	/// <see langword="true"/>.
 	/// </summary>
 	public MenuItemCheckStyle CheckType {
 		get => _checkType;
@@ -237,20 +167,19 @@ public class MenuItem {
 	internal bool IsFromSubMenu => Parent != null;
 
 	/// <summary>
-	/// Merely a debugging aid to see the interaction with main.
+	/// Returns <see langword="true"/> if the menu item is enabled. This method is a wrapper around <see cref="CanExecute"/>.
 	/// </summary>
-	public MenuItem GetMenuItem ()
-	{
-		return this;
-	}
+	public bool IsEnabled () => CanExecute == null ? true : CanExecute ();
 
 	/// <summary>
 	/// Merely a debugging aid to see the interaction with main.
 	/// </summary>
-	public bool GetMenuBarItem ()
-	{
-		return IsFromSubMenu;
-	}
+	public MenuItem GetMenuItem () => this;
+
+	/// <summary>
+	/// Merely a debugging aid to see the interaction with main.
+	/// </summary>
+	public bool GetMenuBarItem () => IsFromSubMenu;
 
 	/// <summary>
 	/// Toggle the <see cref="Checked"/> between three states if <see cref="AllowNullChecked"/> is <see langword="true"/>
@@ -261,7 +190,7 @@ public class MenuItem {
 		if (_checkType != MenuItemCheckStyle.Checked) {
 			throw new InvalidOperationException ("This isn't a Checked MenuItemCheckStyle!");
 		}
-		bool? previousChecked = Checked;
+		var previousChecked = Checked;
 		if (AllowNullChecked) {
 			switch (previousChecked) {
 			case null:
@@ -282,7 +211,7 @@ public class MenuItem {
 
 	int GetMenuBarItemLength (string title)
 	{
-		int len = 0;
+		var len = 0;
 		foreach (var ch in title.EnumerateRunes ()) {
 			if (ch == MenuBar.HotKeySpecifier) {
 				continue;
@@ -292,10 +221,75 @@ public class MenuItem {
 
 		return len;
 	}
+
+	#region Keyboard Handling
+	// TODO: Update to use Key instead of Rune
+	/// <summary>
+	/// The HotKey is used to activate a <see cref="MenuItem"/> with the keyboard. HotKeys are defined by prefixing the
+	/// <see cref="Title"/>
+	/// of a MenuItem with an underscore ('_').
+	/// <para>
+	/// Pressing Alt-Hotkey for a <see cref="MenuBarItem"/> (menu items on the menu bar) works even if the menu is not active).
+	/// Once a menu has focus and is active, pressing just the HotKey will activate the MenuItem.
+	/// </para>
+	/// <para>
+	/// For example for a MenuBar with a "_File" MenuBarItem that contains a "_New" MenuItem, Alt-F will open the File menu.
+	/// Pressing the N key will then activate the New MenuItem.
+	/// </para>
+	/// <para>
+	/// See also <see cref="Shortcut"/> which enable global key-bindings to menu items.
+	/// </para>
+	/// </summary>
+	public Rune HotKey { get; set; }
+
+	void GetHotKey ()
+	{
+		var nextIsHot = false;
+		foreach (var x in _title) {
+			if (x == MenuBar.HotKeySpecifier.Value) {
+				nextIsHot = true;
+			} else {
+				if (nextIsHot) {
+					HotKey = (Rune)char.ToUpper (x);
+					break;
+				}
+				nextIsHot = false;
+				HotKey = default;
+			}
+		}
+	}
+
+
+	// TODO: Update to use Key instead of KeyCode
+	/// <summary>
+	/// Shortcut defines a key binding to the MenuItem that will invoke the MenuItem's action globally for the
+	/// <see cref="View"/> that is
+	/// the parent of the <see cref="MenuBar"/> or <see cref="ContextMenu"/> this <see cref="MenuItem"/>.
+	/// <para>
+	/// The <see cref="KeyCode"/> will be drawn on the MenuItem to the right of the <see cref="Title"/> and <see cref="Help"/>
+	/// text. See <see cref="ShortcutTag"/>.
+	/// </para>
+	/// </summary>
+	public KeyCode Shortcut {
+		get => _shortcutHelper.Shortcut;
+		set {
+
+			if (_shortcutHelper.Shortcut != value && (ShortcutHelper.PostShortcutValidation (value) || value == KeyCode.Null)) {
+				_shortcutHelper.Shortcut = value;
+			}
+		}
+	}
+
+	/// <summary>
+	/// Gets the text describing the keystroke combination defined by <see cref="Shortcut"/>.
+	/// </summary>
+	public string ShortcutTag => _shortcutHelper.Shortcut == KeyCode.Null ? string.Empty : Key.ToString (_shortcutHelper.Shortcut, MenuBar.ShortcutDelimiter);
+	#endregion Keyboard Handling
 }
 
 /// <summary>
-/// An internal class used to represent a menu pop-up menu. Created and managed by <see cref="MenuBar"/> and <see cref="ContextMenu"/>.
+/// An internal class used to represent a menu pop-up menu. Created and managed by <see cref="MenuBar"/> and
+/// <see cref="ContextMenu"/>.
 /// </summary>
 class Menu : View {
 	internal MenuBarItem _barItems;
@@ -308,11 +302,11 @@ class Menu : View {
 		if (items == null || items.Length == 0) {
 			return new Rect ();
 		}
-		int minX = x;
-		int minY = y;
-		int borderOffset = 2; // This 2 is for the space around
-		int maxW = (items.Max (z => z?.Width) ?? 0) + borderOffset;
-		int maxH = items.Length + borderOffset;
+		var minX = x;
+		var minY = y;
+		var borderOffset = 2; // This 2 is for the space around
+		var maxW = (items.Max (z => z?.Width) ?? 0) + borderOffset;
+		var maxH = items.Length + borderOffset;
 		if (parent != null && x + maxW > Driver.Cols) {
 			minX = Math.Max (parent.Frame.Right - parent.Frame.Width - maxW, 0);
 		}
@@ -343,7 +337,7 @@ class Menu : View {
 		} else {
 
 			_currentChild = -1;
-			for (int i = 0; i < barItems.Children?.Length; i++) {
+			for (var i = 0; i < barItems.Children?.Length; i++) {
 				if (barItems.Children [i]?.IsEnabled () == true) {
 					_currentChild = i;
 					break;
@@ -463,7 +457,7 @@ class Menu : View {
 				if (item == null) {
 					return true;
 				}
-				bool disabled = item == null || !item.IsEnabled ();
+				var disabled = item == null || !item.IsEnabled ();
 				if (!disabled && (_host.UseSubMenusSingleFrame || !CheckSubMenu ())) {
 					SetNeedsDisplay ();
 					SetParentSetNeedsDisplay ();
@@ -519,13 +513,13 @@ class Menu : View {
 			}
 
 			// Search for hot keys next.
-			for (int c = 0; c < children.Length; c++) {
-				int hotKeyValue = children [c]?.HotKey.Value ?? default;
+			for (var c = 0; c < children.Length; c++) {
+				var hotKeyValue = children [c]?.HotKey.Value ?? default;
 				var hotKey = (KeyCode)hotKeyValue;
 				if (hotKey == KeyCode.Null) {
 					continue;
 				}
-				bool matches = key == hotKey || key == (hotKey | KeyCode.AltMask);
+				var matches = key == hotKey || key == (hotKey | KeyCode.AltMask);
 				if (!_host.IsMenuOpen) {
 					// If the menu is open, only match if Alt is not pressed.
 					matches = key == hotKey;
@@ -593,13 +587,13 @@ class Menu : View {
 			locationOffset.X += SuperView.Border.Thickness.Left;
 			locationOffset.Y += SuperView.Border.Thickness.Top;
 		}
-		var view = FindDeepestView (this, a.MouseEvent.X + locationOffset.X, a.MouseEvent.Y + locationOffset.Y, out int rx, out int ry);
+		var view = FindDeepestView (this, a.MouseEvent.X + locationOffset.X, a.MouseEvent.Y + locationOffset.Y, out var rx, out var ry);
 		if (view == this) {
 			if (!Visible) {
 				throw new InvalidOperationException ("This shouldn't running on a invisible menu!");
 			}
 
-			var nme = new MouseEvent () {
+			var nme = new MouseEvent {
 				X = rx,
 				Y = ry,
 				Flags = a.MouseEvent.Flags,
@@ -636,7 +630,7 @@ class Menu : View {
 		OnDrawAdornments ();
 		OnRenderLineCanvas ();
 
-		for (int i = Bounds.Y; i < _barItems.Children.Length; i++) {
+		for (var i = Bounds.Y; i < _barItems.Children.Length; i++) {
 			if (i < 0) {
 				continue;
 			}
@@ -654,7 +648,7 @@ class Menu : View {
 			}
 
 			Driver.SetAttribute (DetermineColorSchemeFor (item, i));
-			for (int p = Bounds.X; p < Frame.Width - 2; p++) {
+			for (var p = Bounds.X; p < Frame.Width - 2; p++) {
 				// This - 2 is for the border
 				if (p < 0) {
 					continue;
@@ -704,13 +698,13 @@ class Menu : View {
 				textToDraw = item.Title;
 			}
 
-			BoundsToScreen (0, i, out int vtsCol, out int vtsRow, false);
+			BoundsToScreen (0, i, out var vtsCol, out var vtsRow, false);
 			if (vtsCol < Driver.Cols) {
 				Driver.Move (vtsCol + 1, vtsRow);
 				if (!item.IsEnabled ()) {
 					DrawHotString (textToDraw, ColorScheme.Disabled, ColorScheme.Disabled);
 				} else if (i == 0 && _host.UseSubMenusSingleFrame && item.Parent.Parent != null) {
-					var tf = new TextFormatter () {
+					var tf = new TextFormatter {
 						Alignment = TextAlignment.Centered,
 						HotKeySpecifier = MenuBar.HotKeySpecifier,
 						Text = textToDraw
@@ -727,8 +721,8 @@ class Menu : View {
 				}
 
 				// The help string
-				int l = item.ShortcutTag.GetColumns () == 0 ? item.Help.GetColumns () : item.Help.GetColumns () + item.ShortcutTag.GetColumns () + 2;
-				int col = Frame.Width - l - 3;
+				var l = item.ShortcutTag.GetColumns () == 0 ? item.Help.GetColumns () : item.Help.GetColumns () + item.ShortcutTag.GetColumns () + 2;
+				var col = Frame.Width - l - 3;
 				BoundsToScreen (col, i, out vtsCol, out vtsRow, false);
 				if (vtsCol < Driver.Cols) {
 					Driver.Move (vtsCol, vtsRow);
@@ -780,10 +774,7 @@ class Menu : View {
 		_host.Run (action);
 	}
 
-	public override bool OnLeave (View view)
-	{
-		return _host.OnLeave (view);
-	}
+	public override bool OnLeave (View view) => _host.OnLeave (view);
 
 	void RunSelected ()
 	{
@@ -827,7 +818,7 @@ class Menu : View {
 				disabled = false;
 			}
 			if (!_host.UseSubMenusSingleFrame && _host.UseKeysUpDownAsKeysLeftRight && _barItems.SubMenu (_barItems.Children [_currentChild]) != null &&
-			!disabled && _host.IsMenuOpen) {
+			    !disabled && _host.IsMenuOpen) {
 				if (!CheckSubMenu ()) {
 					return false;
 				}
@@ -881,8 +872,8 @@ class Menu : View {
 				disabled = false;
 			}
 			if (!_host.UseSubMenusSingleFrame && _host.UseKeysUpDownAsKeysLeftRight &&
-			_barItems.SubMenu (_barItems.Children [_currentChild]) != null &&
-			!disabled && _host.IsMenuOpen) {
+			    _barItems.SubMenu (_barItems.Children [_currentChild]) != null &&
+			    !disabled && _host.IsMenuOpen) {
 				if (!CheckSubMenu ()) {
 					return false;
 				}
@@ -916,7 +907,7 @@ class Menu : View {
 		}
 		_host._handled = false;
 		bool disabled;
-		int meY = me.Y - (Border == null ? 0 : Border.Thickness.Top);
+		var meY = me.Y - (Border == null ? 0 : Border.Thickness.Top);
 		if (me.Flags == MouseFlags.Button1Clicked) {
 			disabled = false;
 			if (meY < 0) {
@@ -937,9 +928,10 @@ class Menu : View {
 				RunSelected ();
 			}
 			return true;
-		} else if (me.Flags == MouseFlags.Button1Pressed || me.Flags == MouseFlags.Button1DoubleClicked ||
-			me.Flags == MouseFlags.Button1TripleClicked || me.Flags == MouseFlags.ReportMousePosition ||
-			me.Flags.HasFlag (MouseFlags.Button1Pressed | MouseFlags.ReportMousePosition)) {
+		}
+		if (me.Flags == MouseFlags.Button1Pressed || me.Flags == MouseFlags.Button1DoubleClicked ||
+		    me.Flags == MouseFlags.Button1TripleClicked || me.Flags == MouseFlags.ReportMousePosition ||
+		    me.Flags.HasFlag (MouseFlags.Button1Pressed | MouseFlags.ReportMousePosition)) {
 
 			disabled = false;
 			if (meY < 0 || meY >= _barItems.Children.Length) {
@@ -973,12 +965,12 @@ class Menu : View {
 		}
 		var subMenu = _barItems.SubMenu (_barItems.Children [_currentChild]);
 		if (subMenu != null) {
-			int pos = -1;
+			var pos = -1;
 			if (_host._openSubMenu != null) {
 				pos = _host._openSubMenu.FindIndex (o => o?._barItems == subMenu);
 			}
 			if (pos == -1 && this != _host.openCurrentMenu && subMenu.Children != _host.openCurrentMenu._barItems.Children
-			&& !_host.CloseMenu (false, true)) {
+			    && !_host.CloseMenu (false, true)) {
 				return false;
 			}
 			_host.Activate (_host._selected, pos, subMenu);
@@ -993,7 +985,7 @@ class Menu : View {
 
 	int GetSubMenuIndex (MenuBarItem subMenu)
 	{
-		int pos = -1;
+		var pos = -1;
 		if (this != null && Subviews.Count > 0) {
 			Menu v = null;
 			foreach (var menu in Subviews) {

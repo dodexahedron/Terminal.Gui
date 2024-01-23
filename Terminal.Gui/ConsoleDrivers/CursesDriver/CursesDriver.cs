@@ -2,8 +2,6 @@
 // Driver.cs: Curses-based Driver
 //
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 using Terminal.Gui.ConsoleDrivers;
@@ -15,11 +13,22 @@ namespace Terminal.Gui;
 /// This is the Curses driver for the gui.cs/Terminal framework.
 /// </summary>
 class CursesDriver : ConsoleDriver {
+	CursorVisibility? _currentCursorVisibility;
+
+	CursorVisibility? _initialCursorVisibility;
+
+	MouseFlags _lastMouseFlags;
+	UnixMainLoop _mainLoopDriver;
+
+	object _processInputToken;
+
+	public Curses.Window _window;
+
 	public override int Cols {
 		get => Curses.Cols;
 		internal set {
 			Curses.Cols = value;
-			ClearContents();
+			ClearContents ();
 		}
 	}
 
@@ -27,19 +36,13 @@ class CursesDriver : ConsoleDriver {
 		get => Curses.Lines;
 		internal set {
 			Curses.Lines = value;
-			ClearContents();
+			ClearContents ();
 		}
 	}
 
-	CursorVisibility? _initialCursorVisibility = null;
-	CursorVisibility? _currentCursorVisibility = null;
-
-	public override string GetVersionInfo () => $"{Curses.curses_version ()}";
-	UnixMainLoop _mainLoopDriver = null;
-
 	public override bool SupportsTrueColor => false;
 
-	object _processInputToken;
+	public override string GetVersionInfo () => $"{Curses.curses_version ()}";
 
 	internal override MainLoop Init ()
 	{
@@ -157,123 +160,6 @@ class CursesDriver : ConsoleDriver {
 		}
 	}
 
-	#region Color Handling
-	/// <summary>
-	/// Creates an Attribute from the provided curses-based foreground and background color numbers
-	/// </summary>
-	/// <param name="foreground">Contains the curses color number for the foreground (color, plus any attributes)</param>
-	/// <param name="background">Contains the curses color number for the background (color, plus any attributes)</param>
-	/// <returns></returns>
-	static Attribute MakeColor (short foreground, short background)
-	{
-		short v = (short)((int)foreground | background << 4);
-
-		// TODO: for TrueColor - Use InitExtendedPair
-		Curses.InitColorPair (v, foreground, background);
-		return new Attribute (
-			Curses.ColorPair (v),
-			CursesColorNumberToColorName (foreground),
-			CursesColorNumberToColorName (background));
-	}
-
-	/// <inheritdoc/>
-	/// <remarks>
-	/// In the CursesDriver, colors are encoded as an int. 
-	/// The foreground color is stored in the most significant 4 bits, 
-	/// and the background color is stored in the least significant 4 bits.
-	/// The Terminal.GUi Color values are converted to curses color encoding before being encoded.
-	/// </remarks>
-	public override Attribute MakeColor (Color foreground, Color background)
-	{
-		if (!RunningUnitTests) {
-			return MakeColor (ColorNameToCursesColorNumber (foreground.ColorName), ColorNameToCursesColorNumber (background.ColorName));
-		} else {
-			return new Attribute (
-				0,
-				foreground,
-				background);
-		}
-	}
-
-	static short ColorNameToCursesColorNumber (ColorName color)
-	{
-		switch (color) {
-		case ColorName.Black:
-			return Curses.COLOR_BLACK;
-		case ColorName.Blue:
-			return Curses.COLOR_BLUE;
-		case ColorName.Green:
-			return Curses.COLOR_GREEN;
-		case ColorName.Cyan:
-			return Curses.COLOR_CYAN;
-		case ColorName.Red:
-			return Curses.COLOR_RED;
-		case ColorName.Magenta:
-			return Curses.COLOR_MAGENTA;
-		case ColorName.Yellow:
-			return Curses.COLOR_YELLOW;
-		case ColorName.Gray:
-			return Curses.COLOR_WHITE;
-		case ColorName.DarkGray:
-			return Curses.COLOR_GRAY;
-		case ColorName.BrightBlue:
-			return Curses.COLOR_BLUE | Curses.COLOR_GRAY;
-		case ColorName.BrightGreen:
-			return Curses.COLOR_GREEN | Curses.COLOR_GRAY;
-		case ColorName.BrightCyan:
-			return Curses.COLOR_CYAN | Curses.COLOR_GRAY;
-		case ColorName.BrightRed:
-			return Curses.COLOR_RED | Curses.COLOR_GRAY;
-		case ColorName.BrightMagenta:
-			return Curses.COLOR_MAGENTA | Curses.COLOR_GRAY;
-		case ColorName.BrightYellow:
-			return Curses.COLOR_YELLOW | Curses.COLOR_GRAY;
-		case ColorName.White:
-			return Curses.COLOR_WHITE | Curses.COLOR_GRAY;
-		}
-		throw new ArgumentException ("Invalid color code");
-	}
-
-	static ColorName CursesColorNumberToColorName (short color)
-	{
-		switch (color) {
-		case Curses.COLOR_BLACK:
-			return ColorName.Black;
-		case Curses.COLOR_BLUE:
-			return ColorName.Blue;
-		case Curses.COLOR_GREEN:
-			return ColorName.Green;
-		case Curses.COLOR_CYAN:
-			return ColorName.Cyan;
-		case Curses.COLOR_RED:
-			return ColorName.Red;
-		case Curses.COLOR_MAGENTA:
-			return ColorName.Magenta;
-		case Curses.COLOR_YELLOW:
-			return ColorName.Yellow;
-		case Curses.COLOR_WHITE:
-			return ColorName.Gray;
-		case Curses.COLOR_GRAY:
-			return ColorName.DarkGray;
-		case Curses.COLOR_BLUE | Curses.COLOR_GRAY:
-			return ColorName.BrightBlue;
-		case Curses.COLOR_GREEN | Curses.COLOR_GRAY:
-			return ColorName.BrightGreen;
-		case Curses.COLOR_CYAN | Curses.COLOR_GRAY:
-			return ColorName.BrightCyan;
-		case Curses.COLOR_RED | Curses.COLOR_GRAY:
-			return ColorName.BrightRed;
-		case Curses.COLOR_MAGENTA | Curses.COLOR_GRAY:
-			return ColorName.BrightMagenta;
-		case Curses.COLOR_YELLOW | Curses.COLOR_GRAY:
-			return ColorName.BrightYellow;
-		case Curses.COLOR_WHITE | Curses.COLOR_GRAY:
-			return ColorName.White;
-		}
-		throw new ArgumentException ("Invalid curses color code");
-	}
-	#endregion
-
 	public override void UpdateCursor ()
 	{
 		EnsureCursorVisibility ();
@@ -304,13 +190,13 @@ class CursesDriver : ConsoleDriver {
 
 	public override void UpdateScreen ()
 	{
-		for (int row = 0; row < Rows; row++) {
+		for (var row = 0; row < Rows; row++) {
 			if (!_dirtyLines [row]) {
 				continue;
 			}
 			_dirtyLines [row] = false;
 
-			for (int col = 0; col < Cols; col++) {
+			for (var col = 0; col < Cols; col++) {
 				if (Contents [row, col].IsDirty == false) {
 					continue;
 				}
@@ -345,8 +231,6 @@ class CursesDriver : ConsoleDriver {
 			_window.wrefresh ();
 		}
 	}
-
-	public Curses.Window _window;
 
 	static KeyCode MapCursesKey (int cursesKey)
 	{
@@ -427,7 +311,7 @@ class CursesDriver : ConsoleDriver {
 	internal void ProcessInput ()
 	{
 		int wch;
-		int code = Curses.get_wch (out wch);
+		var code = Curses.get_wch (out wch);
 		//System.Diagnostics.Debug.WriteLine ($"code: {code}; wch: {wch}");
 		if (code == Curses.ERR) {
 			return;
@@ -443,7 +327,7 @@ class CursesDriver : ConsoleDriver {
 				return;
 			}
 			if (wch == Curses.KeyMouse) {
-				int wch2 = wch;
+				var wch2 = wch;
 
 				while (wch2 == Curses.KeyMouse) {
 					Key kea = null;
@@ -488,7 +372,7 @@ class CursesDriver : ConsoleDriver {
 		if (wch == 27) {
 			Curses.timeout (10);
 
-			code = Curses.get_wch (out int wch2);
+			code = Curses.get_wch (out var wch2);
 
 			if (code == Curses.KEY_CODE_YES) {
 				k = KeyCode.AltMask | MapCursesKey (wch);
@@ -523,11 +407,11 @@ class CursesDriver : ConsoleDriver {
 					} else if (wch >= (uint)KeyCode.A && wch <= (uint)KeyCode.Z) {
 						k = KeyCode.ShiftMask | KeyCode.AltMask | KeyCode.Space;
 					} else if (wch2 < 256) {
-						k = (KeyCode)wch2;// | KeyCode.AltMask;
+						k = (KeyCode)wch2; // | KeyCode.AltMask;
 					} else {
 						k = (KeyCode)((uint)(KeyCode.AltMask | KeyCode.CtrlMask) + wch2);
 					}
-				} 
+				}
 				key = new Key (k);
 			} else {
 				key = new Key (KeyCode.Esc);
@@ -549,8 +433,8 @@ class CursesDriver : ConsoleDriver {
 				}
 			} else if (wch >= (uint)KeyCode.A && wch <= (uint)KeyCode.Z) {
 				k = (KeyCode)wch | KeyCode.ShiftMask;
-			} 
-			
+			}
+
 			if (wch == '\n' || wch == '\r') {
 				k = KeyCode.Enter;
 			}
@@ -567,7 +451,7 @@ class CursesDriver : ConsoleDriver {
 			code = Curses.get_wch (out wch2);
 			var consoleKeyInfo = new ConsoleKeyInfo ((char)wch2, 0, false, false, false);
 			if (wch2 == 0 || wch2 == 27 || wch2 == Curses.KeyMouse) {
-				EscSeqUtils.DecodeEscSeq (null, ref consoleKeyInfo, ref ck, cki, ref mod, out _, out _, out _, out _, out bool isKeyMouse, out var mouseFlags, out var pos, out _, ProcessMouseEvent);
+				EscSeqUtils.DecodeEscSeq (null, ref consoleKeyInfo, ref ck, cki, ref mod, out _, out _, out _, out _, out var isKeyMouse, out var mouseFlags, out var pos, out _, ProcessMouseEvent);
 				if (isKeyMouse) {
 					foreach (var mf in mouseFlags) {
 						ProcessMouseEvent (mf, pos);
@@ -588,37 +472,44 @@ class CursesDriver : ConsoleDriver {
 		}
 	}
 
-	MouseFlags _lastMouseFlags;
-
 	void ProcessMouseEvent (MouseFlags mouseFlag, Point pos)
 	{
-		bool WasButtonReleased (MouseFlags flag) => flag.HasFlag (MouseFlags.Button1Released) ||
-							flag.HasFlag (MouseFlags.Button2Released) ||
-							flag.HasFlag (MouseFlags.Button3Released) ||
-							flag.HasFlag (MouseFlags.Button4Released);
+		bool WasButtonReleased (MouseFlags flag)
+		{
+			return flag.HasFlag (MouseFlags.Button1Released) ||
+			       flag.HasFlag (MouseFlags.Button2Released) ||
+			       flag.HasFlag (MouseFlags.Button3Released) ||
+			       flag.HasFlag (MouseFlags.Button4Released);
+		}
 
-		bool IsButtonNotPressed (MouseFlags flag) => !flag.HasFlag (MouseFlags.Button1Pressed) &&
-								!flag.HasFlag (MouseFlags.Button2Pressed) &&
-								!flag.HasFlag (MouseFlags.Button3Pressed) &&
-								!flag.HasFlag (MouseFlags.Button4Pressed);
+		bool IsButtonNotPressed (MouseFlags flag)
+		{
+			return !flag.HasFlag (MouseFlags.Button1Pressed) &&
+			       !flag.HasFlag (MouseFlags.Button2Pressed) &&
+			       !flag.HasFlag (MouseFlags.Button3Pressed) &&
+			       !flag.HasFlag (MouseFlags.Button4Pressed);
+		}
 
-		bool IsButtonClickedOrDoubleClicked (MouseFlags flag) => flag.HasFlag (MouseFlags.Button1Clicked) ||
-									flag.HasFlag (MouseFlags.Button2Clicked) ||
-									flag.HasFlag (MouseFlags.Button3Clicked) ||
-									flag.HasFlag (MouseFlags.Button4Clicked) ||
-									flag.HasFlag (MouseFlags.Button1DoubleClicked) ||
-									flag.HasFlag (MouseFlags.Button2DoubleClicked) ||
-									flag.HasFlag (MouseFlags.Button3DoubleClicked) ||
-									flag.HasFlag (MouseFlags.Button4DoubleClicked);
+		bool IsButtonClickedOrDoubleClicked (MouseFlags flag)
+		{
+			return flag.HasFlag (MouseFlags.Button1Clicked) ||
+			       flag.HasFlag (MouseFlags.Button2Clicked) ||
+			       flag.HasFlag (MouseFlags.Button3Clicked) ||
+			       flag.HasFlag (MouseFlags.Button4Clicked) ||
+			       flag.HasFlag (MouseFlags.Button1DoubleClicked) ||
+			       flag.HasFlag (MouseFlags.Button2DoubleClicked) ||
+			       flag.HasFlag (MouseFlags.Button3DoubleClicked) ||
+			       flag.HasFlag (MouseFlags.Button4DoubleClicked);
+		}
 
 		if (WasButtonReleased (mouseFlag) && IsButtonNotPressed (_lastMouseFlags) ||
-		IsButtonClickedOrDoubleClicked (mouseFlag) && _lastMouseFlags == 0) {
+		    IsButtonClickedOrDoubleClicked (mouseFlag) && _lastMouseFlags == 0) {
 			return;
 		}
 
 		_lastMouseFlags = mouseFlag;
 
-		var me = new MouseEvent () {
+		var me = new MouseEvent {
 			Flags = mouseFlag,
 			X = pos.X,
 			Y = pos.Y
@@ -634,7 +525,7 @@ class CursesDriver : ConsoleDriver {
 		//	// If xclip is installed on Linux under WSL, this will return true.
 		//	return false;
 		//}
-		(int exitCode, string result) = ClipboardProcessRunner.Bash ("uname -a", waitForOutput: true);
+		(var exitCode, var result) = ClipboardProcessRunner.Bash ("uname -a", waitForOutput: true);
 		if (exitCode == 0 && result.Contains ("microsoft") && result.Contains ("WSL")) {
 			return true;
 		}
@@ -729,16 +620,133 @@ class CursesDriver : ConsoleDriver {
 		OnKeyUp (new Key (key));
 		//OnKeyPressed (new KeyEventArgsEventArgs (key));
 	}
+
+	#region Color Handling
+	/// <summary>
+	/// Creates an Attribute from the provided curses-based foreground and background color numbers
+	/// </summary>
+	/// <param name="foreground">Contains the curses color number for the foreground (color, plus any attributes)</param>
+	/// <param name="background">Contains the curses color number for the background (color, plus any attributes)</param>
+	/// <returns></returns>
+	static Attribute MakeColor (short foreground, short background)
+	{
+		var v = (short)(foreground | background << 4);
+
+		// TODO: for TrueColor - Use InitExtendedPair
+		Curses.InitColorPair (v, foreground, background);
+		return new Attribute (
+			Curses.ColorPair (v),
+			CursesColorNumberToColorName (foreground),
+			CursesColorNumberToColorName (background));
+	}
+
+	/// <inheritdoc/>
+	/// <remarks>
+	/// In the CursesDriver, colors are encoded as an int.
+	/// The foreground color is stored in the most significant 4 bits,
+	/// and the background color is stored in the least significant 4 bits.
+	/// The Terminal.GUi Color values are converted to curses color encoding before being encoded.
+	/// </remarks>
+	public override Attribute MakeColor (Color foreground, Color background)
+	{
+		if (!RunningUnitTests) {
+			return MakeColor (ColorNameToCursesColorNumber (foreground.ColorName), ColorNameToCursesColorNumber (background.ColorName));
+		}
+		return new Attribute (
+			0,
+			foreground,
+			background);
+	}
+
+	static short ColorNameToCursesColorNumber (ColorName color)
+	{
+		switch (color) {
+		case ColorName.Black:
+			return Curses.COLOR_BLACK;
+		case ColorName.Blue:
+			return Curses.COLOR_BLUE;
+		case ColorName.Green:
+			return Curses.COLOR_GREEN;
+		case ColorName.Cyan:
+			return Curses.COLOR_CYAN;
+		case ColorName.Red:
+			return Curses.COLOR_RED;
+		case ColorName.Magenta:
+			return Curses.COLOR_MAGENTA;
+		case ColorName.Yellow:
+			return Curses.COLOR_YELLOW;
+		case ColorName.Gray:
+			return Curses.COLOR_WHITE;
+		case ColorName.DarkGray:
+			return Curses.COLOR_GRAY;
+		case ColorName.BrightBlue:
+			return Curses.COLOR_BLUE | Curses.COLOR_GRAY;
+		case ColorName.BrightGreen:
+			return Curses.COLOR_GREEN | Curses.COLOR_GRAY;
+		case ColorName.BrightCyan:
+			return Curses.COLOR_CYAN | Curses.COLOR_GRAY;
+		case ColorName.BrightRed:
+			return Curses.COLOR_RED | Curses.COLOR_GRAY;
+		case ColorName.BrightMagenta:
+			return Curses.COLOR_MAGENTA | Curses.COLOR_GRAY;
+		case ColorName.BrightYellow:
+			return Curses.COLOR_YELLOW | Curses.COLOR_GRAY;
+		case ColorName.White:
+			return Curses.COLOR_WHITE | Curses.COLOR_GRAY;
+		}
+		throw new ArgumentException ("Invalid color code");
+	}
+
+	static ColorName CursesColorNumberToColorName (short color)
+	{
+		switch (color) {
+		case Curses.COLOR_BLACK:
+			return ColorName.Black;
+		case Curses.COLOR_BLUE:
+			return ColorName.Blue;
+		case Curses.COLOR_GREEN:
+			return ColorName.Green;
+		case Curses.COLOR_CYAN:
+			return ColorName.Cyan;
+		case Curses.COLOR_RED:
+			return ColorName.Red;
+		case Curses.COLOR_MAGENTA:
+			return ColorName.Magenta;
+		case Curses.COLOR_YELLOW:
+			return ColorName.Yellow;
+		case Curses.COLOR_WHITE:
+			return ColorName.Gray;
+		case Curses.COLOR_GRAY:
+			return ColorName.DarkGray;
+		case Curses.COLOR_BLUE | Curses.COLOR_GRAY:
+			return ColorName.BrightBlue;
+		case Curses.COLOR_GREEN | Curses.COLOR_GRAY:
+			return ColorName.BrightGreen;
+		case Curses.COLOR_CYAN | Curses.COLOR_GRAY:
+			return ColorName.BrightCyan;
+		case Curses.COLOR_RED | Curses.COLOR_GRAY:
+			return ColorName.BrightRed;
+		case Curses.COLOR_MAGENTA | Curses.COLOR_GRAY:
+			return ColorName.BrightMagenta;
+		case Curses.COLOR_YELLOW | Curses.COLOR_GRAY:
+			return ColorName.BrightYellow;
+		case Curses.COLOR_WHITE | Curses.COLOR_GRAY:
+			return ColorName.White;
+		}
+		throw new ArgumentException ("Invalid curses color code");
+	}
+	#endregion
 }
 
 static class Platform {
+
+	static int _suspendSignal;
+
 	[DllImport ("libc")]
 	extern static int uname (IntPtr buf);
 
 	[DllImport ("libc")]
 	extern static int killpg (int pgrp, int pid);
-
-	static int _suspendSignal;
 
 	static int GetSuspendSignal ()
 	{
@@ -746,7 +754,7 @@ static class Platform {
 			return _suspendSignal;
 		}
 
-		IntPtr buf = Marshal.AllocHGlobal (8192);
+		var buf = Marshal.AllocHGlobal (8192);
 		if (uname (buf) != 0) {
 			Marshal.FreeHGlobal (buf);
 			_suspendSignal = -1;
@@ -785,7 +793,7 @@ static class Platform {
 	/// <returns>The suspend.</returns>
 	public static bool Suspend ()
 	{
-		int signal = GetSuspendSignal ();
+		var signal = GetSuspendSignal ();
 		if (signal == -1) {
 			return false;
 		}

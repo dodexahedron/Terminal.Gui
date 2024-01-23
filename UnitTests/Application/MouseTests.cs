@@ -10,7 +10,7 @@ public class MouseTests {
 
 	public MouseTests (ITestOutputHelper output)
 	{
-		this._output = output;
+		_output = output;
 #if DEBUG_IDISPOSABLE
 		Responder.Instances.Clear ();
 		RunState.Instances.Clear ();
@@ -33,7 +33,7 @@ public class MouseTests {
 	[InlineData (-1, 0, -1, 0, true)]
 	public void MouseEventCoordinatesAreScreenRelative (int clickX, int clickY, int expectedX, int expectedY, bool expectedClicked)
 	{
-		var mouseEvent = new MouseEvent () {
+		var mouseEvent = new MouseEvent {
 			X = clickX,
 			Y = clickY,
 			Flags = MouseFlags.Button1Pressed
@@ -99,7 +99,7 @@ public class MouseTests {
 		Application.Top.Width = size.Width;
 		Application.Top.Height = size.Height;
 
-		var mouseEvent = new MouseEvent () {
+		var mouseEvent = new MouseEvent {
 			X = clickX,
 			Y = clickY,
 			Flags = MouseFlags.Button1Clicked
@@ -179,7 +179,7 @@ public class MouseTests {
 		Application.Top.Height = size.Height * 2;
 		Application.Top.BorderStyle = LineStyle.None;
 
-		var view = new View () {
+		var view = new View {
 			X = pos.X,
 			Y = pos.Y,
 			Width = size.Width,
@@ -191,7 +191,7 @@ public class MouseTests {
 		view.CanFocus = true;
 
 		Application.Top.Add (view);
-		var mouseEvent = new MouseEvent () {
+		var mouseEvent = new MouseEvent {
 			X = clickX,
 			Y = clickY,
 			Flags = MouseFlags.Button1Clicked
@@ -207,14 +207,14 @@ public class MouseTests {
 		Application.OnMouseEvent (mouseEventArgs);
 		Assert.Equal (expectedClicked, clicked);
 	}
-	#endregion mouse coordinate tests 
+	#endregion mouse coordinate tests
 
 	#region mouse grab tests
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void MouseGrabView_WithNullMouseEventView ()
 	{
-		var tf = new TextField () { Width = 10 };
-		var sv = new ScrollView () {
+		var tf = new TextField { Width = 10 };
+		var sv = new ScrollView {
 			Width = Dim.Fill (),
 			Height = Dim.Fill (),
 			ContentSize = new Size (100, 100)
@@ -231,7 +231,7 @@ public class MouseTests {
 				Assert.True (tf.HasFocus);
 				Assert.Null (Application.MouseGrabView);
 
-				Application.OnMouseEvent (new MouseEventEventArgs (new MouseEvent () {
+				Application.OnMouseEvent (new MouseEventEventArgs (new MouseEvent {
 					X = 5,
 					Y = 5,
 					Flags = MouseFlags.ReportMousePosition
@@ -247,7 +247,7 @@ public class MouseTests {
 				// another toplevel (Dialog) was opened
 				Assert.Null (Application.MouseGrabView);
 
-				Application.OnMouseEvent (new MouseEventEventArgs (new MouseEvent () {
+				Application.OnMouseEvent (new MouseEventEventArgs (new MouseEvent {
 					X = 5,
 					Y = 5,
 					Flags = MouseFlags.ReportMousePosition
@@ -255,7 +255,7 @@ public class MouseTests {
 
 				Assert.Null (Application.MouseGrabView);
 
-				Application.OnMouseEvent (new MouseEventEventArgs (new MouseEvent () {
+				Application.OnMouseEvent (new MouseEventEventArgs (new MouseEvent {
 					X = 40,
 					Y = 12,
 					Flags = MouseFlags.ReportMousePosition
@@ -263,7 +263,7 @@ public class MouseTests {
 
 				Assert.Null (Application.MouseGrabView);
 
-				Application.OnMouseEvent (new MouseEventEventArgs (new MouseEvent () {
+				Application.OnMouseEvent (new MouseEventEventArgs (new MouseEvent {
 					X = 0,
 					Y = 0,
 					Flags = MouseFlags.Button1Pressed
@@ -282,7 +282,7 @@ public class MouseTests {
 		Application.Run ();
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void MouseGrabView_GrabbedMouse_UnGrabbedMouse ()
 	{
 		View grabView = null;

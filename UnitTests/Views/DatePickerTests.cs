@@ -36,7 +36,7 @@ public class DatePickerTests {
 	[Fact]
 	public void DatePicker_SetDate_ShouldChangeText ()
 	{
-		var datePicker = new DatePicker () {
+		var datePicker = new DatePicker {
 			Culture = CultureInfo.GetCultureInfo ("en-GB")
 		};
 		var newDate = new DateTime (2024, 1, 15);
@@ -62,11 +62,11 @@ public class DatePickerTests {
 		datePicker.FocusNext ();
 
 		// Change month to January 
-		Assert.True (datePicker.NewKeyDownEvent (new (KeyCode.Enter)));
+		Assert.True (datePicker.NewKeyDownEvent (new Key (KeyCode.Enter)));
 		Assert.Equal (1, datePicker.Date.Month);
 
 		// Date should not change as previous month button is disabled
-		Assert.False (datePicker.NewKeyDownEvent (new (KeyCode.Enter)));
+		Assert.False (datePicker.NewKeyDownEvent (new Key (KeyCode.Enter)));
 		Assert.Equal (1, datePicker.Date.Month);
 	}
 
@@ -86,11 +86,11 @@ public class DatePickerTests {
 		datePicker.FocusNext ();
 
 		// Change month to December
-		Assert.True (datePicker.NewKeyDownEvent (new (KeyCode.Enter)));
+		Assert.True (datePicker.NewKeyDownEvent (new Key (KeyCode.Enter)));
 		Assert.Equal (12, datePicker.Date.Month);
 
 		// Date should not change as next month button is disabled
-		Assert.False (datePicker.NewKeyDownEvent (new (KeyCode.Enter)));
+		Assert.False (datePicker.NewKeyDownEvent (new Key (KeyCode.Enter)));
 		Assert.Equal (12, datePicker.Date.Month);
 	}
 }

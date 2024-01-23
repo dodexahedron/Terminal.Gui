@@ -5,7 +5,7 @@ using Terminal.Gui;
 namespace UICatalog.Scenarios;
 
 [ScenarioMetadata ("Adornments Demo", "Demonstrates Margin, Border, and Padding on Views.")]
-[ScenarioCategory ("Layout"), ScenarioCategory ("Borders")]
+[ScenarioCategory ("Layout")] [ScenarioCategory ("Borders")]
 public class Adornments : Scenario {
 
 	public override void Init ()
@@ -17,11 +17,11 @@ public class Adornments : Scenario {
 
 		var view = new Window { Title = "The Window" };
 		var tf1 = new TextField ("TextField") { Width = 10 };
-		var color = new ColorPicker () { Title = "BG", BoxHeight = 1, BoxWidth =1, X = Pos.AnchorEnd(11) };
+		var color = new ColorPicker { Title = "BG", BoxHeight = 1, BoxWidth = 1, X = Pos.AnchorEnd (11) };
 		color.BorderStyle = LineStyle.RoundedDotted;
 		color.ColorChanged += (s, e) => {
 			color.SuperView.ColorScheme = new ColorScheme (color.SuperView.ColorScheme) {
-				Normal = new Attribute(color.SuperView.ColorScheme.Normal.Foreground, e.Color)
+				Normal = new Attribute (color.SuperView.ColorScheme.Normal.Foreground, e.Color)
 			};
 		};
 
@@ -31,7 +31,7 @@ public class Adornments : Scenario {
 		};
 		button.Clicked += (s, e) => MessageBox.Query (20, 7, "Hi", $"Am I a {view.GetType ().Name}?", "Yes", "No");
 
-		var label = new TextView () {
+		var label = new TextView {
 			X = Pos.Center (),
 			Y = Pos.Bottom (button),
 			Title = "Title",
@@ -66,7 +66,7 @@ public class Adornments : Scenario {
 
 		var editor = new AdornmentsEditor {
 			Title = $"{Application.QuitKey} to Quit - Scenario: {GetName ()}",
-			ColorScheme = Colors.ColorSchemes [TopLevelColorScheme],
+			ColorScheme = Colors.ColorSchemes [TopLevelColorScheme]
 		};
 		view.X = 36;
 		view.Y = 0;

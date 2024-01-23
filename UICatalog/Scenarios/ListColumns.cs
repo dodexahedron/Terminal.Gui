@@ -13,6 +13,10 @@ namespace UICatalog.Scenarios;
 [ScenarioCategory ("Text and Formatting")]
 [ScenarioCategory ("Top Level Windows")]
 public class ListColumns : Scenario {
+
+	ColorScheme _alternatingColorScheme;
+	DataTable _currentTable;
+	TableView _listColView;
 	MenuItem _miAlternatingColors;
 	MenuItem _miAlwaysUseNormalColorForVerticalCellLines;
 	MenuItem _miBottomline;
@@ -24,14 +28,10 @@ public class ListColumns : Scenario {
 	MenuItem _miSmoothScrolling;
 	MenuItem _miTopline;
 
-	ColorScheme _alternatingColorScheme;
-	DataTable _currentTable;
-	TableView _listColView;
-
 	public override void Setup ()
 	{
 		Win.Title = GetName ();
-		Win.Y = 1;                 // menu
+		Win.Y = 1; // menu
 		Win.Height = Dim.Fill (1); // status bar
 
 		_listColView = new TableView {

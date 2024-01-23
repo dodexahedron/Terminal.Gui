@@ -603,7 +603,7 @@ ffffffffffffffffffff
 			iteration++;
 			switch (iteration) {
 			case 1:
-				result = MessageBox.Query (title: string.Empty, message: string.Empty, defaultButton: 0, wrapMessage: false, "btn0", "btn1");
+				result = MessageBox.Query (string.Empty, string.Empty, 0, false, "btn0", "btn1");
 				Application.RequestStop ();
 				break;
 
@@ -635,7 +635,7 @@ ffffffffffffffffffff
 			iteration++;
 			switch (iteration) {
 			case 1:
-				result = MessageBox.Query (title: string.Empty, message: string.Empty, defaultButton: 0, wrapMessage: false, "btn0", "btn1");
+				result = MessageBox.Query (string.Empty, string.Empty, 0, false, "btn0", "btn1");
 				Application.RequestStop ();
 				break;
 
@@ -669,7 +669,7 @@ ffffffffffffffffffff
 			iteration++;
 			switch (iteration) {
 			case 1:
-				result = MessageBox.Query (title: string.Empty, message: string.Empty, defaultButton: 0, wrapMessage: false, "btn0", "btn1");
+				result = MessageBox.Query (string.Empty, string.Empty, 0, false, "btn0", "btn1");
 				Application.RequestStop ();
 				break;
 

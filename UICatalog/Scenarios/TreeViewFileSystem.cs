@@ -9,31 +9,32 @@ namespace UICatalog.Scenarios;
 [ScenarioMetadata ("File System Explorer", "Hierarchical file system explorer demonstrating TreeView.")]
 [ScenarioCategory ("Controls")] [ScenarioCategory ("TreeView")] [ScenarioCategory ("Files and IO")]
 public class TreeViewFileSystem : Scenario {
+
+	DetailsFrame _detailsFrame;
+	readonly FileSystemIconProvider _iconProvider = new ();
+	MenuItem _miArrowSymbols;
+
+	MenuItem _miBasicIcons;
+	MenuItem _miColoredSymbols;
+	MenuItem _miCursor;
+	MenuItem _miCustomColors;
+
+	MenuItem _miFullPaths;
+	MenuItem _miHighlightModelTextOnly;
+	MenuItem _miInvertSymbols;
+	MenuItem _miLeaveLastRow;
+	MenuItem _miMultiSelect;
+	MenuItem _miNerdIcons;
+	MenuItem _miNoSymbols;
+	MenuItem _miPlusMinus;
+
+	MenuItem _miShowLines;
+	MenuItem _miUnicodeIcons;
+
 	/// <summary>
 	/// A tree view where nodes are files and folders
 	/// </summary>
 	TreeView<IFileSystemInfo> _treeViewFiles;
-
-	MenuItem _miShowLines;
-	MenuItem _miPlusMinus;
-	MenuItem _miArrowSymbols;
-	MenuItem _miNoSymbols;
-	MenuItem _miColoredSymbols;
-	MenuItem _miInvertSymbols;
-
-	MenuItem _miBasicIcons;
-	MenuItem _miUnicodeIcons;
-	MenuItem _miNerdIcons;
-
-	MenuItem _miFullPaths;
-	MenuItem _miLeaveLastRow;
-	MenuItem _miHighlightModelTextOnly;
-	MenuItem _miCustomColors;
-	MenuItem _miCursor;
-	MenuItem _miMultiSelect;
-
-	DetailsFrame _detailsFrame;
-	FileSystemIconProvider _iconProvider = new ();
 
 	public override void Setup ()
 	{
@@ -45,11 +46,11 @@ public class TreeViewFileSystem : Scenario {
 			new ("_File", new MenuItem [] {
 				new ("_Quit", $"{Application.QuitKey}", () => Quit ())
 			}),
-			new ("_View", new MenuItem [] {
+			new ("_View", new [] {
 				_miFullPaths = new MenuItem ("_Full Paths", "", () => SetFullName ()) { Checked = false, CheckType = MenuItemCheckStyle.Checked },
 				_miMultiSelect = new MenuItem ("_Multi Select", "", () => SetMultiSelect ()) { Checked = true, CheckType = MenuItemCheckStyle.Checked }
 			}),
-			new ("_Style", new MenuItem [] {
+			new ("_Style", new [] {
 				_miShowLines = new MenuItem ("_Show Lines", "", () => ShowLines ()) {
 					Checked = true, CheckType = MenuItemCheckStyle.Checked
 				},
@@ -75,7 +76,7 @@ public class TreeViewFileSystem : Scenario {
 		});
 		Application.Top.Add (menu);
 
-		_treeViewFiles = new TreeView<IFileSystemInfo> () {
+		_treeViewFiles = new TreeView<IFileSystemInfo> {
 			X = 0,
 			Y = 0,
 			Width = Dim.Percent (50),
@@ -165,7 +166,7 @@ public class TreeViewFileSystem : Scenario {
 				return;
 			}
 
-			int? location = _treeViewFiles.GetObjectRow (selected);
+			var location = _treeViewFiles.GetObjectRow (selected);
 
 			//selected object is offscreen or somehow not found
 			if (location == null || location < 0 || location > _treeViewFiles.Frame.Height) {
@@ -206,45 +207,6 @@ public class TreeViewFileSystem : Scenario {
 		menu.MenuItems = new MenuBarItem (new [] { new MenuItem ("Properties", null, () => ShowPropertiesOf (forObject)) });
 
 		Application.Invoke (menu.Show);
-	}
-
-	class DetailsFrame : FrameView {
-		IFileSystemInfo fileInfo;
-		FileSystemIconProvider _iconProvider;
-
-		public DetailsFrame (FileSystemIconProvider iconProvider)
-		{
-			Title = "Details";
-			Visible = true;
-			CanFocus = true;
-			_iconProvider = iconProvider;
-		}
-
-		public IFileSystemInfo FileInfo {
-			get => fileInfo;
-			set {
-				fileInfo = value;
-				StringBuilder sb = null;
-
-				if (fileInfo is IFileInfo f) {
-					Title = $"{_iconProvider.GetIconWithOptionalSpace (f)}{f.Name}".Trim ();
-					sb = new StringBuilder ();
-					sb.AppendLine ($"Path:\n {f.FullName}\n");
-					sb.AppendLine ($"Size:\n {f.Length:N0} bytes\n");
-					sb.AppendLine ($"Modified:\n {f.LastWriteTime}\n");
-					sb.AppendLine ($"Created:\n {f.CreationTime}");
-				}
-
-				if (fileInfo is IDirectoryInfo dir) {
-					Title = $"{_iconProvider.GetIconWithOptionalSpace (dir)}{dir.Name}".Trim ();
-					sb = new StringBuilder ();
-					sb.AppendLine ($"Path:\n {dir?.FullName}\n");
-					sb.AppendLine ($"Modified:\n {dir.LastWriteTime}\n");
-					sb.AppendLine ($"Created:\n {dir.CreationTime}\n");
-				}
-				Text = sb.ToString ();
-			}
-		}
 	}
 
 	void ShowPropertiesOf (IFileSystemInfo fileSystemInfo) => _detailsFrame.FileInfo = fileSystemInfo;
@@ -337,9 +299,9 @@ public class TreeViewFileSystem : Scenario {
 		_miFullPaths.Checked = !_miFullPaths.Checked;
 
 		if (_miFullPaths.Checked == true) {
-			_treeViewFiles.AspectGetter = (f) => f.FullName;
+			_treeViewFiles.AspectGetter = f => f.FullName;
 		} else {
-			_treeViewFiles.AspectGetter = (f) => f.Name;
+			_treeViewFiles.AspectGetter = f => f.Name;
 		}
 		_treeViewFiles.SetNeedsDisplay ();
 	}
@@ -367,18 +329,20 @@ public class TreeViewFileSystem : Scenario {
 		_miCustomColors.Checked = !_miCustomColors.Checked;
 
 		if (_miCustomColors.Checked == true) {
-			_treeViewFiles.ColorGetter = (m) => {
+			_treeViewFiles.ColorGetter = m => {
 				if (m is IDirectoryInfo && m.Attributes.HasFlag (FileAttributes.Hidden)) {
 					return new ColorScheme {
 						Focus = new Attribute (Color.BrightRed, _treeViewFiles.ColorScheme.Focus.Background),
 						Normal = new Attribute (Color.BrightYellow, _treeViewFiles.ColorScheme.Normal.Background)
-					}; ;
+					};
+					;
 				}
 				if (m is IFileInfo && m.Attributes.HasFlag (FileAttributes.Hidden)) {
 					return new ColorScheme {
 						Focus = new Attribute (Color.BrightRed, _treeViewFiles.ColorScheme.Focus.Background),
 						Normal = new Attribute (Color.BrightYellow, _treeViewFiles.ColorScheme.Normal.Background)
-					}; ;
+					};
+					;
 				}
 				return null;
 			};
@@ -396,4 +360,43 @@ public class TreeViewFileSystem : Scenario {
 	}
 
 	void Quit () => Application.RequestStop ();
+
+	class DetailsFrame : FrameView {
+		readonly FileSystemIconProvider _iconProvider;
+		IFileSystemInfo fileInfo;
+
+		public DetailsFrame (FileSystemIconProvider iconProvider)
+		{
+			Title = "Details";
+			Visible = true;
+			CanFocus = true;
+			_iconProvider = iconProvider;
+		}
+
+		public IFileSystemInfo FileInfo {
+			get => fileInfo;
+			set {
+				fileInfo = value;
+				StringBuilder sb = null;
+
+				if (fileInfo is IFileInfo f) {
+					Title = $"{_iconProvider.GetIconWithOptionalSpace (f)}{f.Name}".Trim ();
+					sb = new StringBuilder ();
+					sb.AppendLine ($"Path:\n {f.FullName}\n");
+					sb.AppendLine ($"Size:\n {f.Length:N0} bytes\n");
+					sb.AppendLine ($"Modified:\n {f.LastWriteTime}\n");
+					sb.AppendLine ($"Created:\n {f.CreationTime}");
+				}
+
+				if (fileInfo is IDirectoryInfo dir) {
+					Title = $"{_iconProvider.GetIconWithOptionalSpace (dir)}{dir.Name}".Trim ();
+					sb = new StringBuilder ();
+					sb.AppendLine ($"Path:\n {dir?.FullName}\n");
+					sb.AppendLine ($"Modified:\n {dir.LastWriteTime}\n");
+					sb.AppendLine ($"Created:\n {dir.CreationTime}\n");
+				}
+				Text = sb.ToString ();
+			}
+		}
+	}
 }

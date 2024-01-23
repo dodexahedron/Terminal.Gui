@@ -8,10 +8,7 @@ namespace Terminal.Gui.InputTests;
 public class KeyBindingTests {
 	readonly ITestOutputHelper _output;
 
-	public KeyBindingTests (ITestOutputHelper output)
-	{
-		this._output = output;
-	}
+	public KeyBindingTests (ITestOutputHelper output) => _output = output;
 
 
 	[Fact]
@@ -38,7 +35,7 @@ public class KeyBindingTests {
 	public void Add_Multiple_Adds ()
 	{
 		var keyBindings = new KeyBindings ();
-		var commands = new Command [] {
+		var commands = new [] {
 			Command.Right,
 			Command.Left
 		};
@@ -70,7 +67,7 @@ public class KeyBindingTests {
 	public void Scope_Add_Adds (KeyBindingScope scope)
 	{
 		var keyBindings = new KeyBindings ();
-		var commands = new Command [] {
+		var commands = new [] {
 			Command.Right,
 			Command.Left
 		};
@@ -96,7 +93,7 @@ public class KeyBindingTests {
 	public void Scope_Get_Filters (KeyBindingScope scope)
 	{
 		var keyBindings = new KeyBindings ();
-		var commands = new Command [] {
+		var commands = new [] {
 			Command.Right,
 			Command.Left
 		};
@@ -111,7 +108,7 @@ public class KeyBindingTests {
 		Assert.Contains (Command.Left, binding.Commands);
 
 		// negative test
-		binding = keyBindings.Get (Key.A, (KeyBindingScope)(int)-1);
+		binding = keyBindings.Get (Key.A, (KeyBindingScope)(-1));
 		Assert.Null (binding);
 
 		var resultCommands = keyBindings.GetCommands (Key.A);
@@ -155,7 +152,7 @@ public class KeyBindingTests {
 	public void GetCommands_WithMultipleCommands_ReturnsCommands ()
 	{
 		var keyBindings = new KeyBindings ();
-		var commands = new Command [] {
+		var commands = new [] {
 			Command.Right,
 			Command.Left
 		};
@@ -169,7 +166,7 @@ public class KeyBindingTests {
 	public void GetCommands_WithMultipleBindings_ReturnsCommands ()
 	{
 		var keyBindings = new KeyBindings ();
-		var commands = new Command [] {
+		var commands = new [] {
 			Command.Right,
 			Command.Left
 		};
@@ -264,13 +261,13 @@ public class KeyBindingTests {
 	public void GetKeyFromCommands_MultipleCommands ()
 	{
 		var keyBindings = new KeyBindings ();
-		var commands1 = new Command [] {
+		var commands1 = new [] {
 			Command.Right,
 			Command.Left
 		};
 		keyBindings.Add (Key.A, commands1);
 
-		var commands2 = new Command [] {
+		var commands2 = new [] {
 			Command.LineUp,
 			Command.LineDown
 		};

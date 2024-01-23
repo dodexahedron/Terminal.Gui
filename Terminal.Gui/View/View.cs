@@ -127,7 +127,6 @@ namespace Terminal.Gui;
 /// ///
 /// </remarks>
 #endregion API Docs
-
 public partial class View : Responder, ISupportInitializeNotification {
 	bool _oldEnabled;
 
@@ -476,9 +475,9 @@ public partial class View : Responder, ISupportInitializeNotification {
 	/// <param name="layoutStyle"></param>
 	/// <param name="direction"></param>
 	void SetInitialProperties (string text,
-				   Rect rect,
-				   LayoutStyle layoutStyle = LayoutStyle.Computed,
-				   TextDirection direction = TextDirection.LeftRight_TopBottom)
+		Rect rect,
+		LayoutStyle layoutStyle = LayoutStyle.Computed,
+		TextDirection direction = TextDirection.LeftRight_TopBottom)
 	{
 		TextFormatter = new TextFormatter ();
 		TextFormatter.HotKeyChanged += TextFormatter_HotKeyChanged;

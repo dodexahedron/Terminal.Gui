@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Xunit;
+﻿using Xunit;
 using Xunit.Abstractions;
 
 namespace Terminal.Gui.ViewTests;
@@ -8,31 +6,7 @@ namespace Terminal.Gui.ViewTests;
 public class ViewKeyBindingTests {
 	readonly ITestOutputHelper _output;
 
-	public ViewKeyBindingTests (ITestOutputHelper output)
-	{
-		this._output = output;
-	}
-
-	// tests that test KeyBindingScope.Focus and KeyBindingScope.HotKey (tests for KeyBindingScope.Application are in Application/KeyboardTests.cs)
-
-
-
-	public class ScopedKeyBindingView : View {
-		public bool ApplicationCommand { get; set; }
-		public bool HotKeyCommand { get; set; }
-		public bool FocusedCommand { get; set; }
-
-		public ScopedKeyBindingView ()
-		{
-			AddCommand (Command.Save, () => ApplicationCommand = true);
-			AddCommand (Command.Default, () => HotKeyCommand = true);
-			AddCommand (Command.Left, () => FocusedCommand = true);
-
-			KeyBindings.Add (KeyCode.A, KeyBindingScope.Application, Command.Save);
-			HotKey = KeyCode.H;
-			KeyBindings.Add (KeyCode.F, KeyBindingScope.Focused, Command.Left);
-		}
-	}
+	public ViewKeyBindingTests (ITestOutputHelper output) => _output = output;
 
 	[Fact]
 	[AutoInitShutdown]
@@ -45,16 +19,16 @@ public class ViewKeyBindingTests {
 		Application.Top.Add (view);
 		Application.Begin (Application.Top);
 
-		Application.OnKeyDown (new (KeyCode.A));
+		Application.OnKeyDown (new Key (KeyCode.A));
 		Assert.True (invoked);
 
 		invoked = false;
-		Application.OnKeyDown (new (KeyCode.H));
+		Application.OnKeyDown (new Key (KeyCode.H));
 		Assert.True (invoked);
 
 		invoked = false;
 		Assert.False (view.HasFocus);
-		Application.OnKeyDown (new (KeyCode.F));
+		Application.OnKeyDown (new Key (KeyCode.F));
 		Assert.False (invoked);
 		Assert.False (view.FocusedCommand);
 
@@ -62,7 +36,7 @@ public class ViewKeyBindingTests {
 		view.CanFocus = true;
 		view.SetFocus ();
 		Assert.True (view.HasFocus);
-		Application.OnKeyDown (new (KeyCode.F));
+		Application.OnKeyDown (new Key (KeyCode.F));
 		Assert.True (invoked);
 
 		Assert.True (view.ApplicationCommand);
@@ -81,7 +55,7 @@ public class ViewKeyBindingTests {
 		Application.Top.Add (view);
 		Application.Begin (Application.Top);
 
-		Application.OnKeyDown (new (KeyCode.Z));
+		Application.OnKeyDown (new Key (KeyCode.Z));
 		Assert.False (invoked);
 		Assert.False (view.ApplicationCommand);
 		Assert.False (view.HotKeyCommand);
@@ -89,7 +63,7 @@ public class ViewKeyBindingTests {
 
 		invoked = false;
 		Assert.False (view.HasFocus);
-		Application.OnKeyDown (new (KeyCode.F));
+		Application.OnKeyDown (new Key (KeyCode.F));
 		Assert.False (invoked);
 		Assert.False (view.ApplicationCommand);
 		Assert.False (view.HotKeyCommand);
@@ -109,18 +83,18 @@ public class ViewKeyBindingTests {
 		Application.Begin (Application.Top);
 
 		invoked = false;
-		Application.OnKeyDown (new (KeyCode.H));
+		Application.OnKeyDown (new Key (KeyCode.H));
 		Assert.True (invoked);
 		Assert.True (view.HotKeyCommand);
 
 		view.HotKey = KeyCode.Z;
 		invoked = false;
 		view.HotKeyCommand = false;
-		Application.OnKeyDown (new (KeyCode.H)); // old hot key
+		Application.OnKeyDown (new Key (KeyCode.H)); // old hot key
 		Assert.False (invoked);
 		Assert.False (view.HotKeyCommand);
 
-		Application.OnKeyDown (new (KeyCode.Z)); // new hot key
+		Application.OnKeyDown (new Key (KeyCode.Z)); // new hot key
 		Assert.True (invoked);
 		Assert.True (view.HotKeyCommand);
 
@@ -137,12 +111,36 @@ public class ViewKeyBindingTests {
 		Application.Top.Add (view);
 		Application.Begin (Application.Top);
 
-		Application.OnKeyDown (new (KeyCode.Z));
+		Application.OnKeyDown (new Key (KeyCode.Z));
 		Assert.False (invoked);
 		Assert.False (view.HotKeyCommand);
 
 		invoked = false;
-		Application.OnKeyDown (new (KeyCode.F));
+		Application.OnKeyDown (new Key (KeyCode.F));
 		Assert.False (view.HotKeyCommand);
+	}
+
+	// tests that test KeyBindingScope.Focus and KeyBindingScope.HotKey (tests for KeyBindingScope.Application are in Application/KeyboardTests.cs)
+
+
+
+	public class ScopedKeyBindingView : View {
+
+		public ScopedKeyBindingView ()
+		{
+			AddCommand (Command.Save, () => ApplicationCommand = true);
+			AddCommand (Command.Default, () => HotKeyCommand = true);
+			AddCommand (Command.Left, () => FocusedCommand = true);
+
+			KeyBindings.Add (KeyCode.A, KeyBindingScope.Application, Command.Save);
+			HotKey = KeyCode.H;
+			KeyBindings.Add (KeyCode.F, KeyBindingScope.Focused, Command.Left);
+		}
+
+		public bool ApplicationCommand { get; set; }
+
+		public bool HotKeyCommand { get; set; }
+
+		public bool FocusedCommand { get; set; }
 	}
 }

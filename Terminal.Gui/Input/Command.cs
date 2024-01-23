@@ -55,7 +55,8 @@ public enum Command {
 	ScrollUp,
 
 	/// <summary>
-	/// Moves the selection left one by the minimum increment supported by the <see cref="View"/> e.g. single character, cell, item etc.
+	/// Moves the selection left one by the minimum increment supported by the <see cref="View"/> e.g. single character, cell,
+	/// item etc.
 	/// </summary>
 	Left,
 

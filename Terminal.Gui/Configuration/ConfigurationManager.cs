@@ -92,7 +92,7 @@ public static class ConfigurationManager {
 
 	static readonly string _configFilename = "config.json";
 
-	internal static readonly JsonSerializerOptions _serializerOptions = new() {
+	internal static readonly JsonSerializerOptions _serializerOptions = new () {
 		ReadCommentHandling = JsonCommentHandling.Skip,
 		PropertyNameCaseInsensitive = true,
 		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,

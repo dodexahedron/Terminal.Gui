@@ -13,39 +13,27 @@ using System.Text;
 namespace Terminal.Gui;
 
 /// <summary>
-///   Simple Date editing <see cref="View"/>
+/// Simple Date editing <see cref="View"/>
 /// </summary>
 /// <remarks>
-///   The <see cref="DateField"/> <see cref="View"/> provides date editing functionality with mouse support.
+/// The <see cref="DateField"/> <see cref="View"/> provides date editing functionality with mouse support.
 /// </remarks>
 public class DateField : TextField {
 
-	private const string RIGHT_TO_LEFT_MARK = "\u200f";
+	const string RIGHT_TO_LEFT_MARK = "\u200f";
+	readonly int _dateFieldLength = 12;
 
 	DateTime _date;
-	private string _separator;
-	private string _format;
-	private readonly int _dateFieldLength = 12;
-	private int FormatLength => StandardizeDateFormat (_format).Trim ().Length;
+	string _format;
+	string _separator;
 
 	/// <summary>
-	///   DateChanged event, raised when the <see cref="Date"/> property has changed.
-	/// </summary>
-	/// <remarks>
-	///   This event is raised when the <see cref="Date"/> property changes.
-	/// </remarks>
-	/// <remarks>
-	///   The passed event arguments containing the old value, new value, and format string.
-	/// </remarks>
-	public event EventHandler<DateTimeEventArgs<DateTime>> DateChanged;
-
-	/// <summary>
-	///  Initializes a new instance of <see cref="DateField"/> using <see cref="LayoutStyle.Computed"/> layout.
+	/// Initializes a new instance of <see cref="DateField"/> using <see cref="LayoutStyle.Computed"/> layout.
 	/// </summary>
 	public DateField () : this (DateTime.MinValue) { }
 
 	/// <summary>
-	///  Initializes a new instance of <see cref="DateField"/> using <see cref="LayoutStyle.Computed"/> layout.
+	/// Initializes a new instance of <see cref="DateField"/> using <see cref="LayoutStyle.Computed"/> layout.
 	/// </summary>
 	/// <param name="date"></param>
 	public DateField (DateTime date) : base ("")
@@ -53,6 +41,63 @@ public class DateField : TextField {
 		Width = _dateFieldLength;
 		SetInitialProperties (date);
 	}
+
+	int FormatLength => StandardizeDateFormat (_format).Trim ().Length;
+
+	/// <summary>
+	/// Gets or sets the date of the <see cref="DateField"/>.
+	/// </summary>
+	/// <remarks>
+	/// </remarks>
+	public DateTime Date {
+		get => _date;
+		set {
+			if (ReadOnly) {
+				return;
+			}
+
+			var oldData = _date;
+			_date = value;
+			Text = value.ToString (" " + StandardizeDateFormat (_format.Trim ()))
+				.Replace (RIGHT_TO_LEFT_MARK, "");
+			var args = new DateTimeEventArgs<DateTime> (oldData, value, _format);
+			if (oldData != value) {
+				OnDateChanged (args);
+			}
+		}
+	}
+
+	/// <summary>
+	/// CultureInfo for date. The default is CultureInfo.CurrentCulture.
+	/// </summary>
+	public CultureInfo Culture {
+		get => CultureInfo.CurrentCulture;
+		set {
+			if (value is not null) {
+				CultureInfo.CurrentCulture = value;
+				_separator = GetDataSeparator (value.DateTimeFormat.DateSeparator);
+				_format = " " + StandardizeDateFormat (value.DateTimeFormat.ShortDatePattern);
+				Text = Date.ToString (_format).Replace (RIGHT_TO_LEFT_MARK, "");
+			}
+		}
+	}
+
+	/// <inheritdoc/>
+	public override int CursorPosition {
+		get => base.CursorPosition;
+		set => base.CursorPosition = Math.Max (Math.Min (value, FormatLength), 1);
+	}
+
+	/// <summary>
+	/// DateChanged event, raised when the <see cref="Date"/> property has changed.
+	/// </summary>
+	/// <remarks>
+	/// This event is raised when the <see cref="Date"/> property changes.
+	/// </remarks>
+	/// <remarks>
+	/// The passed event arguments containing the old value, new value, and format string.
+	/// </remarks>
+	public event EventHandler<DateTimeEventArgs<DateTime>> DateChanged;
 
 	void SetInitialProperties (DateTime date)
 	{
@@ -96,7 +141,7 @@ public class DateField : TextField {
 		KeyBindings.Add (Key.F.WithCtrl, Command.Right);
 	}
 
-	/// <inheritdoc />
+	/// <inheritdoc/>
 	public override bool OnProcessKeyDown (Key a)
 	{
 		// Ignore non-numeric characters.
@@ -114,8 +159,8 @@ public class DateField : TextField {
 	void DateField_Changing (object sender, TextChangingEventArgs e)
 	{
 		try {
-			int spaces = 0;
-			for (int i = 0; i < e.NewText.Length; i++) {
+			var spaces = 0;
+			for (var i = 0; i < e.NewText.Length; i++) {
 				if (e.NewText [i] == ' ') {
 					spaces++;
 				} else {
@@ -123,61 +168,17 @@ public class DateField : TextField {
 				}
 			}
 			spaces += FormatLength;
-			string trimedText = e.NewText [..spaces];
+			var trimedText = e.NewText [..spaces];
 			spaces -= FormatLength;
 			trimedText = trimedText.Replace (new string (' ', spaces), " ");
 			var date = Convert.ToDateTime (trimedText).ToString (_format.Trim ());
 			if ($" {date}" != e.NewText) {
 				e.NewText = $" {date}".Replace (RIGHT_TO_LEFT_MARK, "");
 			}
-			AdjCursorPosition (CursorPosition, true);
+			AdjCursorPosition (CursorPosition);
 		} catch (Exception) {
 			e.Cancel = true;
 		}
-	}
-
-	/// <summary>
-	///   Gets or sets the date of the <see cref="DateField"/>.
-	/// </summary>
-	/// <remarks>
-	/// </remarks>
-	public DateTime Date {
-		get => _date;
-		set {
-			if (ReadOnly) {
-				return;
-			}
-
-			var oldData = _date;
-			_date = value;
-			Text = value.ToString (" " + StandardizeDateFormat (_format.Trim ()))
-				.Replace (RIGHT_TO_LEFT_MARK, "");
-			var args = new DateTimeEventArgs<DateTime> (oldData, value, _format);
-			if (oldData != value) {
-				OnDateChanged (args);
-			}
-		}
-	}
-
-	/// <summary>
-	/// CultureInfo for date. The default is CultureInfo.CurrentCulture.
-	/// </summary>
-	public CultureInfo Culture {
-		get => CultureInfo.CurrentCulture;
-		set {
-			if (value is not null) {
-				CultureInfo.CurrentCulture = value;
-				_separator = GetDataSeparator (value.DateTimeFormat.DateSeparator);
-				_format = " " + StandardizeDateFormat (value.DateTimeFormat.ShortDatePattern);
-				Text = Date.ToString (_format).Replace (RIGHT_TO_LEFT_MARK, "");
-			}
-		}
-	}
-
-	/// <inheritdoc/>
-	public override int CursorPosition {
-		get => base.CursorPosition;
-		set => base.CursorPosition = Math.Max (Math.Min (value, FormatLength), 1);
 	}
 
 	bool SetText (Rune key)
@@ -185,7 +186,8 @@ public class DateField : TextField {
 		if (CursorPosition > FormatLength) {
 			CursorPosition = FormatLength;
 			return false;
-		} else if (CursorPosition < 1) {
+		}
+		if (CursorPosition < 1) {
 			CursorPosition = 1;
 			return false;
 		}
@@ -194,7 +196,8 @@ public class DateField : TextField {
 		var newText = text.GetRange (0, CursorPosition);
 		newText.Add (key);
 		if (CursorPosition < FormatLength) {
-			newText = [.. newText, .. text.GetRange (CursorPosition + 1, text.Count - (CursorPosition + 1))];
+			newText =  [
+			.. newText, .. text.GetRange (CursorPosition + 1, text.Count - (CursorPosition + 1))];
 		}
 		return SetText (StringExtensions.ToString (newText));
 	}
@@ -206,17 +209,17 @@ public class DateField : TextField {
 		}
 
 		text = NormalizeFormat (text);
-		string [] vals = text.Split (_separator);
+		var vals = text.Split (_separator);
 		for (var i = 0; i < vals.Length; i++) {
 			if (vals [i].Contains (RIGHT_TO_LEFT_MARK)) {
 				vals [i] = vals [i].Replace (RIGHT_TO_LEFT_MARK, "");
 			}
 		}
-		string [] frm = _format.Split (_separator);
+		var frm = _format.Split (_separator);
 		int year;
 		int month;
 		int day;
-		int idx = GetFormatIndex (frm, "y");
+		var idx = GetFormatIndex (frm, "y");
 		if (Int32.Parse (vals [idx]) < 1) {
 			year = 1;
 			vals [idx] = "1";
@@ -243,7 +246,7 @@ public class DateField : TextField {
 		} else {
 			day = Int32.Parse (vals [idx]);
 		}
-		string d = GetDate (month, day, year, frm);
+		var d = GetDate (month, day, year, frm);
 
 		DateTime date;
 		try {
@@ -268,7 +271,7 @@ public class DateField : TextField {
 		}
 
 		var fmtText = text.ToCharArray ();
-		for (int i = 0; i < text.Length; i++) {
+		for (var i = 0; i < text.Length; i++) {
 			var c = fmt [i];
 			if (c.ToString () == sepChar && text [i].ToString () != sepChar) {
 				fmtText [i] = c;
@@ -280,8 +283,8 @@ public class DateField : TextField {
 
 	string GetDate (int month, int day, int year, string [] fm)
 	{
-		string date = " ";
-		for (int i = 0; i < fm.Length; i++) {
+		var date = " ";
+		for (var i = 0; i < fm.Length; i++) {
 			if (fm [i].Contains ('M')) {
 				date += $"{month,2:00}";
 			} else if (fm [i].Contains ('d')) {
@@ -298,8 +301,8 @@ public class DateField : TextField {
 
 	static int GetFormatIndex (string [] fm, string t)
 	{
-		int idx = -1;
-		for (int i = 0; i < fm.Length; i++) {
+		var idx = -1;
+		for (var i = 0; i < fm.Length; i++) {
 			if (fm [i].Contains (t)) {
 				idx = i;
 				break;
@@ -308,7 +311,7 @@ public class DateField : TextField {
 		return idx;
 	}
 
-	private string GetDataSeparator (string separator)
+	string GetDataSeparator (string separator)
 	{
 		var sepChar = separator.Trim ();
 		if (sepChar.Length > 1 && sepChar.Contains (RIGHT_TO_LEFT_MARK)) {
@@ -323,37 +326,37 @@ public class DateField : TextField {
 	// Converts various date formats to a uniform 10-character format. 
 	// This aids in simplifying the handling of single-digit months and days, 
 	// and reduces the number of distinct date formats to maintain.
-	private static string StandardizeDateFormat (string format) =>
-	    format switch {
-		    "MM/dd/yyyy" => "MM/dd/yyyy",
-		    "yyyy-MM-dd" => "yyyy-MM-dd",
-		    "yyyy/MM/dd" => "yyyy/MM/dd",
-		    "dd/MM/yyyy" => "dd/MM/yyyy",
-		    "d?/M?/yyyy" => "dd/MM/yyyy",
-		    "dd.MM.yyyy" => "dd.MM.yyyy",
-		    "dd-MM-yyyy" => "dd-MM-yyyy",
-		    "dd/MM yyyy" => "dd/MM/yyyy",
-		    "d. M. yyyy" => "dd.MM.yyyy",
-		    "yyyy.MM.dd" => "yyyy.MM.dd",
-		    "g yyyy/M/d" => "yyyy/MM/dd",
-		    "d/M/yyyy" => "dd/MM/yyyy",
-		    "d?/M?/yyyy g" => "dd/MM/yyyy",
-		    "d-M-yyyy" => "dd-MM-yyyy",
-		    "d.MM.yyyy" => "dd.MM.yyyy",
-		    "d.MM.yyyy '?'." => "dd.MM.yyyy",
-		    "M/d/yyyy" => "MM/dd/yyyy",
-		    "d. M. yyyy." => "dd.MM.yyyy",
-		    "d.M.yyyy." => "dd.MM.yyyy",
-		    "g yyyy-MM-dd" => "yyyy-MM-dd",
-		    "d.M.yyyy" => "dd.MM.yyyy",
-		    "d/MM/yyyy" => "dd/MM/yyyy",
-		    "yyyy/M/d" => "yyyy/MM/dd",
-		    "dd. MM. yyyy." => "dd.MM.yyyy",
-		    "yyyy. MM. dd." => "yyyy.MM.dd",
-		    "yyyy. M. d." => "yyyy.MM.dd",
-		    "d. MM. yyyy" => "dd.MM.yyyy",
-		    _ => "dd/MM/yyyy"
-	    };
+	static string StandardizeDateFormat (string format) =>
+		format switch {
+			"MM/dd/yyyy" => "MM/dd/yyyy",
+			"yyyy-MM-dd" => "yyyy-MM-dd",
+			"yyyy/MM/dd" => "yyyy/MM/dd",
+			"dd/MM/yyyy" => "dd/MM/yyyy",
+			"d?/M?/yyyy" => "dd/MM/yyyy",
+			"dd.MM.yyyy" => "dd.MM.yyyy",
+			"dd-MM-yyyy" => "dd-MM-yyyy",
+			"dd/MM yyyy" => "dd/MM/yyyy",
+			"d. M. yyyy" => "dd.MM.yyyy",
+			"yyyy.MM.dd" => "yyyy.MM.dd",
+			"g yyyy/M/d" => "yyyy/MM/dd",
+			"d/M/yyyy" => "dd/MM/yyyy",
+			"d?/M?/yyyy g" => "dd/MM/yyyy",
+			"d-M-yyyy" => "dd-MM-yyyy",
+			"d.MM.yyyy" => "dd.MM.yyyy",
+			"d.MM.yyyy '?'." => "dd.MM.yyyy",
+			"M/d/yyyy" => "MM/dd/yyyy",
+			"d. M. yyyy." => "dd.MM.yyyy",
+			"d.M.yyyy." => "dd.MM.yyyy",
+			"g yyyy-MM-dd" => "yyyy-MM-dd",
+			"d.M.yyyy" => "dd.MM.yyyy",
+			"d/MM/yyyy" => "dd/MM/yyyy",
+			"yyyy/M/d" => "yyyy/MM/dd",
+			"dd. MM. yyyy." => "dd.MM.yyyy",
+			"yyyy. MM. dd." => "yyyy.MM.dd",
+			"yyyy. M. d." => "yyyy.MM.dd",
+			"d. MM. yyyy" => "dd.MM.yyyy",
+			_ => "dd/MM/yyyy"
+		};
 
 	void IncCursorPosition ()
 	{
@@ -436,7 +439,6 @@ public class DateField : TextField {
 		ClearAllSelection ();
 		SetText ((Rune)'0');
 		DecCursorPosition ();
-		return;
 	}
 
 	/// <inheritdoc/>
@@ -448,7 +450,6 @@ public class DateField : TextField {
 
 		ClearAllSelection ();
 		SetText ((Rune)'0');
-		return;
 	}
 
 	/// <inheritdoc/>
@@ -457,8 +458,8 @@ public class DateField : TextField {
 		var result = base.MouseEvent (ev);
 
 		if (result && SelectedLength == 0 && ev.Flags.HasFlag (MouseFlags.Button1Pressed)) {
-			int point = ev.X;
-			AdjCursorPosition (point, true);
+			var point = ev.X;
+			AdjCursorPosition (point);
 		}
 		return result;
 	}

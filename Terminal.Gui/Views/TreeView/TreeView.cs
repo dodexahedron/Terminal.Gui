@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace Terminal.Gui; 
+namespace Terminal.Gui;
 
 /// <summary>
 /// Interface for all non generic members of <see cref="TreeView{T}"/>.
@@ -62,6 +62,11 @@ public class TreeView<T> : View, ITreeView where T : class {
 	public static string NoBuilderError = "ERROR: TreeBuilder Not Set";
 
 	/// <summary>
+	/// Secondary selected regions of tree when <see cref="MultiSelect"/> is true.
+	/// </summary>
+	readonly Stack<TreeSelection<T>> multiSelectedRegions = new ();
+
+	/// <summary>
 	/// Cached result of <see cref="BuildLineMap"/>
 	/// </summary>
 	IReadOnlyCollection<Branch<T>> cachedLineMap;
@@ -74,11 +79,6 @@ public class TreeView<T> : View, ITreeView where T : class {
 	/// (no filtering).
 	/// </summary>
 	public ITreeViewFilter<T> Filter = null;
-
-	/// <summary>
-	/// Secondary selected regions of tree when <see cref="MultiSelect"/> is true.
-	/// </summary>
-	readonly Stack<TreeSelection<T>> multiSelectedRegions = new ();
 
 	KeyCode objectActivationKey = KeyCode.Enter;
 	int scrollOffsetHorizontal;

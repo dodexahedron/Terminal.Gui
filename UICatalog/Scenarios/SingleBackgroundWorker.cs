@@ -4,178 +4,179 @@ using System.ComponentModel;
 using System.Threading;
 using Terminal.Gui;
 
-namespace UICatalog.Scenarios {
-	[ScenarioMetadata (Name: "Single BackgroundWorker", Description: "A single BackgroundWorker threading opening another Toplevel")]
-	[ScenarioCategory ("Threading")]
-	[ScenarioCategory ("Top Level Windows")]
-	public class SingleBackgroundWorker : Scenario {
-		public override void Run ()
+namespace UICatalog.Scenarios; 
+
+[ScenarioMetadata ("Single BackgroundWorker", "A single BackgroundWorker threading opening another Toplevel")]
+[ScenarioCategory ("Threading")]
+[ScenarioCategory ("Top Level Windows")]
+public class SingleBackgroundWorker : Scenario {
+	public override void Run ()
+	{
+		Application.Top.Dispose ();
+
+		Application.Run<MainApp> ();
+
+		Application.Top.Dispose ();
+	}
+
+	public class MainApp : Toplevel {
+		readonly ListView listLog;
+		readonly List<string> log = new ();
+		DateTime? startStaging;
+		BackgroundWorker worker;
+
+		public MainApp ()
 		{
-			Application.Top.Dispose ();
+			var menu = new MenuBar (new MenuBarItem [] {
+				new ("_Options", new MenuItem [] {
+					new ("_Run Worker", "", () => RunWorker (), null, null, KeyCode.CtrlMask | KeyCode.R),
+					null,
+					new ("_Quit", "", () => Application.RequestStop (), null, null, KeyCode.CtrlMask | KeyCode.Q)
+				})
+			});
+			Add (menu);
 
-			Application.Run<MainApp> ();
+			var statusBar = new StatusBar (new [] {
+				new StatusItem (Application.QuitKey, $"{Application.QuitKey} to Quit", () => Application.RequestStop ()),
+				new StatusItem (KeyCode.CtrlMask | KeyCode.P, "~^R~ Run Worker", () => RunWorker ())
+			});
+			Add (statusBar);
 
-			Application.Top.Dispose ();
+			var top = new Toplevel ();
+
+			top.Add (new Label ("Worker Log") {
+				X = Pos.Center (),
+				Y = 0
+			});
+
+			listLog = new ListView (log) {
+				X = 0,
+				Y = 2,
+				Width = Dim.Fill (),
+				Height = Dim.Fill ()
+			};
+			top.Add (listLog);
+			Add (top);
 		}
 
-		public class MainApp : Toplevel {
-			private BackgroundWorker worker;
-			private List<string> log = new List<string> ();
-			private DateTime? startStaging;
-			private ListView listLog;
+		void RunWorker ()
+		{
+			worker = new BackgroundWorker { WorkerSupportsCancellation = true };
 
-			public MainApp ()
-			{
-				var menu = new MenuBar (new MenuBarItem [] {
-					new MenuBarItem ("_Options", new MenuItem [] {
-						new MenuItem ("_Run Worker", "", () => RunWorker(), null, null, KeyCode.CtrlMask | KeyCode.R),
-						null,
-						new MenuItem ("_Quit", "", () => Application.RequestStop(), null, null, KeyCode.CtrlMask | KeyCode.Q)
-					})
-				});
-				Add (menu);
-
-				var statusBar = new StatusBar (new [] {
-					new StatusItem(Application.QuitKey, $"{Application.QuitKey} to Quit", () => Application.RequestStop()),
-					new StatusItem(KeyCode.CtrlMask | KeyCode.P, "~^R~ Run Worker", () => RunWorker())
-				});
-				Add (statusBar);
-
-				var top = new Toplevel ();
-
-				top.Add (new Label ("Worker Log") {
-					X = Pos.Center (),
-					Y = 0
-				});
-
-				listLog = new ListView (log) {
-					X = 0,
-					Y = 2,
-					Width = Dim.Fill (),
-					Height = Dim.Fill ()
-				};
-				top.Add (listLog);
-				Add (top);
-			}
-
-			private void RunWorker ()
-			{
-				worker = new BackgroundWorker () { WorkerSupportsCancellation = true };
-
-				var cancel = new Button ("Cancel Worker");
-				cancel.Clicked += (s,e) => {
-					if (worker == null) {
-						log.Add ($"Worker is not running at {DateTime.Now}!");
-						listLog.SetNeedsDisplay ();
-						return;
-					}
-
-					log.Add ($"Worker {startStaging}.{startStaging:fff} is canceling at {DateTime.Now}!");
+			var cancel = new Button ("Cancel Worker");
+			cancel.Clicked += (s, e) => {
+				if (worker == null) {
+					log.Add ($"Worker is not running at {DateTime.Now}!");
 					listLog.SetNeedsDisplay ();
-					worker.CancelAsync ();
-				};
-
-				startStaging = DateTime.Now;
-				log.Add ($"Worker is started at {startStaging}.{startStaging:fff}");
-				listLog.SetNeedsDisplay ();
-
-				var md = new Dialog (cancel) { Title = $"Running Worker started at {startStaging}.{startStaging:fff}" };
-				md.Add (new Label ("Wait for worker to finish...") {
-					X = Pos.Center (),
-					Y = Pos.Center ()
-				});
-
-				worker.DoWork += (s, e) => {
-					var stageResult = new List<string> ();
-					for (int i = 0; i < 500; i++) {
-						stageResult.Add ($"Worker {i} started at {DateTime.Now}");
-						e.Result = stageResult;
-						Thread.Sleep (1);
-						if (worker.CancellationPending) {
-							e.Cancel = true;
-							return;
-						}
-					}
-				};
-
-				worker.RunWorkerCompleted += (s, e) => {
-					if (md.IsCurrentTop) {
-						//Close the dialog
-						Application.RequestStop ();
-					}
-
-					if (e.Error != null) {
-						// Failed
-						log.Add ($"Exception occurred {e.Error.Message} on Worker {startStaging}.{startStaging:fff} at {DateTime.Now}");
-						listLog.SetNeedsDisplay ();
-					} else if (e.Cancelled) {
-						// Canceled
-						log.Add ($"Worker {startStaging}.{startStaging:fff} was canceled at {DateTime.Now}!");
-						listLog.SetNeedsDisplay ();
-					} else {
-						// Passed
-						log.Add ($"Worker {startStaging}.{startStaging:fff} was completed at {DateTime.Now}.");
-						listLog.SetNeedsDisplay ();
-						Application.Refresh ();
-						var builderUI = new StagingUIController (startStaging, e.Result as List<string>);
-						builderUI.Load ();
-					}
-					worker = null;
-				};
-				worker.RunWorkerAsync ();
-				Application.Run (md);
-			}
-		}
-
-		public class StagingUIController : Window {
-			Toplevel top;
-
-			public StagingUIController (DateTime? start, List<string> list)
-			{
-				top = new Toplevel (Application.Top.Frame);
-				top.KeyDown += (s,e) => {
-					// Prevents Ctrl+Q from closing this.
-					// Only Ctrl+C is allowed.
-					if (e == Application.QuitKey) {
-						e.Handled = true;
-					}
-				};
-
-				bool Close ()
-				{
-					var n = MessageBox.Query (50, 7, "Close Window.", "Are you sure you want to close this window?", "Yes", "No");
-					return n == 0;
+					return;
 				}
 
-				var menu = new MenuBar (new MenuBarItem [] {
-					new MenuBarItem ("_Stage", new MenuItem [] {
-						new MenuItem ("_Close", "", () => { if (Close()) { Application.RequestStop(); } }, null, null, KeyCode.CtrlMask | KeyCode.C)
-					})
-				});
-				top.Add (menu);
+				log.Add ($"Worker {startStaging}.{startStaging:fff} is canceling at {DateTime.Now}!");
+				listLog.SetNeedsDisplay ();
+				worker.CancelAsync ();
+			};
 
-				var statusBar = new StatusBar (new [] {
-					new StatusItem(KeyCode.CtrlMask | KeyCode.C, "~^C~ Close", () => { if (Close()) { Application.RequestStop(); } }),
-				});
-				top.Add (statusBar);
+			startStaging = DateTime.Now;
+			log.Add ($"Worker is started at {startStaging}.{startStaging:fff}");
+			listLog.SetNeedsDisplay ();
 
-				Title = $"Worker started at {start}.{start:fff}";
-				ColorScheme = Colors.ColorSchemes ["Base"];
+			var md = new Dialog (cancel) { Title = $"Running Worker started at {startStaging}.{startStaging:fff}" };
+			md.Add (new Label ("Wait for worker to finish...") {
+				X = Pos.Center (),
+				Y = Pos.Center ()
+			});
 
-				Add (new ListView (list) {
-					X = 0,
-					Y = 0,
-					Width = Dim.Fill (),
-					Height = Dim.Fill ()
-				});
+			worker.DoWork += (s, e) => {
+				var stageResult = new List<string> ();
+				for (var i = 0; i < 500; i++) {
+					stageResult.Add ($"Worker {i} started at {DateTime.Now}");
+					e.Result = stageResult;
+					Thread.Sleep (1);
+					if (worker.CancellationPending) {
+						e.Cancel = true;
+						return;
+					}
+				}
+			};
 
-				top.Add (this);
-			}
+			worker.RunWorkerCompleted += (s, e) => {
+				if (md.IsCurrentTop) {
+					//Close the dialog
+					Application.RequestStop ();
+				}
 
-			public void Load ()
-			{
-				Application.Run (top);
-			}
+				if (e.Error != null) {
+					// Failed
+					log.Add ($"Exception occurred {e.Error.Message} on Worker {startStaging}.{startStaging:fff} at {DateTime.Now}");
+					listLog.SetNeedsDisplay ();
+				} else if (e.Cancelled) {
+					// Canceled
+					log.Add ($"Worker {startStaging}.{startStaging:fff} was canceled at {DateTime.Now}!");
+					listLog.SetNeedsDisplay ();
+				} else {
+					// Passed
+					log.Add ($"Worker {startStaging}.{startStaging:fff} was completed at {DateTime.Now}.");
+					listLog.SetNeedsDisplay ();
+					Application.Refresh ();
+					var builderUI = new StagingUIController (startStaging, e.Result as List<string>);
+					builderUI.Load ();
+				}
+				worker = null;
+			};
+			worker.RunWorkerAsync ();
+			Application.Run (md);
 		}
+	}
+
+	public class StagingUIController : Window {
+		readonly Toplevel top;
+
+		public StagingUIController (DateTime? start, List<string> list)
+		{
+			top = new Toplevel (Application.Top.Frame);
+			top.KeyDown += (s, e) => {
+				// Prevents Ctrl+Q from closing this.
+				// Only Ctrl+C is allowed.
+				if (e == Application.QuitKey) {
+					e.Handled = true;
+				}
+			};
+
+			bool Close ()
+			{
+				var n = MessageBox.Query (50, 7, "Close Window.", "Are you sure you want to close this window?", "Yes", "No");
+				return n == 0;
+			}
+
+			var menu = new MenuBar (new MenuBarItem [] {
+				new ("_Stage", new MenuItem [] {
+					new ("_Close", "", () => {
+						if (Close ()) { Application.RequestStop (); }
+					}, null, null, KeyCode.CtrlMask | KeyCode.C)
+				})
+			});
+			top.Add (menu);
+
+			var statusBar = new StatusBar (new [] {
+				new StatusItem (KeyCode.CtrlMask | KeyCode.C, "~^C~ Close", () => {
+					if (Close ()) { Application.RequestStop (); }
+				})
+			});
+			top.Add (statusBar);
+
+			Title = $"Worker started at {start}.{start:fff}";
+			ColorScheme = Colors.ColorSchemes ["Base"];
+
+			Add (new ListView (list) {
+				X = 0,
+				Y = 0,
+				Width = Dim.Fill (),
+				Height = Dim.Fill ()
+			});
+
+			top.Add (this);
+		}
+
+		public void Load () => Application.Run (top);
 	}
 }

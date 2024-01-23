@@ -14,32 +14,30 @@
 // still incorrect so we still need this hack.
 #define HACK_CHECK_WINCHANGED
 
-using System.Text;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using Terminal.Gui.ConsoleDrivers;
-using static Unix.Terminal.Delegates;
 using static Terminal.Gui.ConsoleDrivers.ConsoleKeyMapping;
 
 namespace Terminal.Gui;
 
-
-internal class WindowsConsole {
+class WindowsConsole {
 	public const int STD_OUTPUT_HANDLE = -11;
 	public const int STD_INPUT_HANDLE = -10;
 
-	IntPtr _inputHandle, _outputHandle;
+	readonly IntPtr _inputHandle;
+	readonly IntPtr _outputHandle;
 	IntPtr _screenBuffer;
 	readonly uint _originalConsoleMode;
-	CursorVisibility? _initialCursorVisibility = null;
-	CursorVisibility? _currentCursorVisibility = null;
-	CursorVisibility? _pendingCursorVisibility = null;
-	readonly StringBuilder _stringBuilder = new StringBuilder (256 * 1024);
+	CursorVisibility? _initialCursorVisibility;
+	CursorVisibility? _currentCursorVisibility;
+	CursorVisibility? _pendingCursorVisibility;
+	readonly StringBuilder _stringBuilder = new (256 * 1024);
 
 	public WindowsConsole ()
 	{
@@ -61,18 +59,18 @@ internal class WindowsConsole {
 			ReadFromConsoleOutput (size, bufferSize, ref window);
 		}
 
-		bool result = false;
+		var result = false;
 		if (force16Colors) {
-			int i = 0;
-			CharInfo [] ci = new CharInfo [charInfoBuffer.Length];
-			foreach (ExtendedCharInfo info in charInfoBuffer) {
-				ci [i++] = new CharInfo () {
-					Char = new CharUnion () { UnicodeChar = info.Char },
-					Attributes = (ushort)(((int)info.Attribute.Foreground.ColorName) | ((int)info.Attribute.Background.ColorName << 4))
+			var i = 0;
+			var ci = new CharInfo [charInfoBuffer.Length];
+			foreach (var info in charInfoBuffer) {
+				ci [i++] = new CharInfo {
+					Char = new CharUnion { UnicodeChar = info.Char },
+					Attributes = (ushort)((int)info.Attribute.Foreground.ColorName | (int)info.Attribute.Background.ColorName << 4)
 				};
 			}
 
-			result = WriteConsoleOutput (_screenBuffer, ci, bufferSize, new Coord () { X = window.Left, Y = window.Top }, ref window);
+			result = WriteConsoleOutput (_screenBuffer, ci, bufferSize, new Coord { X = window.Left, Y = window.Top }, ref window);
 		} else {
 
 			_stringBuilder.Clear ();
@@ -102,15 +100,15 @@ internal class WindowsConsole {
 
 			_stringBuilder.Append (EscSeqUtils.CSI_RestoreCursorPosition);
 
-			string s = _stringBuilder.ToString ();
+			var s = _stringBuilder.ToString ();
 
-			result = WriteConsole (_screenBuffer, s, (uint)(s.Length), out uint _, null);
+			result = WriteConsole (_screenBuffer, s, (uint)s.Length, out var _, null);
 		}
 
 		if (!result) {
 			var err = Marshal.GetLastWin32Error ();
 			if (err != 0) {
-				throw new System.ComponentModel.Win32Exception (err);
+				throw new Win32Exception (err);
 			}
 		}
 
@@ -120,43 +118,40 @@ internal class WindowsConsole {
 	public void ReadFromConsoleOutput (Size size, Coord coords, ref SmallRect window)
 	{
 		_screenBuffer = CreateConsoleScreenBuffer (
-		    DesiredAccess.GenericRead | DesiredAccess.GenericWrite,
-		    ShareMode.FileShareRead | ShareMode.FileShareWrite,
-		    IntPtr.Zero,
-		    1,
-		    IntPtr.Zero
+			DesiredAccess.GenericRead | DesiredAccess.GenericWrite,
+			ShareMode.FileShareRead | ShareMode.FileShareWrite,
+			IntPtr.Zero,
+			1,
+			IntPtr.Zero
 		);
 		if (_screenBuffer == INVALID_HANDLE_VALUE) {
 			var err = Marshal.GetLastWin32Error ();
 
 			if (err != 0) {
-				throw new System.ComponentModel.Win32Exception (err);
+				throw new Win32Exception (err);
 			}
 		}
 
-		if (!_initialCursorVisibility.HasValue && GetCursorVisibility (out CursorVisibility visibility)) {
+		if (!_initialCursorVisibility.HasValue && GetCursorVisibility (out var visibility)) {
 			_initialCursorVisibility = visibility;
 		}
 
 		if (!SetConsoleActiveScreenBuffer (_screenBuffer)) {
-			throw new System.ComponentModel.Win32Exception (Marshal.GetLastWin32Error ());
+			throw new Win32Exception (Marshal.GetLastWin32Error ());
 		}
 
 		_originalStdOutChars = new CharInfo [size.Height * size.Width];
 
-		if (!ReadConsoleOutput (_screenBuffer, _originalStdOutChars, coords, new Coord () { X = 0, Y = 0 }, ref window)) {
-			throw new System.ComponentModel.Win32Exception (Marshal.GetLastWin32Error ());
+		if (!ReadConsoleOutput (_screenBuffer, _originalStdOutChars, coords, new Coord { X = 0, Y = 0 }, ref window)) {
+			throw new Win32Exception (Marshal.GetLastWin32Error ());
 		}
 	}
 
-	public bool SetCursorPosition (Coord position)
-	{
-		return SetConsoleCursorPosition (_screenBuffer, position);
-	}
+	public bool SetCursorPosition (Coord position) => SetConsoleCursorPosition (_screenBuffer, position);
 
 	public void SetInitialCursorVisibility ()
 	{
-		if (_initialCursorVisibility.HasValue == false && GetCursorVisibility (out CursorVisibility visibility)) {
+		if (_initialCursorVisibility.HasValue == false && GetCursorVisibility (out var visibility)) {
 			_initialCursorVisibility = visibility;
 		}
 	}
@@ -167,12 +162,12 @@ internal class WindowsConsole {
 			visibility = CursorVisibility.Invisible;
 			return false;
 		}
-		if (!GetConsoleCursorInfo (_screenBuffer, out ConsoleCursorInfo info)) {
+		if (!GetConsoleCursorInfo (_screenBuffer, out var info)) {
 			var err = Marshal.GetLastWin32Error ();
 			if (err != 0) {
-				throw new System.ComponentModel.Win32Exception (err);
+				throw new Win32Exception (err);
 			}
-			visibility = Gui.CursorVisibility.Default;
+			visibility = CursorVisibility.Default;
 
 			return false;
 		}
@@ -216,7 +211,7 @@ internal class WindowsConsole {
 		}
 
 		if (_currentCursorVisibility.HasValue == false || _currentCursorVisibility.Value != visibility) {
-			ConsoleCursorInfo info = new ConsoleCursorInfo {
+			var info = new ConsoleCursorInfo {
 				dwSize = (uint)visibility & 0x00FF,
 				bVisible = ((uint)visibility & 0xFF00) != 0
 			};
@@ -267,7 +262,7 @@ internal class WindowsConsole {
 			return Size.Empty;
 		}
 		var sz = new Size (csbi.srWindow.Right - csbi.srWindow.Left + 1,
-		    csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
+			csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
 		position = new Point (csbi.srWindow.Left, csbi.srWindow.Top);
 
 		return sz;
@@ -278,10 +273,10 @@ internal class WindowsConsole {
 		var csbi = new CONSOLE_SCREEN_BUFFER_INFOEX ();
 		csbi.cbSize = (uint)Marshal.SizeOf (csbi);
 		if (!GetConsoleScreenBufferInfoEx (_outputHandle, ref csbi)) {
-			throw new System.ComponentModel.Win32Exception (Marshal.GetLastWin32Error ());
+			throw new Win32Exception (Marshal.GetLastWin32Error ());
 		}
 		var sz = new Size (csbi.srWindow.Right - csbi.srWindow.Left + 1,
-		    csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
+			csbi.srWindow.Bottom - csbi.srWindow.Top + 1);
 		position = new Point (csbi.srWindow.Left, csbi.srWindow.Top);
 
 		return sz;
@@ -293,7 +288,7 @@ internal class WindowsConsole {
 		csbi.cbSize = (uint)Marshal.SizeOf (csbi);
 
 		if (!GetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
-			throw new System.ComponentModel.Win32Exception (Marshal.GetLastWin32Error ());
+			throw new Win32Exception (Marshal.GetLastWin32Error ());
 		}
 		var maxWinSize = GetLargestConsoleWindowSize (_screenBuffer);
 		var newCols = Math.Min (cols, maxWinSize.X);
@@ -302,7 +297,7 @@ internal class WindowsConsole {
 		csbi.srWindow = new SmallRect (0, 0, newCols, newRows);
 		csbi.dwMaximumWindowSize = new Coord (newCols, newRows);
 		if (!SetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
-			throw new System.ComponentModel.Win32Exception (Marshal.GetLastWin32Error ());
+			throw new Win32Exception (Marshal.GetLastWin32Error ());
 		}
 		var winRect = new SmallRect (0, 0, (short)(newCols - 1), (short)Math.Max (newRows - 1, 0));
 		if (!SetConsoleWindowInfo (_outputHandle, true, ref winRect)) {
@@ -316,7 +311,7 @@ internal class WindowsConsole {
 	void SetConsoleOutputWindow (CONSOLE_SCREEN_BUFFER_INFOEX csbi)
 	{
 		if (_screenBuffer != IntPtr.Zero && !SetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
-			throw new System.ComponentModel.Win32Exception (Marshal.GetLastWin32Error ());
+			throw new Win32Exception (Marshal.GetLastWin32Error ());
 		}
 	}
 
@@ -330,18 +325,18 @@ internal class WindowsConsole {
 		var csbi = new CONSOLE_SCREEN_BUFFER_INFOEX ();
 		csbi.cbSize = (uint)Marshal.SizeOf (csbi);
 		if (!GetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
-			throw new System.ComponentModel.Win32Exception (Marshal.GetLastWin32Error ());
+			throw new Win32Exception (Marshal.GetLastWin32Error ());
 		}
 		var sz = new Size (csbi.srWindow.Right - csbi.srWindow.Left + 1,
-		    Math.Max (csbi.srWindow.Bottom - csbi.srWindow.Top + 1, 0));
+			Math.Max (csbi.srWindow.Bottom - csbi.srWindow.Top + 1, 0));
 		position = new Point (csbi.srWindow.Left, csbi.srWindow.Top);
 		SetConsoleOutputWindow (csbi);
 		var winRect = new SmallRect (0, 0, (short)(sz.Width - 1), (short)Math.Max (sz.Height - 1, 0));
 		if (!SetConsoleScreenBufferInfoEx (_outputHandle, ref csbi)) {
-			throw new System.ComponentModel.Win32Exception (Marshal.GetLastWin32Error ());
+			throw new Win32Exception (Marshal.GetLastWin32Error ());
 		}
 		if (!SetConsoleWindowInfo (_outputHandle, true, ref winRect)) {
-			throw new System.ComponentModel.Win32Exception (Marshal.GetLastWin32Error ());
+			throw new Win32Exception (Marshal.GetLastWin32Error ());
 		}
 
 		return sz;
@@ -349,12 +344,10 @@ internal class WindowsConsole {
 
 	uint ConsoleMode {
 		get {
-			GetConsoleMode (_inputHandle, out uint v);
+			GetConsoleMode (_inputHandle, out var v);
 			return v;
 		}
-		set {
-			SetConsoleMode (_inputHandle, value);
-		}
+		set => SetConsoleMode (_inputHandle, value);
 	}
 
 	[Flags]
@@ -362,22 +355,27 @@ internal class WindowsConsole {
 		EnableProcessedInput = 1,
 		EnableMouseInput = 16,
 		EnableQuickEditMode = 64,
-		EnableExtendedFlags = 128,
+		EnableExtendedFlags = 128
 	}
 
 	[StructLayout (LayoutKind.Explicit, CharSet = CharSet.Unicode)]
 	public struct KeyEventRecord {
-		[FieldOffset (0), MarshalAs (UnmanagedType.Bool)]
+		[FieldOffset (0)] [MarshalAs (UnmanagedType.Bool)]
 		public bool bKeyDown;
-		[FieldOffset (4), MarshalAs (UnmanagedType.U2)]
+
+		[FieldOffset (4)] [MarshalAs (UnmanagedType.U2)]
 		public ushort wRepeatCount;
-		[FieldOffset (6), MarshalAs (UnmanagedType.U2)]
+
+		[FieldOffset (6)] [MarshalAs (UnmanagedType.U2)]
 		public VK wVirtualKeyCode;
-		[FieldOffset (8), MarshalAs (UnmanagedType.U2)]
+
+		[FieldOffset (8)] [MarshalAs (UnmanagedType.U2)]
 		public ushort wVirtualScanCode;
+
 		[FieldOffset (10)]
 		public char UnicodeChar;
-		[FieldOffset (12), MarshalAs (UnmanagedType.U4)]
+
+		[FieldOffset (12)] [MarshalAs (UnmanagedType.U4)]
 		public ControlKeyState dwControlKeyState;
 
 		public override readonly string ToString () => $"[KeyEventRecord({(bKeyDown ? "down" : "up")},{wRepeatCount},{wVirtualKeyCode},{wVirtualScanCode},{new Rune (UnicodeChar).MakePrintable ()},{dwControlKeyState})]";
@@ -417,10 +415,13 @@ internal class WindowsConsole {
 	public struct MouseEventRecord {
 		[FieldOffset (0)]
 		public Coord MousePosition;
+
 		[FieldOffset (4)]
 		public ButtonState ButtonState;
+
 		[FieldOffset (8)]
 		public ControlKeyState ControlKeyState;
+
 		[FieldOffset (12)]
 		public EventFlags EventFlags;
 
@@ -431,10 +432,7 @@ internal class WindowsConsole {
 	public struct WindowBufferSizeRecord {
 		public Coord _size;
 
-		public WindowBufferSizeRecord (short x, short y)
-		{
-			_size = new Coord (x, y);
-		}
+		public WindowBufferSizeRecord (short x, short y) => _size = new Coord (x, y);
 
 		public override readonly string ToString () => $"[WindowBufferSize{_size}";
 	}
@@ -461,40 +459,42 @@ internal class WindowsConsole {
 	public struct InputRecord {
 		[FieldOffset (0)]
 		public EventType EventType;
+
 		[FieldOffset (4)]
 		public KeyEventRecord KeyEvent;
+
 		[FieldOffset (4)]
 		public MouseEventRecord MouseEvent;
+
 		[FieldOffset (4)]
 		public WindowBufferSizeRecord WindowBufferSizeEvent;
+
 		[FieldOffset (4)]
 		public MenuEventRecord MenuEvent;
+
 		[FieldOffset (4)]
 		public FocusEventRecord FocusEvent;
 
-		public override readonly string ToString ()
-		{
-			return EventType switch {
-				EventType.Focus => FocusEvent.ToString (),
-				EventType.Key => KeyEvent.ToString (),
-				EventType.Menu => MenuEvent.ToString (),
-				EventType.Mouse => MouseEvent.ToString (),
-				EventType.WindowBufferSize => WindowBufferSizeEvent.ToString (),
-				_ => "Unknown event type: " + EventType
-			};
-		}
-	};
+		public override readonly string ToString () => EventType switch {
+			EventType.Focus => FocusEvent.ToString (),
+			EventType.Key => KeyEvent.ToString (),
+			EventType.Menu => MenuEvent.ToString (),
+			EventType.Mouse => MouseEvent.ToString (),
+			EventType.WindowBufferSize => WindowBufferSizeEvent.ToString (),
+			_ => "Unknown event type: " + EventType
+		};
+	}
 
 	[Flags]
 	enum ShareMode : uint {
 		FileShareRead = 1,
-		FileShareWrite = 2,
+		FileShareWrite = 2
 	}
 
 	[Flags]
 	enum DesiredAccess : uint {
 		GenericRead = 2147483648,
-		GenericWrite = 1073741824,
+		GenericWrite = 1073741824
 	}
 
 	[StructLayout (LayoutKind.Sequential)]
@@ -516,8 +516,9 @@ internal class WindowsConsole {
 			X = x;
 			Y = y;
 		}
+
 		public override readonly string ToString () => $"({X},{Y})";
-	};
+	}
 
 	[StructLayout (LayoutKind.Explicit, CharSet = CharSet.Unicode)]
 	public struct CharUnion {
@@ -533,7 +534,9 @@ internal class WindowsConsole {
 
 	public struct ExtendedCharInfo {
 		public char Char { get; set; }
+
 		public Attribute Attribute { get; set; }
+
 		public bool Empty { get; set; } // TODO: Temp hack until virutal terminal sequences
 
 		public ExtendedCharInfo (char character, Attribute attribute)
@@ -559,10 +562,7 @@ internal class WindowsConsole {
 			Bottom = bottom;
 		}
 
-		public static void MakeEmpty (ref SmallRect rect)
-		{
-			rect.Left = -1;
-		}
+		public static void MakeEmpty (ref SmallRect rect) => rect.Left = -1;
 
 		public static void Update (ref SmallRect rect, short col, short row)
 		{
@@ -571,16 +571,21 @@ internal class WindowsConsole {
 				rect.Bottom = rect.Top = row;
 				return;
 			}
-			if (col >= rect.Left && col <= rect.Right && row >= rect.Top && row <= rect.Bottom)
+			if (col >= rect.Left && col <= rect.Right && row >= rect.Top && row <= rect.Bottom) {
 				return;
-			if (col < rect.Left)
+			}
+			if (col < rect.Left) {
 				rect.Left = col;
-			if (col > rect.Right)
+			}
+			if (col > rect.Right) {
 				rect.Right = col;
-			if (row < rect.Top)
+			}
+			if (row < rect.Top) {
 				rect.Top = row;
-			if (row > rect.Bottom)
+			}
+			if (row > rect.Bottom) {
 				rect.Bottom = row;
+			}
 		}
 
 		public override readonly string ToString () => $"Left={Left},Top={Top},Right={Right},Bottom={Bottom}";
@@ -615,9 +620,9 @@ internal class WindowsConsole {
 			sb.Append ((ex.ConsoleKeyInfo.Modifiers & ConsoleModifiers.Control) != 0 ? " | Control" : string.Empty);
 			sb.Append ((ex.ConsoleKeyInfo.Modifiers & ConsoleModifiers.Alt) != 0 ? " | Alt" : string.Empty);
 			sb.Append ($", KeyChar: {ke.AsRune.MakePrintable ()} ({(uint)ex.ConsoleKeyInfo.KeyChar}) ");
-			sb.Append ((ex.CapsLock ? "caps," : string.Empty));
-			sb.Append ((ex.NumLock ? "num," : string.Empty));
-			sb.Append ((ex.ScrollLock ? "scroll," : string.Empty));
+			sb.Append (ex.CapsLock ? "caps," : string.Empty);
+			sb.Append (ex.NumLock ? "num," : string.Empty);
+			sb.Append (ex.ScrollLock ? "scroll," : string.Empty);
 			var s = sb.ToString ().TrimEnd (',').TrimEnd (' ');
 			return $"[ConsoleKeyInfoEx({s})]";
 		}
@@ -625,48 +630,48 @@ internal class WindowsConsole {
 
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern IntPtr GetStdHandle (int nStdHandle);
+	extern static IntPtr GetStdHandle (int nStdHandle);
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern bool CloseHandle (IntPtr handle);
+	extern static bool CloseHandle (IntPtr handle);
 
 	[DllImport ("kernel32.dll", EntryPoint = "ReadConsoleInputW", CharSet = CharSet.Unicode)]
-	public static extern bool ReadConsoleInput (
-	    IntPtr hConsoleInput,
-	    IntPtr lpBuffer,
-	    uint nLength,
-	    out uint lpNumberOfEventsRead);
+	public extern static bool ReadConsoleInput (
+		IntPtr hConsoleInput,
+		IntPtr lpBuffer,
+		uint nLength,
+		out uint lpNumberOfEventsRead);
 
 	[DllImport ("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-	static extern bool ReadConsoleOutput (
-	    IntPtr hConsoleOutput,
-	    [Out] CharInfo [] lpBuffer,
-	    Coord dwBufferSize,
-	    Coord dwBufferCoord,
-	    ref SmallRect lpReadRegion
+	extern static bool ReadConsoleOutput (
+		IntPtr hConsoleOutput,
+		[Out] CharInfo [] lpBuffer,
+		Coord dwBufferSize,
+		Coord dwBufferCoord,
+		ref SmallRect lpReadRegion
 	);
 
 	// TODO: This API is obsolete. See https://learn.microsoft.com/en-us/windows/console/writeconsoleoutput
 	[DllImport ("kernel32.dll", EntryPoint = "WriteConsoleOutputW", SetLastError = true, CharSet = CharSet.Unicode)]
-	static extern bool WriteConsoleOutput (
-	    IntPtr hConsoleOutput,
-	    CharInfo [] lpBuffer,
-	    Coord dwBufferSize,
-	    Coord dwBufferCoord,
-	    ref SmallRect lpWriteRegion
+	extern static bool WriteConsoleOutput (
+		IntPtr hConsoleOutput,
+		CharInfo [] lpBuffer,
+		Coord dwBufferSize,
+		Coord dwBufferCoord,
+		ref SmallRect lpWriteRegion
 	);
 
 	[DllImport ("kernel32.dll", EntryPoint = "WriteConsole", SetLastError = true, CharSet = CharSet.Unicode)]
-	static extern bool WriteConsole (
+	extern static bool WriteConsole (
 		IntPtr hConsoleOutput,
 		String lpbufer,
 		UInt32 NumberOfCharsToWriten,
 		out UInt32 lpNumberOfCharsWritten,
 		object lpReserved
-	    );
+	);
 
 	[DllImport ("kernel32.dll")]
-	static extern bool SetConsoleCursorPosition (IntPtr hConsoleOutput, Coord dwCursorPosition);
+	extern static bool SetConsoleCursorPosition (IntPtr hConsoleOutput, Coord dwCursorPosition);
 
 	[StructLayout (LayoutKind.Sequential)]
 	public struct ConsoleCursorInfo {
@@ -675,33 +680,33 @@ internal class WindowsConsole {
 	}
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern bool SetConsoleCursorInfo (IntPtr hConsoleOutput, [In] ref ConsoleCursorInfo lpConsoleCursorInfo);
+	extern static bool SetConsoleCursorInfo (IntPtr hConsoleOutput, [In] ref ConsoleCursorInfo lpConsoleCursorInfo);
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern bool GetConsoleCursorInfo (IntPtr hConsoleOutput, out ConsoleCursorInfo lpConsoleCursorInfo);
+	extern static bool GetConsoleCursorInfo (IntPtr hConsoleOutput, out ConsoleCursorInfo lpConsoleCursorInfo);
 
 	[DllImport ("kernel32.dll")]
-	static extern bool GetConsoleMode (IntPtr hConsoleHandle, out uint lpMode);
+	extern static bool GetConsoleMode (IntPtr hConsoleHandle, out uint lpMode);
 
 	[DllImport ("kernel32.dll")]
-	static extern bool SetConsoleMode (IntPtr hConsoleHandle, uint dwMode);
+	extern static bool SetConsoleMode (IntPtr hConsoleHandle, uint dwMode);
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern IntPtr CreateConsoleScreenBuffer (
-	    DesiredAccess dwDesiredAccess,
-	    ShareMode dwShareMode,
-	    IntPtr secutiryAttributes,
-	    uint flags,
-	    IntPtr screenBufferData
+	extern static IntPtr CreateConsoleScreenBuffer (
+		DesiredAccess dwDesiredAccess,
+		ShareMode dwShareMode,
+		IntPtr secutiryAttributes,
+		uint flags,
+		IntPtr screenBufferData
 	);
 
-	internal static IntPtr INVALID_HANDLE_VALUE = new IntPtr (-1);
+	internal static IntPtr INVALID_HANDLE_VALUE = new (-1);
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern bool SetConsoleActiveScreenBuffer (IntPtr Handle);
+	extern static bool SetConsoleActiveScreenBuffer (IntPtr Handle);
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern bool GetNumberOfConsoleInputEvents (IntPtr handle, out uint lpcNumberOfEvents);
+	extern static bool GetNumberOfConsoleInputEvents (IntPtr handle, out uint lpcNumberOfEvents);
 
 	public InputRecord [] ReadConsoleInput ()
 	{
@@ -709,11 +714,11 @@ internal class WindowsConsole {
 		var pRecord = Marshal.AllocHGlobal (Marshal.SizeOf<InputRecord> () * bufferSize);
 		try {
 			ReadConsoleInput (_inputHandle, pRecord, bufferSize,
-			    out var numberEventsRead);
+				out var numberEventsRead);
 
 			return numberEventsRead == 0
-			    ? null
-			    : new [] { Marshal.PtrToStructure<InputRecord> (pRecord) };
+				? null
+				: new [] { Marshal.PtrToStructure<InputRecord> (pRecord) };
 		} catch (Exception) {
 			return null;
 		} finally {
@@ -721,7 +726,7 @@ internal class WindowsConsole {
 		}
 	}
 
-#if false      // Not needed on the constructor. Perhaps could be used on resizing. To study.                                                                                     
+#if false // Not needed on the constructor. Perhaps could be used on resizing. To study.                                                                                     
 		[DllImport ("kernel32.dll", ExactSpelling = true)]
 		static extern IntPtr GetConsoleWindow ();
 
@@ -776,8 +781,10 @@ internal class WindowsConsole {
 
 		[FieldOffset (0)]
 		public byte R;
+
 		[FieldOffset (1)]
 		public byte G;
+
 		[FieldOffset (2)]
 		public byte B;
 
@@ -786,32 +793,39 @@ internal class WindowsConsole {
 	}
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern bool GetConsoleScreenBufferInfoEx (IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFOEX csbi);
+	extern static bool GetConsoleScreenBufferInfoEx (IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFOEX csbi);
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern bool SetConsoleScreenBufferInfoEx (IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFOEX ConsoleScreenBufferInfo);
+	extern static bool SetConsoleScreenBufferInfoEx (IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFOEX ConsoleScreenBufferInfo);
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern bool SetConsoleWindowInfo (
-	    IntPtr hConsoleOutput,
-	    bool bAbsolute,
-	    [In] ref SmallRect lpConsoleWindow);
+	extern static bool SetConsoleWindowInfo (
+		IntPtr hConsoleOutput,
+		bool bAbsolute,
+		[In] ref SmallRect lpConsoleWindow);
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern Coord GetLargestConsoleWindowSize (
-	    IntPtr hConsoleOutput);
+	extern static Coord GetLargestConsoleWindowSize (
+		IntPtr hConsoleOutput);
 }
 
-internal class WindowsDriver : ConsoleDriver {
-	WindowsConsole.ExtendedCharInfo [] _outputBuffer;
+class WindowsDriver : ConsoleDriver {
+
+	readonly bool _isWindowsTerminal;
+
+	CursorVisibility _cachedCursorVisibility;
 	WindowsConsole.SmallRect _damageRegion;
+	bool _isButtonDoubleClicked;
+	bool _isButtonPressed;
+	bool _isButtonReleased;
+	bool _isOneFingerDoubleClicked;
 
-	public WindowsConsole WinConsole { get; private set; }
-
-	public override bool SupportsTrueColor => RunningUnitTests || (Environment.OSVersion.Version.Build >= 14931 && _isWindowsTerminal);
-
-	readonly bool _isWindowsTerminal = false;
-	WindowsMainLoop _mainLoopDriver = null;
+	WindowsConsole.ButtonState? _lastMouseButtonPressed;
+	WindowsMainLoop _mainLoopDriver;
+	WindowsConsole.ExtendedCharInfo [] _outputBuffer;
+	Point? _point;
+	Point _pointMove;
+	bool _processButtonClick;
 
 	public WindowsDriver ()
 	{
@@ -832,6 +846,10 @@ internal class WindowsDriver : ConsoleDriver {
 		}
 	}
 
+	public WindowsConsole WinConsole { get; private set; }
+
+	public override bool SupportsTrueColor => RunningUnitTests || Environment.OSVersion.Version.Build >= 14931 && _isWindowsTerminal;
+
 	internal override MainLoop Init ()
 	{
 		_mainLoopDriver = new WindowsMainLoop (this);
@@ -840,7 +858,7 @@ internal class WindowsDriver : ConsoleDriver {
 				if (WinConsole != null) {
 					// BUGBUG: The results from GetConsoleOutputWindow are incorrect when called from Init. 
 					// Our thread in WindowsMainLoop.CheckWin will get the correct results. See #if HACK_CHECK_WINCHANGED
-					var winSize = WinConsole.GetConsoleOutputWindow (out Point pos);
+					var winSize = WinConsole.GetConsoleOutputWindow (out var pos);
 					Cols = winSize.Width;
 					Rows = winSize.Height;
 				}
@@ -861,7 +879,7 @@ internal class WindowsDriver : ConsoleDriver {
 
 		_outputBuffer = new WindowsConsole.ExtendedCharInfo [Rows * Cols];
 		Clip = new Rect (0, 0, Cols, Rows);
-		_damageRegion = new WindowsConsole.SmallRect () {
+		_damageRegion = new WindowsConsole.SmallRect {
 			Top = 0,
 			Left = 0,
 			Bottom = (short)Rows,
@@ -878,7 +896,7 @@ internal class WindowsDriver : ConsoleDriver {
 	}
 
 #if HACK_CHECK_WINCHANGED
-	private void ChangeWin (Object s, SizeChangedEventArgs e)
+	void ChangeWin (Object s, SizeChangedEventArgs e)
 	{
 		var w = e.Size.Width;
 		if (w == Cols - 3 && e.Size.Height < Rows) {
@@ -1000,22 +1018,21 @@ internal class WindowsDriver : ConsoleDriver {
 				// Return the mappedChar with they modifiers. Because mappedChar is un-shifted, if Shift was down
 				// we should keep it
 				return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)mappedChar);
-			} else {
-				// KeyChar is printable
-				if (keyInfo.Modifiers.HasFlag (ConsoleModifiers.Alt) && keyInfo.Modifiers.HasFlag (ConsoleModifiers.Control)) {
-					// AltGr support - AltGr is equivalent to Ctrl+Alt - the correct char is in KeyChar
-					return (KeyCode)keyInfo.KeyChar;
-				}
-
-				if (keyInfo.Modifiers != ConsoleModifiers.Shift) {
-					// If Shift wasn't down we don't need to do anything but return the mappedChar
-					return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)(mappedChar));
-				}
-
-				// Strip off Shift - We got here because they KeyChar from Windows is the shifted char (e.g. "Ç")
-				// and passing on Shift would be redundant.
-				return MapToKeyCodeModifiers (keyInfo.Modifiers & ~ConsoleModifiers.Shift, (KeyCode)keyInfo.KeyChar);
 			}
+			// KeyChar is printable
+			if (keyInfo.Modifiers.HasFlag (ConsoleModifiers.Alt) && keyInfo.Modifiers.HasFlag (ConsoleModifiers.Control)) {
+				// AltGr support - AltGr is equivalent to Ctrl+Alt - the correct char is in KeyChar
+				return (KeyCode)keyInfo.KeyChar;
+			}
+
+			if (keyInfo.Modifiers != ConsoleModifiers.Shift) {
+				// If Shift wasn't down we don't need to do anything but return the mappedChar
+				return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)mappedChar);
+			}
+
+			// Strip off Shift - We got here because they KeyChar from Windows is the shifted char (e.g. "Ç")
+			// and passing on Shift would be redundant.
+			return MapToKeyCodeModifiers (keyInfo.Modifiers & ~ConsoleModifiers.Shift, (KeyCode)keyInfo.KeyChar);
 		}
 
 		// A..Z are special cased:
@@ -1036,45 +1053,48 @@ internal class WindowsDriver : ConsoleDriver {
 				return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)(uint)keyInfo.Key);
 			}
 
-			if (((keyInfo.Modifiers == ConsoleModifiers.Shift) ^ (keyInfoEx.CapsLock))) {
+			if (keyInfo.Modifiers == ConsoleModifiers.Shift ^ keyInfoEx.CapsLock) {
 				// If (ShiftMask is on and CapsLock is off) or (ShiftMask is off and CapsLock is on) add the ShiftMask
 				if (char.IsUpper (keyInfo.KeyChar)) {
-					return (KeyCode)((uint)keyInfo.Key) | KeyCode.ShiftMask;
+					return (KeyCode)(uint)keyInfo.Key | KeyCode.ShiftMask;
 				}
 			}
-			return (KeyCode)(uint)keyInfo.KeyChar;
+			return (KeyCode)keyInfo.KeyChar;
 		}
 
 		// Handle control keys whose VK codes match the related ASCII value (those below ASCII 33) like ESC
 		if (Enum.IsDefined (typeof (KeyCode), (uint)keyInfo.Key)) {
 			// If the key is JUST a modifier, return it as just that key
-			if (keyInfo.Key == (ConsoleKey)VK.SHIFT) { // Shift 16
+			if (keyInfo.Key == (ConsoleKey)VK.SHIFT) {
+				// Shift 16
 				return KeyCode.ShiftMask;
 			}
 
-			if (keyInfo.Key == (ConsoleKey)VK.CONTROL) { // Ctrl 17
+			if (keyInfo.Key == (ConsoleKey)VK.CONTROL) {
+				// Ctrl 17
 				return KeyCode.CtrlMask;
 			}
 
-			if (keyInfo.Key == (ConsoleKey)VK.MENU) { // Alt 18
+			if (keyInfo.Key == (ConsoleKey)VK.MENU) {
+				// Alt 18
 				return KeyCode.AltMask;
 			}
 
 			if (keyInfo.KeyChar == 0) {
-				return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)(keyInfo.KeyChar));
-			} else if (keyInfo.Key != ConsoleKey.None) {
-				return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)(keyInfo.KeyChar));
-			} else {
-				return MapToKeyCodeModifiers (keyInfo.Modifiers & ~ConsoleModifiers.Shift, (KeyCode)(keyInfo.KeyChar));
+				return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)keyInfo.KeyChar);
 			}
+			if (keyInfo.Key != ConsoleKey.None) {
+				return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)keyInfo.KeyChar);
+			}
+			return MapToKeyCodeModifiers (keyInfo.Modifiers & ~ConsoleModifiers.Shift, (KeyCode)keyInfo.KeyChar);
 		}
 
 		// Handle control keys (e.g. CursorUp)
-		if (Enum.IsDefined (typeof (KeyCode), ((uint)keyInfo.Key + (uint)KeyCode.MaxCodePoint))) {
+		if (Enum.IsDefined (typeof (KeyCode), (uint)keyInfo.Key + (uint)KeyCode.MaxCodePoint)) {
 			return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)((uint)keyInfo.Key + (uint)KeyCode.MaxCodePoint));
 		}
 
-		return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)(keyInfo.KeyChar));
+		return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)keyInfo.KeyChar);
 	}
 
 	internal void ProcessInput (WindowsConsole.InputRecord inputEvent)
@@ -1109,7 +1129,7 @@ internal class WindowsDriver : ConsoleDriver {
 			var me = ToDriverMouse (inputEvent.MouseEvent);
 			OnMouseEvent (new MouseEventEventArgs (me));
 			if (_processButtonClick) {
-				OnMouseEvent (new MouseEventEventArgs (new MouseEvent () {
+				OnMouseEvent (new MouseEventEventArgs (new MouseEvent {
 					X = me.X,
 					Y = me.Y,
 					Flags = ProcessButtonClick (inputEvent.MouseEvent)
@@ -1134,18 +1154,9 @@ internal class WindowsDriver : ConsoleDriver {
 		}
 	}
 
-	WindowsConsole.ButtonState? _lastMouseButtonPressed = null;
-	bool _isButtonPressed = false;
-	bool _isButtonReleased = false;
-	bool _isButtonDoubleClicked = false;
-	Point? _point;
-	Point _pointMove;
-	bool _isOneFingerDoubleClicked = false;
-	bool _processButtonClick;
-
 	MouseEvent ToDriverMouse (WindowsConsole.MouseEventRecord mouseEvent)
 	{
-		MouseFlags mouseFlag = MouseFlags.AllEvents;
+		var mouseFlag = MouseFlags.AllEvents;
 
 		//System.Diagnostics.Debug.WriteLine (
 		//	$"X:{mouseEvent.MousePosition.X};Y:{mouseEvent.MousePosition.Y};ButtonState:{mouseEvent.ButtonState};EventFlags:{mouseEvent.EventFlags}");
@@ -1168,14 +1179,14 @@ internal class WindowsDriver : ConsoleDriver {
 			_isButtonReleased = false;
 		}
 
-		var p = new Point () {
+		var p = new Point {
 			X = mouseEvent.MousePosition.X,
 			Y = mouseEvent.MousePosition.Y
 		};
 
-		if ((mouseEvent.ButtonState != 0 && mouseEvent.EventFlags == 0 && _lastMouseButtonPressed == null && !_isButtonDoubleClicked) ||
-		     (_lastMouseButtonPressed == null && mouseEvent.EventFlags.HasFlag (WindowsConsole.EventFlags.MouseMoved) &&
-		     mouseEvent.ButtonState != 0 && !_isButtonReleased && !_isButtonDoubleClicked)) {
+		if (mouseEvent.ButtonState != 0 && mouseEvent.EventFlags == 0 && _lastMouseButtonPressed == null && !_isButtonDoubleClicked ||
+		    _lastMouseButtonPressed == null && mouseEvent.EventFlags.HasFlag (WindowsConsole.EventFlags.MouseMoved) &&
+		    mouseEvent.ButtonState != 0 && !_isButtonReleased && !_isButtonDoubleClicked) {
 			switch (mouseEvent.ButtonState) {
 			case WindowsConsole.ButtonState.Button1Pressed:
 				mouseFlag = MouseFlags.Button1Pressed;
@@ -1210,7 +1221,7 @@ internal class WindowsDriver : ConsoleDriver {
 			}
 
 		} else if (_lastMouseButtonPressed != null && mouseEvent.EventFlags == 0
-		      && !_isButtonReleased && !_isButtonDoubleClicked && !_isOneFingerDoubleClicked) {
+		                                           && !_isButtonReleased && !_isButtonDoubleClicked && !_isOneFingerDoubleClicked) {
 			switch (_lastMouseButtonPressed) {
 			case WindowsConsole.ButtonState.Button1Pressed:
 				mouseFlag = MouseFlags.Button1Released;
@@ -1226,13 +1237,13 @@ internal class WindowsDriver : ConsoleDriver {
 			}
 			_isButtonPressed = false;
 			_isButtonReleased = true;
-			if (_point != null && (((Point)_point).X == mouseEvent.MousePosition.X && ((Point)_point).Y == mouseEvent.MousePosition.Y)) {
+			if (_point != null && ((Point)_point).X == mouseEvent.MousePosition.X && ((Point)_point).Y == mouseEvent.MousePosition.Y) {
 				_processButtonClick = true;
 			} else {
 				_point = null;
 			}
 		} else if (mouseEvent.EventFlags == WindowsConsole.EventFlags.MouseMoved
-		      && !_isOneFingerDoubleClicked && _isButtonReleased && p == _point) {
+		           && !_isOneFingerDoubleClicked && _isButtonReleased && p == _point) {
 
 			mouseFlag = ProcessButtonClick (mouseEvent);
 
@@ -1278,7 +1289,7 @@ internal class WindowsDriver : ConsoleDriver {
 			}
 
 		} else if (mouseEvent.EventFlags == WindowsConsole.EventFlags.MouseWheeled &&
-		      mouseEvent.ControlKeyState == WindowsConsole.ControlKeyState.ShiftPressed) {
+		           mouseEvent.ControlKeyState == WindowsConsole.ControlKeyState.ShiftPressed) {
 			switch ((int)mouseEvent.ButtonState) {
 			case int v when v > 0:
 				mouseFlag = MouseFlags.WheeledLeft;
@@ -1314,7 +1325,7 @@ internal class WindowsDriver : ConsoleDriver {
 		//System.Diagnostics.Debug.WriteLine (
 		//	$"point.X:{(point != null ? ((Point)point).X : -1)};point.Y:{(point != null ? ((Point)point).Y : -1)}");
 
-		return new MouseEvent () {
+		return new MouseEvent {
 			X = mouseEvent.MousePosition.X,
 			Y = mouseEvent.MousePosition.Y,
 			Flags = mouseFlag
@@ -1337,7 +1348,7 @@ internal class WindowsDriver : ConsoleDriver {
 			mouseFlag = MouseFlags.Button3Clicked;
 			break;
 		}
-		_point = new Point () {
+		_point = new Point {
 			X = mouseEvent.MousePosition.X,
 			Y = mouseEvent.MousePosition.Y
 		};
@@ -1360,7 +1371,7 @@ internal class WindowsDriver : ConsoleDriver {
 	{
 		while (_isButtonPressed) {
 			await Task.Delay (100);
-			var me = new MouseEvent () {
+			var me = new MouseEvent {
 				X = _pointMove.X,
 				Y = _pointMove.Y,
 				Flags = mouseFlag
@@ -1388,7 +1399,7 @@ internal class WindowsDriver : ConsoleDriver {
 		}
 
 		if (mouseEvent.ControlKeyState.HasFlag (WindowsConsole.ControlKeyState.RightAltPressed) ||
-		     mouseEvent.ControlKeyState.HasFlag (WindowsConsole.ControlKeyState.LeftAltPressed)) {
+		    mouseEvent.ControlKeyState.HasFlag (WindowsConsole.ControlKeyState.LeftAltPressed)) {
 			mouseFlag |= MouseFlags.ButtonAlt;
 		}
 		return mouseFlag;
@@ -1442,16 +1453,13 @@ internal class WindowsDriver : ConsoleDriver {
 		};
 	}
 
-	public override bool IsRuneSupported (Rune rune)
-	{
-		return base.IsRuneSupported (rune) && rune.IsBmp;
-	}
+	public override bool IsRuneSupported (Rune rune) => base.IsRuneSupported (rune) && rune.IsBmp;
 
 	void ResizeScreen ()
 	{
 		_outputBuffer = new WindowsConsole.ExtendedCharInfo [Rows * Cols];
 		Clip = new Rect (0, 0, Cols, Rows);
-		_damageRegion = new WindowsConsole.SmallRect () {
+		_damageRegion = new WindowsConsole.SmallRect {
 			Top = 0,
 			Left = 0,
 			Bottom = (short)Rows,
@@ -1469,19 +1477,19 @@ internal class WindowsDriver : ConsoleDriver {
 			return;
 		}
 
-		var bufferCoords = new WindowsConsole.Coord () {
+		var bufferCoords = new WindowsConsole.Coord {
 			X = (short)Clip.Width,
 			Y = (short)Clip.Height
 		};
 
-		for (int row = 0; row < Rows; row++) {
+		for (var row = 0; row < Rows; row++) {
 			if (!_dirtyLines [row]) {
 				continue;
 			}
 			_dirtyLines [row] = false;
 
-			for (int col = 0; col < Cols; col++) {
-				int position = row * Cols + col;
+			for (var col = 0; col < Cols; col++) {
+				var position = row * Cols + col;
 				_outputBuffer [position].Attribute = Contents [row, col].Attribute.GetValueOrDefault ();
 				if (Contents [row, col].IsDirty == false) {
 					_outputBuffer [position].Empty = true;
@@ -1505,7 +1513,7 @@ internal class WindowsDriver : ConsoleDriver {
 			}
 		}
 
-		_damageRegion = new WindowsConsole.SmallRect () {
+		_damageRegion = new WindowsConsole.SmallRect {
 			Top = 0,
 			Left = 0,
 			Bottom = (short)Rows,
@@ -1515,7 +1523,7 @@ internal class WindowsDriver : ConsoleDriver {
 		if (!RunningUnitTests && WinConsole != null && !WinConsole.WriteToConsole (new Size (Cols, Rows), _outputBuffer, bufferCoords, _damageRegion, Force16Colors)) {
 			var err = Marshal.GetLastWin32Error ();
 			if (err != 0) {
-				throw new System.ComponentModel.Win32Exception (err);
+				throw new Win32Exception (err);
 			}
 		}
 		WindowsConsole.SmallRect.MakeEmpty (ref _damageRegion);
@@ -1528,19 +1536,17 @@ internal class WindowsDriver : ConsoleDriver {
 		UpdateCursor ();
 	}
 
-	CursorVisibility _cachedCursorVisibility;
-
 	public override void UpdateCursor ()
 	{
 		if (Col < 0 || Row < 0 || Col > Cols || Row > Rows) {
-			GetCursorVisibility (out CursorVisibility cursorVisibility);
+			GetCursorVisibility (out var cursorVisibility);
 			_cachedCursorVisibility = cursorVisibility;
 			SetCursorVisibility (CursorVisibility.Invisible);
 			return;
 		}
 
 		SetCursorVisibility (_cachedCursorVisibility);
-		var position = new WindowsConsole.Coord () {
+		var position = new WindowsConsole.Coord {
 			X = (short)Col,
 			Y = (short)Row
 		};
@@ -1565,21 +1571,18 @@ internal class WindowsDriver : ConsoleDriver {
 	}
 
 	/// <inheritdoc/>
-	public override bool EnsureCursorVisibility ()
-	{
-		return WinConsole == null || WinConsole.EnsureCursorVisibility ();
-	}
+	public override bool EnsureCursorVisibility () => WinConsole == null || WinConsole.EnsureCursorVisibility ();
 
 	public override void SendKeys (char keyChar, ConsoleKey key, bool shift, bool alt, bool control)
 	{
-		WindowsConsole.InputRecord input = new WindowsConsole.InputRecord {
+		var input = new WindowsConsole.InputRecord {
 			EventType = WindowsConsole.EventType.Key
 		};
 
-		WindowsConsole.KeyEventRecord keyEvent = new WindowsConsole.KeyEventRecord {
+		var keyEvent = new WindowsConsole.KeyEventRecord {
 			bKeyDown = true
 		};
-		WindowsConsole.ControlKeyState controlKey = new WindowsConsole.ControlKeyState ();
+		var controlKey = new WindowsConsole.ControlKeyState ();
 		if (shift) {
 			controlKey |= WindowsConsole.ControlKeyState.ShiftPressed;
 			keyEvent.UnicodeChar = '\0';
@@ -1643,10 +1646,7 @@ internal class WindowsDriver : ConsoleDriver {
 	}
 
 	#region Not Implemented
-	public override void Suspend ()
-	{
-		throw new NotImplementedException ();
-	}
+	public override void Suspend () => throw new NotImplementedException ();
 	#endregion
 }
 
@@ -1657,17 +1657,17 @@ internal class WindowsDriver : ConsoleDriver {
 /// <remarks>
 /// This implementation is used for WindowsDriver.
 /// </remarks>
-internal class WindowsMainLoop : IMainLoopDriver {
-	readonly ManualResetEventSlim _eventReady = new ManualResetEventSlim (false);
-	readonly ManualResetEventSlim _waitForProbe = new ManualResetEventSlim (false);
-	MainLoop _mainLoop;
+class WindowsMainLoop : IMainLoopDriver {
 	readonly ConsoleDriver _consoleDriver;
-	readonly WindowsConsole _winConsole;
-	CancellationTokenSource _eventReadyTokenSource = new CancellationTokenSource ();
-	CancellationTokenSource _inputHandlerTokenSource = new CancellationTokenSource ();
+	readonly ManualResetEventSlim _eventReady = new (false);
 
 	// The records that we keep fetching
-	readonly Queue<WindowsConsole.InputRecord []> _resultQueue = new Queue<WindowsConsole.InputRecord []> ();
+	readonly Queue<WindowsConsole.InputRecord []> _resultQueue = new ();
+	readonly ManualResetEventSlim _waitForProbe = new (false);
+	readonly WindowsConsole _winConsole;
+	CancellationTokenSource _eventReadyTokenSource = new ();
+	readonly CancellationTokenSource _inputHandlerTokenSource = new ();
+	MainLoop _mainLoop;
 
 	/// <summary>
 	/// Invoked when the window is changed.
@@ -1689,59 +1689,7 @@ internal class WindowsMainLoop : IMainLoopDriver {
 #endif
 	}
 
-	void WindowsInputHandler ()
-	{
-		while (_mainLoop != null) {
-			try {
-				if (!_inputHandlerTokenSource.IsCancellationRequested) {
-					_waitForProbe.Wait (_inputHandlerTokenSource.Token);
-				}
-
-			} catch (OperationCanceledException) {
-				return;
-			} finally {
-				_waitForProbe.Reset ();
-			}
-
-			if (_resultQueue?.Count == 0) {
-				_resultQueue.Enqueue (_winConsole.ReadConsoleInput ());
-			}
-
-			_eventReady.Set ();
-		}
-	}
-
-#if HACK_CHECK_WINCHANGED
-	readonly ManualResetEventSlim _winChange = new ManualResetEventSlim (false);
-	bool _winChanged;
-	Size _windowSize;
-	void CheckWinChange ()
-	{
-		while (_mainLoop != null) {
-			_winChange.Wait ();
-			_winChange.Reset ();
-
-			// Check if the window size changed every half second. 
-			// We do this to minimize the weird tearing seen on Windows when resizing the console
-			while (_mainLoop != null) {
-				Task.Delay (500).Wait ();
-				_windowSize = _winConsole.GetConsoleBufferWindow (out _);
-				if (_windowSize != Size.Empty && (_windowSize.Width != _consoleDriver.Cols
-								|| _windowSize.Height != _consoleDriver.Rows)) {
-					break;
-				}
-			}
-
-			_winChanged = true;
-			_eventReady.Set ();
-		}
-	}
-#endif
-
-	void IMainLoopDriver.Wakeup ()
-	{
-		_eventReady.Set ();
-	}
+	void IMainLoopDriver.Wakeup () => _eventReady.Set ();
 
 	bool IMainLoopDriver.EventsPending ()
 	{
@@ -1812,13 +1760,62 @@ internal class WindowsMainLoop : IMainLoopDriver {
 
 		_mainLoop = null;
 	}
+
+	void WindowsInputHandler ()
+	{
+		while (_mainLoop != null) {
+			try {
+				if (!_inputHandlerTokenSource.IsCancellationRequested) {
+					_waitForProbe.Wait (_inputHandlerTokenSource.Token);
+				}
+
+			} catch (OperationCanceledException) {
+				return;
+			} finally {
+				_waitForProbe.Reset ();
+			}
+
+			if (_resultQueue?.Count == 0) {
+				_resultQueue.Enqueue (_winConsole.ReadConsoleInput ());
+			}
+
+			_eventReady.Set ();
+		}
+	}
+
+#if HACK_CHECK_WINCHANGED
+	readonly ManualResetEventSlim _winChange = new (false);
+	bool _winChanged;
+	Size _windowSize;
+	void CheckWinChange ()
+	{
+		while (_mainLoop != null) {
+			_winChange.Wait ();
+			_winChange.Reset ();
+
+			// Check if the window size changed every half second. 
+			// We do this to minimize the weird tearing seen on Windows when resizing the console
+			while (_mainLoop != null) {
+				Task.Delay (500).Wait ();
+				_windowSize = _winConsole.GetConsoleBufferWindow (out _);
+				if (_windowSize != Size.Empty && (_windowSize.Width != _consoleDriver.Cols
+				                                  || _windowSize.Height != _consoleDriver.Rows)) {
+					break;
+				}
+			}
+
+			_winChanged = true;
+			_eventReady.Set ();
+		}
+	}
+#endif
 }
 
 class WindowsClipboard : ClipboardBase {
-	public WindowsClipboard ()
-	{
-		IsSupported = IsClipboardFormatAvailable (_cfUnicodeText);
-	}
+
+	const uint _cfUnicodeText = 13;
+
+	public WindowsClipboard () => IsSupported = IsClipboardFormatAvailable (_cfUnicodeText);
 
 	public override bool IsSupported { get; }
 
@@ -1829,12 +1826,12 @@ class WindowsClipboard : ClipboardBase {
 				return string.Empty;
 			}
 
-			IntPtr handle = GetClipboardData (_cfUnicodeText);
+			var handle = GetClipboardData (_cfUnicodeText);
 			if (handle == IntPtr.Zero) {
 				return string.Empty;
 			}
 
-			IntPtr pointer = IntPtr.Zero;
+			var pointer = IntPtr.Zero;
 
 			try {
 				pointer = GlobalLock (handle);
@@ -1842,12 +1839,12 @@ class WindowsClipboard : ClipboardBase {
 					return string.Empty;
 				}
 
-				int size = GlobalSize (handle);
-				byte [] buff = new byte [size];
+				var size = GlobalSize (handle);
+				var buff = new byte [size];
 
 				Marshal.Copy (pointer, buff, 0, size);
 
-				return System.Text.Encoding.Unicode.GetString (buff).TrimEnd ('\0');
+				return Encoding.Unicode.GetString (buff).TrimEnd ('\0');
 			} finally {
 				if (pointer != IntPtr.Zero) {
 					GlobalUnlock (handle);
@@ -1914,41 +1911,36 @@ class WindowsClipboard : ClipboardBase {
 		}
 	}
 
-	const uint _cfUnicodeText = 13;
-
-	void ThrowWin32 ()
-	{
-		throw new Win32Exception (Marshal.GetLastWin32Error ());
-	}
+	void ThrowWin32 () => throw new Win32Exception (Marshal.GetLastWin32Error ());
 
 	[DllImport ("User32.dll", SetLastError = true)]
 	[return: MarshalAs (UnmanagedType.Bool)]
-	static extern bool IsClipboardFormatAvailable (uint format);
+	extern static bool IsClipboardFormatAvailable (uint format);
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern int GlobalSize (IntPtr handle);
+	extern static int GlobalSize (IntPtr handle);
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
-	static extern IntPtr GlobalLock (IntPtr hMem);
+	extern static IntPtr GlobalLock (IntPtr hMem);
 
 	[DllImport ("kernel32.dll", SetLastError = true)]
 	[return: MarshalAs (UnmanagedType.Bool)]
-	static extern bool GlobalUnlock (IntPtr hMem);
+	extern static bool GlobalUnlock (IntPtr hMem);
 
 	[DllImport ("user32.dll", SetLastError = true)]
 	[return: MarshalAs (UnmanagedType.Bool)]
-	static extern bool OpenClipboard (IntPtr hWndNewOwner);
+	extern static bool OpenClipboard (IntPtr hWndNewOwner);
 
 	[DllImport ("user32.dll", SetLastError = true)]
 	[return: MarshalAs (UnmanagedType.Bool)]
-	static extern bool CloseClipboard ();
+	extern static bool CloseClipboard ();
 
 	[DllImport ("user32.dll", SetLastError = true)]
-	static extern IntPtr SetClipboardData (uint uFormat, IntPtr data);
+	extern static IntPtr SetClipboardData (uint uFormat, IntPtr data);
 
 	[DllImport ("user32.dll")]
-	static extern bool EmptyClipboard ();
+	extern static bool EmptyClipboard ();
 
 	[DllImport ("user32.dll", SetLastError = true)]
-	static extern IntPtr GetClipboardData (uint uFormat);
+	extern static IntPtr GetClipboardData (uint uFormat);
 }

@@ -10,10 +10,10 @@ namespace UICatalog.Scenarios;
 [ScenarioMetadata ("VkeyPacketSimulator", "Simulates the Virtual Key Packet")]
 [ScenarioCategory ("Mouse and Keyboard")]
 public class VkeyPacketSimulator : Scenario {
-	List<KeyCode> _keyboardStrokes = new ();
-	bool _outputStarted = false;
-	bool _wasUnknown = false;
-	static ManualResetEventSlim _stopOutput = new (false);
+	static readonly ManualResetEventSlim _stopOutput = new (false);
+	readonly List<KeyCode> _keyboardStrokes = new ();
+	bool _outputStarted;
+	bool _wasUnknown;
 
 	public override void Setup ()
 	{
@@ -200,10 +200,10 @@ public class VkeyPacketSimulator : Scenario {
 
 		void Win_LayoutComplete (object sender, LayoutEventArgs obj)
 		{
-			inputHorizontalRuler.Text = outputHorizontalRuler.Text = ruler.Repeat ((int)Math.Ceiling ((double)inputHorizontalRuler.Bounds.Width / (double)ruler.Length)) [0..inputHorizontalRuler.Bounds.Width];
+			inputHorizontalRuler.Text = outputHorizontalRuler.Text = ruler.Repeat ((int)Math.Ceiling (inputHorizontalRuler.Bounds.Width / (double)ruler.Length)) [..inputHorizontalRuler.Bounds.Width];
 			inputVerticalRuler.Height = tvInput.Frame.Height + 1;
-			inputVerticalRuler.Text = ruler.Repeat ((int)Math.Ceiling ((double)inputVerticalRuler.Bounds.Height / (double)ruler.Length)) [0..inputVerticalRuler.Bounds.Height];
-			outputVerticalRuler.Text = ruler.Repeat ((int)Math.Ceiling ((double)outputVerticalRuler.Bounds.Height / (double)ruler.Length)) [0..outputVerticalRuler.Bounds.Height];
+			inputVerticalRuler.Text = ruler.Repeat ((int)Math.Ceiling (inputVerticalRuler.Bounds.Height / (double)ruler.Length)) [..inputVerticalRuler.Bounds.Height];
+			outputVerticalRuler.Text = ruler.Repeat ((int)Math.Ceiling (outputVerticalRuler.Bounds.Height / (double)ruler.Length)) [..outputVerticalRuler.Bounds.Height];
 		}
 
 		Win.LayoutComplete += Win_LayoutComplete;

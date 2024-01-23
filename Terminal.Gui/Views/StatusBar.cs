@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace Terminal.Gui;
+
 /// <summary>
-/// <see cref="StatusItem"/> objects are contained by <see cref="StatusBar"/> <see cref="View"/>s. 
-/// Each <see cref="StatusItem"/> has a title, a shortcut (hotkey), and an <see cref="Command"/> that will be invoked when the 
+/// <see cref="StatusItem"/> objects are contained by <see cref="StatusBar"/> <see cref="View"/>s.
+/// Each <see cref="StatusItem"/> has a title, a shortcut (hotkey), and an <see cref="Command"/> that will be invoked when
+/// the
 /// <see cref="StatusItem.Shortcut"/> is pressed.
 /// The <see cref="StatusItem.Shortcut"/> will be a global hotkey for the application in the current context of the screen.
-/// The color of the <see cref="StatusItem.Title"/> will be changed after each ~. 
+/// The color of the <see cref="StatusItem.Title"/> will be changed after each ~.
 /// A <see cref="StatusItem.Title"/> set to `~F1~ Help` will render as *F1* using <see cref="ColorScheme.HotNormal"/> and
 /// *Help* as <see cref="ColorScheme.HotNormal"/>.
 /// </summary>
@@ -38,7 +40,7 @@ public class StatusItem {
 	/// </summary>
 	/// <value>The title.</value>
 	/// <remarks>
-	/// The colour of the <see cref="StatusItem.Title"/> will be changed after each ~. 
+	/// The colour of the <see cref="StatusItem.Title"/> will be changed after each ~.
 	/// A <see cref="StatusItem.Title"/> set to `~F1~ Help` will render as *F1* using <see cref="ColorScheme.HotNormal"/> and
 	/// *Help* as <see cref="ColorScheme.HotNormal"/>.
 	/// </remarks>
@@ -51,34 +53,65 @@ public class StatusItem {
 	public Action Action { get; set; }
 
 	/// <summary>
-	/// Gets or sets the action to be invoked to determine if the <see cref="StatusItem"/> can be triggered. 
-	/// If <see cref="CanExecute"/> returns <see langword="true"/> the status item will be enabled. Otherwise, it will be disabled.
+	/// Gets or sets the action to be invoked to determine if the <see cref="StatusItem"/> can be triggered.
+	/// If <see cref="CanExecute"/> returns <see langword="true"/> the status item will be enabled. Otherwise, it will be
+	/// disabled.
 	/// </summary>
 	/// <value>Function to determine if the action is can be executed or not.</value>
 	public Func<bool> CanExecute { get; set; }
-
-	/// <summary>
-	/// Returns <see langword="true"/> if the status item is enabled. This method is a wrapper around <see cref="CanExecute"/>.
-	/// </summary>
-	public bool IsEnabled ()
-	{
-		return CanExecute?.Invoke () ?? true;
-	}
 
 	/// <summary>
 	/// Gets or sets arbitrary data for the status item.
 	/// </summary>
 	/// <remarks>This property is not used internally.</remarks>
 	public object Data { get; set; }
-};
+
+	/// <summary>
+	/// Returns <see langword="true"/> if the status item is enabled. This method is a wrapper around <see cref="CanExecute"/>.
+	/// </summary>
+	public bool IsEnabled () => CanExecute?.Invoke () ?? true;
+}
 
 /// <summary>
-/// A status bar is a <see cref="View"/> that snaps to the bottom of a <see cref="Toplevel"/> displaying set of <see cref="StatusItem"/>s.
-/// The <see cref="StatusBar"/> should be context sensitive. This means, if the main menu and an open text editor are visible, the items probably shown will
-/// be ~F1~ Help ~F2~ Save ~F3~ Load. While a dialog to ask a file to load is executed, the remaining commands will probably be ~F1~ Help.
+/// A status bar is a <see cref="View"/> that snaps to the bottom of a <see cref="Toplevel"/> displaying set of
+/// <see cref="StatusItem"/>s.
+/// The <see cref="StatusBar"/> should be context sensitive. This means, if the main menu and an open text editor are
+/// visible, the items probably shown will
+/// be ~F1~ Help ~F2~ Save ~F3~ Load. While a dialog to ask a file to load is executed, the remaining commands will
+/// probably be ~F1~ Help.
 /// So for each context must be a new instance of a status bar.
 /// </summary>
 public class StatusBar : View {
+	static Rune _shortcutDelimiter = (Rune)'=';
+	StatusItem [] _items = { };
+
+	StatusItem _itemToInvoke;
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="StatusBar"/> class.
+	/// </summary>
+	public StatusBar () : this (items: new StatusItem [] { }) { }
+
+	/// <summary>
+	/// Initializes a new instance of the <see cref="StatusBar"/> class with the specified set of <see cref="StatusItem"/>s.
+	/// The <see cref="StatusBar"/> will be drawn on the lowest line of the terminal or <see cref="View.SuperView"/> (if not
+	/// null).
+	/// </summary>
+	/// <param name="items">A list of status bar items.</param>
+	public StatusBar (StatusItem [] items)
+	{
+		if (items != null) {
+			Items = items;
+		}
+		CanFocus = false;
+		ColorScheme = Colors.ColorSchemes ["Menu"];
+		X = 0;
+		Y = Pos.AnchorEnd (1);
+		Width = Dim.Fill ();
+		Height = 1;
+		AddCommand (Command.Accept, InvokeItem);
+	}
+
 	/// <summary>
 	/// The items that compose the <see cref="StatusBar"/>
 	/// </summary>
@@ -96,30 +129,17 @@ public class StatusBar : View {
 	}
 
 	/// <summary>
-	/// Initializes a new instance of the <see cref="StatusBar"/> class.
+	/// Gets or sets shortcut delimiter separator. The default is "-".
 	/// </summary>
-	public StatusBar () : this (items: new StatusItem [] { }) { }
-
-	/// <summary>
-	/// Initializes a new instance of the <see cref="StatusBar"/> class with the specified set of <see cref="StatusItem"/>s.
-	/// The <see cref="StatusBar"/> will be drawn on the lowest line of the terminal or <see cref="View.SuperView"/> (if not null).
-	/// </summary>
-	/// <param name="items">A list of status bar items.</param>
-	public StatusBar (StatusItem [] items) : base ()
-	{
-		if (items != null) {
-			Items = items;
+	public static Rune ShortcutDelimiter {
+		get => _shortcutDelimiter;
+		set {
+			if (_shortcutDelimiter != value) {
+				_shortcutDelimiter = value == default ? (Rune)'=' : value;
+			}
 		}
-		CanFocus = false;
-		ColorScheme = Colors.ColorSchemes ["Menu"];
-		X = 0;
-		Y = Pos.AnchorEnd (1);
-		Width = Dim.Fill ();
-		Height = 1;
-		AddCommand (Command.Accept, InvokeItem);
 	}
 
-	StatusItem _itemToInvoke;
 	bool? InvokeItem ()
 	{
 		if (_itemToInvoke is { Action: not null }) {
@@ -136,7 +156,7 @@ public class StatusBar : View {
 		// InvokeKeyBindings doesn't pass any context so we can't tell which item it is for.
 		// So before we call the base class we set SelectedItem appropriately.
 		var key = keyEvent.KeyCode;
-		if (KeyBindings.TryGet(key, out _)) {
+		if (KeyBindings.TryGet (key, out _)) {
 			// Search RadioLabels 
 			foreach (var item in Items) {
 				if (item.Shortcut == key) {
@@ -148,20 +168,6 @@ public class StatusBar : View {
 
 		}
 		return base.OnInvokingKeyBindings (keyEvent);
-	}
-	static Rune _shortcutDelimiter = (Rune)'=';
-	StatusItem [] _items = new StatusItem [] { };
-
-	/// <summary>
-	/// Gets or sets shortcut delimiter separator. The default is "-".
-	/// </summary>
-	public static Rune ShortcutDelimiter {
-		get => _shortcutDelimiter;
-		set {
-			if (_shortcutDelimiter != value) {
-				_shortcutDelimiter = value == default ? (Rune)'=' : value;
-			}
-		}
 	}
 
 	Attribute ToggleScheme (Attribute scheme)
@@ -187,17 +193,17 @@ public class StatusBar : View {
 	{
 		Move (0, 0);
 		Driver.SetAttribute (GetNormalColor ());
-		for (int i = 0; i < Frame.Width; i++) {
+		for (var i = 0; i < Frame.Width; i++) {
 			Driver.AddRune ((Rune)' ');
 		}
 
 		Move (1, 0);
 		var scheme = GetNormalColor ();
 		Driver.SetAttribute (scheme);
-		for (int i = 0; i < Items.Length; i++) {
+		for (var i = 0; i < Items.Length; i++) {
 			var title = Items [i].Title;
 			Driver.SetAttribute (DetermineColorSchemeFor (Items [i]));
-			for (int n = 0; n < Items [i].Title.GetRuneCount (); n++) {
+			for (var n = 0; n < Items [i].Title.GetRuneCount (); n++) {
 				if (title [n] == '~') {
 					if (Items [i].IsEnabled ()) {
 						scheme = ToggleScheme (scheme);
@@ -208,20 +214,21 @@ public class StatusBar : View {
 			}
 			if (i + 1 < Items.Length) {
 				Driver.AddRune ((Rune)' ');
-				Driver.AddRune (CM.Glyphs.VLine);
+				Driver.AddRune (Glyphs.VLine);
 				Driver.AddRune ((Rune)' ');
 			}
 		}
 	}
-	
+
 	///<inheritdoc/>
 	public override bool MouseEvent (MouseEvent me)
 	{
-		if (me.Flags != MouseFlags.Button1Clicked)
+		if (me.Flags != MouseFlags.Button1Clicked) {
 			return false;
+		}
 
-		int pos = 1;
-		for (int i = 0; i < Items.Length; i++) {
+		var pos = 1;
+		for (var i = 0; i < Items.Length; i++) {
 			if (me.X >= pos && me.X < pos + GetItemTitleLength (Items [i].Title)) {
 				var item = Items [i];
 				if (item.IsEnabled ()) {
@@ -236,10 +243,11 @@ public class StatusBar : View {
 
 	int GetItemTitleLength (string title)
 	{
-		int len = 0;
+		var len = 0;
 		foreach (var ch in title) {
-			if (ch == '~')
+			if (ch == '~') {
 				continue;
+			}
 			len++;
 		}
 
@@ -248,8 +256,9 @@ public class StatusBar : View {
 
 	void Run (Action action)
 	{
-		if (action == null)
+		if (action == null) {
 			return;
+		}
 
 		Application.MainLoop.AddIdle (() => {
 			action ();

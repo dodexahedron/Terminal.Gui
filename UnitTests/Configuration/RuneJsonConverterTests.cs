@@ -1,8 +1,9 @@
 ﻿using System.Text;
-using Xunit;
 using System.Text.Json;
+using Xunit;
 
 namespace Terminal.Gui.ConfigurationTests;
+
 public class RunJsonConverterTests {
 
 	[Theory]
@@ -41,7 +42,7 @@ public class RunJsonConverterTests {
 	[InlineData ("\\UFFF1F34E")]
 	[InlineData ("\\ud83d")] // not printable "high surrogate"
 	[InlineData ("\\udc3d")] // not printable "low surrogate"
-	[InlineData ("\\ud83d \\u1c69")]  // bad surrogate pair
+	[InlineData ("\\ud83d \\u1c69")] // bad surrogate pair
 	[InlineData ("\\ud83ddc69")]
 	// Emoji - Family Unit:
 	// Woman (U+1F469, 👩)
@@ -61,6 +62,4 @@ public class RunJsonConverterTests {
 		// Assert
 		Assert.Throws<JsonException> (() => JsonSerializer.Deserialize<Rune> (json, ConfigurationManager._serializerOptions));
 	}
-
 }
-

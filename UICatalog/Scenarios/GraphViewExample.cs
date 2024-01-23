@@ -18,7 +18,7 @@ public class GraphViewExample : Scenario {
 	GraphView _graphView;
 	MenuItem _miDiags;
 	MenuItem _miShowBorder;
-	Thickness _thickness = new Thickness (1, 1, 1, 1);
+	readonly Thickness _thickness = new (1, 1, 1, 1);
 
 	public override void Setup ()
 	{

@@ -9,19 +9,19 @@ namespace UICatalog.Scenarios;
 [ScenarioMetadata ("All Views Tester", "Provides a test UI for all classes derived from View.")]
 [ScenarioCategory ("Layout")] [ScenarioCategory ("Tests")] [ScenarioCategory ("Top Level Windows")]
 public class AllViewsTester : Scenario {
+	readonly List<string> _dimNames = new () { "Factor", "Fill", "Absolute" };
+
+	// TODO: This is missing some
+	readonly List<string> _posNames = new () { "Factor", "AnchorEnd", "Center", "Absolute" };
 	ListView _classListView;
 	CheckBox _computedCheckBox;
 	View _curView;
-	readonly List<string> _dimNames = new () { "Factor", "Fill", "Absolute" };
 	FrameView _hostPane;
 	RadioGroup _hRadioGroup;
 	TextField _hText;
 	int _hVal;
 	FrameView _leftPane;
 	FrameView _locationFrame;
-
-	// TODO: This is missing some
-	readonly List<string> _posNames = new () { "Factor", "AnchorEnd", "Center", "Absolute" };
 
 	// Settings
 	FrameView _settingsPane;

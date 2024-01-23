@@ -1,7 +1,7 @@
 ﻿using Xunit;
 using Xunit.Abstractions;
 
-namespace Terminal.Gui.ViewsTests; 
+namespace Terminal.Gui.ViewsTests;
 
 public class ButtonTests {
 	readonly ITestOutputHelper _output;
@@ -261,7 +261,7 @@ public class ButtonTests {
 		Assert.Equal (KeyCode.S, btn.HotKey);
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void Update_Only_On_Or_After_Initialize ()
 	{
 		var btn = new Button ("Say Hello 你") {
@@ -300,7 +300,7 @@ public class ButtonTests {
 		Assert.Equal (new Rect (0, 0, 30, 5), pos);
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void Update_Parameterless_Only_On_Or_After_Initialize ()
 	{
 		var btn = new Button {
@@ -340,7 +340,7 @@ public class ButtonTests {
 		Assert.Equal (new Rect (0, 0, 30, 5), pos);
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void AutoSize_Stays_True_With_EmptyText ()
 	{
 		var btn = new Button {
@@ -378,7 +378,7 @@ public class ButtonTests {
 		TestHelpers.AssertDriverContentsWithFrameAre (expected, _output);
 	}
 
-	[Fact, AutoInitShutdown]
+	[Fact] [AutoInitShutdown]
 	public void AutoSize_Stays_True_Center ()
 	{
 		var btn = new Button {
@@ -545,7 +545,7 @@ public class ButtonTests {
 			Width = Dim.Fill (),
 			Height = Dim.Fill ()
 		};
-		tabView.AddTab (new Tab () { DisplayText = "Find", View = tab }, true);
+		tabView.AddTab (new Tab { DisplayText = "Find", View = tab }, true);
 
 		var win = new Window {
 			Width = Dim.Fill (),
@@ -670,11 +670,11 @@ public class ButtonTests {
 		btn.HotKeyChanged += (s, e) => {
 			sender = s;
 			args = e;
-		btn.HotKeyChanged += (s, e) => {
-			sender = s;
-			args = e;
+			btn.HotKeyChanged += (s, e) => {
+				sender = s;
+				args = e;
 
-		};
+			};
 		};
 
 		btn.HotKey = KeyCode.R;

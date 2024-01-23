@@ -6,7 +6,7 @@ using Terminal.Gui;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace UICatalog.Tests; 
+namespace UICatalog.Tests;
 
 public class ScenarioTests {
 	readonly ITestOutputHelper _output;

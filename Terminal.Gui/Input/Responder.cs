@@ -19,38 +19,12 @@ using System.Linq;
 using System.Reflection;
 
 namespace Terminal.Gui;
+
 /// <summary>
 /// Responder base class implemented by objects that want to participate on keyboard and mouse input.
 /// </summary>
 public class Responder : IDisposable {
 	bool disposedValue;
-
-#if DEBUG_IDISPOSABLE
-	/// <summary>
-	/// For debug purposes to verify objects are being disposed properly
-	/// </summary>
-	public bool WasDisposed = false;
-	/// <summary>
-	/// For debug purposes to verify objects are being disposed properly
-	/// </summary>
-	public int DisposedCount = 0;
-	/// <summary>
-	/// For debug purposes
-	/// </summary>
-	public static List<Responder> Instances = new List<Responder> ();
-	/// <summary>
-	/// For debug purposes
-	/// </summary>
-	public Responder ()
-	{
-		Instances.Add (this);
-	}
-#endif
-
-	/// <summary>
-	/// Event raised when <see cref="Dispose()"/> has been called to signal that this object is being disposed.
-	/// </summary>
-	public event EventHandler Disposing;
 
 	/// <summary>
 	/// Gets or sets a value indicating whether this <see cref="Responder"/> can focus.
@@ -75,14 +49,34 @@ public class Responder : IDisposable {
 	public virtual bool Visible { get; set; } = true;
 
 	/// <summary>
+	/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resource.
+	/// </summary>
+	public void Dispose ()
+	{
+		// Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+		Disposing?.Invoke (this, EventArgs.Empty);
+		Dispose (disposing: true);
+		GC.SuppressFinalize (this);
+#if DEBUG_IDISPOSABLE
+		WasDisposed = true;
+
+		foreach (var instance in Instances.Where (x => x.WasDisposed).ToList ()) {
+			Instances.Remove (instance);
+		}
+#endif
+	}
+
+	/// <summary>
+	/// Event raised when <see cref="Dispose()"/> has been called to signal that this object is being disposed.
+	/// </summary>
+	public event EventHandler Disposing;
+
+	/// <summary>
 	/// Method invoked when a mouse event is generated
 	/// </summary>
 	/// <returns><c>true</c>, if the event was handled, <c>false</c> otherwise.</returns>
 	/// <param name="mouseEvent">Contains the details about the mouse event.</param>
-	public virtual bool MouseEvent (MouseEvent mouseEvent)
-	{
-		return false;
-	}
+	public virtual bool MouseEvent (MouseEvent mouseEvent) => false;
 
 	/// <summary>
 	/// Called when the mouse first enters the view; the view will now
@@ -91,10 +85,7 @@ public class Responder : IDisposable {
 	/// </summary>
 	/// <param name="mouseEvent"></param>
 	/// <returns><c>true</c>, if the event was handled, <c>false</c> otherwise.</returns>
-	public virtual bool OnMouseEnter (MouseEvent mouseEvent)
-	{
-		return false;
-	}
+	public virtual bool OnMouseEnter (MouseEvent mouseEvent) => false;
 
 	/// <summary>
 	/// Called when the mouse has moved outside of the view; the view will no longer receive mouse events (until
@@ -102,30 +93,21 @@ public class Responder : IDisposable {
 	/// </summary>
 	/// <param name="mouseEvent"></param>
 	/// <returns><c>true</c>, if the event was handled, <c>false</c> otherwise.</returns>
-	public virtual bool OnMouseLeave (MouseEvent mouseEvent)
-	{
-		return false;
-	}
+	public virtual bool OnMouseLeave (MouseEvent mouseEvent) => false;
 
 	/// <summary>
 	/// Method invoked when a view gets focus.
 	/// </summary>
 	/// <param name="view">The view that is losing focus.</param>
 	/// <returns><c>true</c>, if the event was handled, <c>false</c> otherwise.</returns>
-	public virtual bool OnEnter (View view)
-	{
-		return false;
-	}
+	public virtual bool OnEnter (View view) => false;
 
 	/// <summary>
 	/// Method invoked when a view loses focus.
 	/// </summary>
 	/// <param name="view">The view that is getting focus.</param>
 	/// <returns><c>true</c>, if the event was handled, <c>false</c> otherwise.</returns>
-	public virtual bool OnLeave (View view)
-	{
-		return false;
-	}
+	public virtual bool OnLeave (View view) => false;
 
 	/// <summary>
 	/// Method invoked when the <see cref="CanFocus"/> property from a view is changed.
@@ -151,7 +133,7 @@ public class Responder : IDisposable {
 	/// <returns><see langword="true"/> if it's overridden, <see langword="false"/> otherwise.</returns>
 	internal static bool IsOverridden (Responder subclass, string method)
 	{
-		MethodInfo m = subclass.GetType ().GetMethod (method,
+		var m = subclass.GetType ().GetMethod (method,
 			BindingFlags.Instance
 			| BindingFlags.Public
 			| BindingFlags.NonPublic
@@ -185,21 +167,25 @@ public class Responder : IDisposable {
 		}
 	}
 
-	/// <summary>
-	/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resource.
-	/// </summary>
-	public void Dispose ()
-	{
-		// Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-		Disposing?.Invoke (this, EventArgs.Empty);
-		Dispose (disposing: true);
-		GC.SuppressFinalize (this);
 #if DEBUG_IDISPOSABLE
-		WasDisposed = true;
+	/// <summary>
+	/// For debug purposes to verify objects are being disposed properly
+	/// </summary>
+	public bool WasDisposed;
 
-		foreach (var instance in Instances.Where (x => x.WasDisposed).ToList ()) {
-			Instances.Remove (instance);
-		}
+	/// <summary>
+	/// For debug purposes to verify objects are being disposed properly
+	/// </summary>
+	public int DisposedCount = 0;
+
+	/// <summary>
+	/// For debug purposes
+	/// </summary>
+	public static List<Responder> Instances = new ();
+
+	/// <summary>
+	/// For debug purposes
+	/// </summary>
+	public Responder () => Instances.Add (this);
 #endif
-	}
 }

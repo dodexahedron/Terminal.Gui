@@ -9,10 +9,7 @@ namespace Terminal.Gui.ViewsTests;
 public class MenuTests {
 	readonly ITestOutputHelper _output;
 
-	public MenuTests (ITestOutputHelper output)
-	{
-		_output = output;
-	}
+	public MenuTests (ITestOutputHelper output) => _output = output;
 
 	// TODO: Create more low-level unit tests for Menu and MenuItem
 

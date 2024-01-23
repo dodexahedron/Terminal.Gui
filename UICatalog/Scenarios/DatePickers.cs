@@ -3,7 +3,7 @@
 namespace UICatalog.Scenarios;
 
 [ScenarioMetadata ("Date Picker", "Demonstrates how to use DatePicker class")]
-[ScenarioCategory ("Controls"), ScenarioCategory ("DateTime")]
+[ScenarioCategory ("Controls")] [ScenarioCategory ("DateTime")]
 public class DatePickers : Scenario {
 
 

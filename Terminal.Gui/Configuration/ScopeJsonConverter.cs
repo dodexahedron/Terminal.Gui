@@ -1,10 +1,11 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
-#nullable enable
 
 namespace Terminal.Gui;
 
@@ -13,20 +14,7 @@ namespace Terminal.Gui;
 /// config data to/from <see cref="ConfigurationManager"/> JSON documents.
 /// </summary>
 /// <typeparam name="scopeT"></typeparam>
-internal class ScopeJsonConverter<scopeT> : JsonConverter<scopeT> where scopeT : Scope<scopeT> {
-	// See: https://stackoverflow.com/questions/60830084/how-to-pass-an-argument-by-reference-using-reflection
-	internal abstract class ReadHelper {
-		public abstract object? Read (ref Utf8JsonReader reader, Type type, JsonSerializerOptions options);
-	}
-
-	internal class ReadHelper<converterT> : ReadHelper {
-		private readonly ReadDelegate _readDelegate;
-		private delegate converterT ReadDelegate (ref Utf8JsonReader reader, Type type, JsonSerializerOptions options);
-		public ReadHelper (object converter)
-			=> _readDelegate = (ReadDelegate)Delegate.CreateDelegate (typeof (ReadDelegate), converter, "Read");
-		public override object? Read (ref Utf8JsonReader reader, Type type, JsonSerializerOptions options)
-			=> _readDelegate.Invoke (ref reader, type, options);
-	}
+class ScopeJsonConverter<scopeT> : JsonConverter<scopeT> where scopeT : Scope<scopeT> {
 
 	public override scopeT Read (ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 	{
@@ -67,7 +55,7 @@ internal class ScopeJsonConverter<scopeT> : JsonConverter<scopeT> where scopeT :
 					try {
 						scope! [propertyName].PropertyValue = JsonSerializer.Deserialize (ref reader, propertyType!, options);
 					} catch (Exception ex) {
-						System.Diagnostics.Debug.WriteLine ($"scopeT Read: {ex}");
+						Debug.WriteLine ($"scopeT Read: {ex}");
 					}
 				}
 			} else {
@@ -111,11 +99,11 @@ internal class ScopeJsonConverter<scopeT> : JsonConverter<scopeT> where scopeT :
 		}
 
 		foreach (var p in from p in scope
-					.Where (cp =>
+				.Where (cp =>
 					cp.Value.PropertyInfo?.GetCustomAttribute (typeof (SerializableConfigurationProperty)) is
-					SerializableConfigurationProperty scp && scp?.Scope == typeof (scopeT))
-					where p.Value.PropertyValue != null
-					select p) {
+						SerializableConfigurationProperty scp && scp?.Scope == typeof (scopeT))
+			where p.Value.PropertyValue != null
+			select p) {
 
 			writer.WritePropertyName (p.Key);
 			var propertyType = p.Value.PropertyInfo?.PropertyType;
@@ -129,12 +117,29 @@ internal class ScopeJsonConverter<scopeT> : JsonConverter<scopeT> where scopeT :
 					}
 				}
 				if (p.Value.PropertyValue != null) {
-					converter.GetType ().GetMethod ("Write")?.Invoke (converter, new object [] { writer, p.Value.PropertyValue, options });
+					converter.GetType ().GetMethod ("Write")?.Invoke (converter, new [] { writer, p.Value.PropertyValue, options });
 				}
 			} else {
 				JsonSerializer.Serialize (writer, p.Value.PropertyValue, options);
 			}
 		}
 		writer.WriteEndObject ();
+	}
+
+	// See: https://stackoverflow.com/questions/60830084/how-to-pass-an-argument-by-reference-using-reflection
+	internal abstract class ReadHelper {
+		public abstract object? Read (ref Utf8JsonReader reader, Type type, JsonSerializerOptions options);
+	}
+
+	internal class ReadHelper<converterT> : ReadHelper {
+		readonly ReadDelegate _readDelegate;
+
+		public ReadHelper (object converter)
+			=> _readDelegate = (ReadDelegate)Delegate.CreateDelegate (typeof (ReadDelegate), converter, "Read");
+
+		public override object? Read (ref Utf8JsonReader reader, Type type, JsonSerializerOptions options)
+			=> _readDelegate.Invoke (ref reader, type, options);
+
+		delegate converterT ReadDelegate (ref Utf8JsonReader reader, Type type, JsonSerializerOptions options);
 	}
 }

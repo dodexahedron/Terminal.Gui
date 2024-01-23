@@ -3,8 +3,9 @@ using System.Globalization;
 using Xunit;
 
 namespace Terminal.Gui.ViewsTests;
+
 public class DateFieldTests {
-	[Fact, TestDate]
+	[Fact] [TestDate]
 	public void Constructors_Defaults ()
 	{
 		var df = new DateField ();
@@ -27,7 +28,7 @@ public class DateFieldTests {
 		Assert.Equal ($" {date.ToString (CultureInfo.InvariantCulture.DateTimeFormat.ShortDatePattern)}", df.Text);
 	}
 
-	[Fact, TestDate]
+	[Fact] [TestDate]
 	public void CursorPosition_Min_Is_Always_One_Max_Is_Always_Max_Format ()
 	{
 		var df = new DateField ();
@@ -38,116 +39,116 @@ public class DateFieldTests {
 		Assert.Equal (10, df.CursorPosition);
 	}
 
-	[Fact, TestDate]
+	[Fact] [TestDate]
 	public void CursorPosition_Min_Is_Always_One_Max_Is_Always_Max_Format_After_Selection ()
 	{
 		var df = new DateField ();
 		// Start selection
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.CursorLeft | KeyCode.ShiftMask)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.CursorLeft | KeyCode.ShiftMask)));
 		Assert.Equal (1, df.SelectedStart);
 		Assert.Equal (1, df.SelectedLength);
 		Assert.Equal (0, df.CursorPosition);
 		// Without selection
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.CursorLeft)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.CursorLeft)));
 		Assert.Equal (-1, df.SelectedStart);
 		Assert.Equal (0, df.SelectedLength);
 		Assert.Equal (1, df.CursorPosition);
 		df.CursorPosition = 10;
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.CursorRight | KeyCode.ShiftMask)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.CursorRight | KeyCode.ShiftMask)));
 		Assert.Equal (10, df.SelectedStart);
 		Assert.Equal (1, df.SelectedLength);
 		Assert.Equal (11, df.CursorPosition);
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.CursorRight)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.CursorRight)));
 		Assert.Equal (-1, df.SelectedStart);
 		Assert.Equal (0, df.SelectedLength);
 		Assert.Equal (10, df.CursorPosition);
 	}
 
-	[Fact, TestDate]
+	[Fact] [TestDate]
 	public void KeyBindings_Command ()
 	{
-		DateField df = new DateField (DateTime.Parse ("12/12/1971")) {
+		var df = new DateField (DateTime.Parse ("12/12/1971")) {
 			ReadOnly = true
 		};
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.Delete)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.Delete)));
 		Assert.Equal (" 12/12/1971", df.Text);
 		df.ReadOnly = false;
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.D | KeyCode.CtrlMask)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.D | KeyCode.CtrlMask)));
 		Assert.Equal (" 02/12/1971", df.Text);
 		df.CursorPosition = 4;
 		df.ReadOnly = true;
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.Delete)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.Delete)));
 		Assert.Equal (" 02/12/1971", df.Text);
 		df.ReadOnly = false;
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.Backspace)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.Backspace)));
 		Assert.Equal (" 02/02/1971", df.Text);
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.Home)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.Home)));
 		Assert.Equal (1, df.CursorPosition);
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.End)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.End)));
 		Assert.Equal (10, df.CursorPosition);
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.A | KeyCode.CtrlMask)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.A | KeyCode.CtrlMask)));
 		Assert.Equal (1, df.CursorPosition);
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.E | KeyCode.CtrlMask)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.E | KeyCode.CtrlMask)));
 		Assert.Equal (10, df.CursorPosition);
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.CursorLeft)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.CursorLeft)));
 		Assert.Equal (9, df.CursorPosition);
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.CursorRight)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.CursorRight)));
 		Assert.Equal (10, df.CursorPosition);
 		// Non-numerics are ignored
-		Assert.False (df.NewKeyDownEvent (new (KeyCode.A)));
+		Assert.False (df.NewKeyDownEvent (new Key (KeyCode.A)));
 		df.ReadOnly = true;
 		df.CursorPosition = 1;
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.D1)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.D1)));
 		Assert.Equal (" 02/02/1971", df.Text);
 		df.ReadOnly = false;
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.D1)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.D1)));
 		Assert.Equal (" 12/02/1971", df.Text);
 		Assert.Equal (2, df.CursorPosition);
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.D | KeyCode.AltMask)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.D | KeyCode.AltMask)));
 		Assert.Equal (" 10/02/1971", df.Text);
 	}
 
-	[Fact, TestDate]
+	[Fact] [TestDate]
 	public void Typing_With_Selection_Normalize_Format ()
 	{
-		DateField df = new DateField (DateTime.Parse ("12/12/1971")) {
+		var df = new DateField (DateTime.Parse ("12/12/1971")) {
 			// Start selection at before the first separator /
 			CursorPosition = 2
 		};
 		// Now select the separator /
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.CursorRight | KeyCode.ShiftMask)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.CursorRight | KeyCode.ShiftMask)));
 		Assert.Equal (2, df.SelectedStart);
 		Assert.Equal (1, df.SelectedLength);
 		Assert.Equal (3, df.CursorPosition);
 		// Type 3 over the separator
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.D3)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.D3)));
 		// The format was normalized and replaced again with /
 		Assert.Equal (" 12/12/1971", df.Text);
 		Assert.Equal (4, df.CursorPosition);
 	}
 
-	[Fact, TestDate, AutoInitShutdown]
+	[Fact] [TestDate] [AutoInitShutdown]
 	public void Copy_Paste ()
 	{
-		DateField df1 = new DateField (DateTime.Parse ("12/12/1971"));
-		DateField df2 = new DateField (DateTime.Parse ("12/31/2023"));
+		var df1 = new DateField (DateTime.Parse ("12/12/1971"));
+		var df2 = new DateField (DateTime.Parse ("12/31/2023"));
 		// Select all text
-		Assert.True (df2.NewKeyDownEvent (new (KeyCode.End | KeyCode.ShiftMask)));
+		Assert.True (df2.NewKeyDownEvent (new Key (KeyCode.End | KeyCode.ShiftMask)));
 		Assert.Equal (1, df2.SelectedStart);
 		Assert.Equal (10, df2.SelectedLength);
 		Assert.Equal (11, df2.CursorPosition);
 		// Copy from df2
-		Assert.True (df2.NewKeyDownEvent (new (KeyCode.C | KeyCode.CtrlMask)));
+		Assert.True (df2.NewKeyDownEvent (new Key (KeyCode.C | KeyCode.CtrlMask)));
 		// Paste into df1
-		Assert.True (df1.NewKeyDownEvent (new (KeyCode.V | KeyCode.CtrlMask)));
+		Assert.True (df1.NewKeyDownEvent (new Key (KeyCode.V | KeyCode.CtrlMask)));
 		Assert.Equal (" 12/31/2023", df1.Text);
 		Assert.Equal (11, df1.CursorPosition);
 	}
 
-	[Fact, TestDate]
+	[Fact] [TestDate]
 	public void Date_Start_From_01_01_0001_And_End_At_12_31_9999 ()
 	{
-		DateField df = new DateField (DateTime.Parse ("01/01/0001"));
+		var df = new DateField (DateTime.Parse ("01/01/0001"));
 		Assert.Equal (" 01/01/0001", df.Text);
 		df.Date = DateTime.Parse ("12/31/9999");
 		Assert.Equal (" 12/31/9999", df.Text);
@@ -156,14 +157,14 @@ public class DateFieldTests {
 	[Fact]
 	public void Using_Pt_Culture ()
 	{
-		CultureInfo cultureBackup = CultureInfo.CurrentCulture;
+		var cultureBackup = CultureInfo.CurrentCulture;
 		CultureInfo.CurrentCulture = new CultureInfo ("pt-PT");
-		DateField df = new DateField (DateTime.Parse ("12/12/1971")) {
+		var df = new DateField (DateTime.Parse ("12/12/1971")) {
 			// Move to the first 2
 			CursorPosition = 2
 		};
 		// Type 3 over the separator
-		Assert.True (df.NewKeyDownEvent (new (KeyCode.D3)));
+		Assert.True (df.NewKeyDownEvent (new Key (KeyCode.D3)));
 		// If InvariantCulture was used this will fail but not with PT culture
 		Assert.Equal (" 13/12/1971", df.Text);
 		Assert.Equal ("13/12/1971", df.Date.ToString (CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern));
@@ -174,9 +175,9 @@ public class DateFieldTests {
 	[Fact]
 	public void Using_All_Culture_StandardizeDateFormat ()
 	{
-		CultureInfo cultureBackup = CultureInfo.CurrentCulture;
+		var cultureBackup = CultureInfo.CurrentCulture;
 
-		DateTime date = DateTime.Parse ("1/1/1971");
+		var date = DateTime.Parse ("1/1/1971");
 		foreach (var culture in CultureInfo.GetCultures (CultureTypes.AllCultures)) {
 			CultureInfo.CurrentCulture = culture;
 			var separator = culture.DateTimeFormat.DateSeparator.Trim ();
@@ -184,9 +185,9 @@ public class DateFieldTests {
 				separator = separator.Replace ("\u200f", "");
 			}
 			var format = culture.DateTimeFormat.ShortDatePattern;
-			DateField df = new DateField (date);
-			if ((!culture.TextInfo.IsRightToLeft || (culture.TextInfo.IsRightToLeft && !df.Text.Contains ('\u200f')))
-				&& (format.StartsWith ('d') || format.StartsWith ('M'))) {
+			var df = new DateField (date);
+			if ((!culture.TextInfo.IsRightToLeft || culture.TextInfo.IsRightToLeft && !df.Text.Contains ('\u200f'))
+			    && (format.StartsWith ('d') || format.StartsWith ('M'))) {
 
 				switch (culture.Name) {
 				case "ar-SA":
