@@ -221,13 +221,15 @@ public partial class View : Responder, ISupportInitializeNotification {
 	/// </summary>
 	public bool ClearOnVisibleFalse { get; set; } = true;
 
-	/// <inheritdoc/>
-	/// >
-	public override bool Visible {
-		get => base.Visible;
+	private bool _visible = true;
+	/// <summary>
+	/// Gets or sets a value indicating whether this <see cref="View"/> and all its child controls are displayed.
+	/// </summary>
+	public virtual bool Visible {
+		get => _visible;
 		set {
-			if (base.Visible != value) {
-				base.Visible = value;
+			if (_visible != value) {
+				_visible = value;
 				if (!value) {
 					if (HasFocus) {
 						SetHasFocus (false, this);

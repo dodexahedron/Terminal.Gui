@@ -59,11 +59,6 @@ public class Responder : IDisposable {
 	public virtual bool CanFocus { get; set; }
 
 	/// <summary>
-	/// Gets or sets a value indicating whether this <see cref="Responder"/> and all its child controls are displayed.
-	/// </summary>
-	public virtual bool Visible { get; set; } = true;
-
-	/// <summary>
 	/// Method invoked when a mouse event is generated
 	/// </summary>
 	/// <returns><c>true</c>, if the event was handled, <c>false</c> otherwise.</returns>
