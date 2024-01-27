@@ -1,11 +1,11 @@
-﻿#nullable enable
+#nullable enable
 namespace Terminal.Gui;
 
 public partial class View {
     private static readonly IList<View> _empty = new List<View> (0).AsReadOnly ();
     internal bool _addingView;
-    private List<View> _subviews; // This is null, and allocated on demand.
-    private View _superView;
+    private List<View>? _subviews; // This is null, and allocated on demand.
+    private View? _superView;
 
     /// <summary>Indicates whether the view was added to <see cref="SuperView" />.</summary>
     public bool IsAdded { get; private set; }
@@ -21,7 +21,7 @@ public partial class View {
     ///   Returns the container for this view, or null if this view has not been added to a container.
     /// </summary>
     /// <value>The super view.</value>
-    public virtual View SuperView {
+    public virtual View? SuperView {
         get => _superView;
         set => throw new NotImplementedException ();
     }
@@ -48,7 +48,8 @@ public partial class View {
         view._superView = this;
         if (view.CanFocus) {
             _addingView = true;
-            if (SuperView?.CanFocus == false) {
+            // TODO: This also looks like stuff that should not be done from the current instance.
+            if (SuperView is { CanFocus: false }) {
                 SuperView._addingView = true;
                 SuperView.CanFocus = true;
                 SuperView._addingView = false;
