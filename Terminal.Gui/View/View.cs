@@ -232,14 +232,20 @@ public partial class View : Responder, ISupportInitializeNotification {
 				return;
 
 			_visible = value;
+
+			// TODO: Raise a new VisibleChanging event.
+			// TODO: Consider subscribing newly-added subviews to one or both of these events.
+			// TODO: Consider whether recursive getter is necessary or not after events are in place.
 			if (!value) {
 				if (HasFocus) {
 					SetHasFocus (false, this);
 				}
+
 				if (ClearOnVisibleFalse) {
 					Clear ();
 				}
 			}
+
 			OnVisibleChanged ();
 			SetNeedsDisplay ();
 		}
