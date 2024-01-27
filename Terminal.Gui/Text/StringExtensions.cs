@@ -1,10 +1,5 @@
 ﻿#nullable enable
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Terminal.Gui;
 /// <summary>
 /// Extensions to <see cref="string"/> to support TUI text manipulation.
