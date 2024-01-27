@@ -248,14 +248,10 @@ public class MenuBar : View {
 		}
 	}
 
-	///<inheritdoc/>
-	public override bool Visible {
-		get => base.Visible;
-		set {
-			base.Visible = value;
-			if (!value) {
-				CloseAllMenus ();
-			}
+	public override void SetDesiredVisibility (bool desiredVisibility) {
+		base.SetDesiredVisibility (desiredVisibility);
+		if (!desiredVisibility) {
+			CloseAllMenus ();
 		}
 	}
 
@@ -865,7 +861,7 @@ public class MenuBar : View {
 					}
 					var newSubMenu = new MenuBarItem (mbi) { Parent = subMenu };
 					openCurrentMenu = new Menu (this, first.Frame.Left, first.Frame.Top, newSubMenu, null, MenusBorderStyle);
-					last.Visible = false;
+					last.SetDesiredVisibility (false);
 					Application.GrabMouse (openCurrentMenu);
 				}
 				openCurrentMenu._previousSubFocused = last._previousSubFocused;
@@ -1069,7 +1065,7 @@ public class MenuBar : View {
 				menu = _openMenu;
 			}
 			if (!menu.Visible) {
-				menu.Visible = true;
+				menu.SetDesiredVisibility (true);
 			}
 			openCurrentMenu = menu;
 			openCurrentMenu.SetFocus ();

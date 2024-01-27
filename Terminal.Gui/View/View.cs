@@ -223,14 +223,18 @@ public partial class View : Responder, ISupportInitializeNotification {
 
 	private bool _visible = true;
 
-	/// <summary>
-	///   Gets a value indicating whether this <see cref="View" /> will be displayed.
-	/// </summary>
+	/// <summary>Gets a value indicating whether this <see cref="View" /> will be displayed.</summary>
+	/// <returns>
+	///   Binary AND of this <see cref="View" />'s last explicitly set visibility and the Visible property of <see cref="SuperView" />, or
+	///   <see langword="true" /> if <see cref="SuperView" /> is <see langword="null" />.
+	/// </returns>
 	/// <remarks>
-	///   Value returned by the getter is the binary AND of this <see cref="View" />'s last explicitly set visibility and the Visible property of
-	///   <see cref="SuperView" />.
+	///   Init-only setter sets to the desired value if false or the visibility of <see cref="SuperView" /> if true.
 	/// </remarks>
-	public virtual bool Visible => _visible && (SuperView?.Visible ?? true);
+	public virtual bool Visible {
+		get => _visible && (SuperView?.Visible ?? true);
+		init => _visible = value && Visible;
+	}
 
 	public virtual void SetDesiredVisibility (bool value) {
 		if (Visible == value)
