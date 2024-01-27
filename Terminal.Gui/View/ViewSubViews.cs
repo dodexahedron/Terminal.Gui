@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace Terminal.Gui;
@@ -297,11 +297,13 @@ public partial class View {
 	}
 
 
-	// BUGBUG: v2 - Seems weird that this is in View and not Responder.
-	bool _hasFocus;
+	private bool _hasFocus;
 
-	/// <inheritdoc/>
-	public override bool HasFocus => _hasFocus;
+	/// <summary>
+	/// Gets a value indicating whether this <see cref="View"/> has focus.
+	/// </summary>
+	/// <value><c>true</c> if has focus; otherwise, <c>false</c>.</value>
+	public bool HasFocus => _hasFocus;
 
 	void SetHasFocus (bool value, View view, bool force = false)
 	{

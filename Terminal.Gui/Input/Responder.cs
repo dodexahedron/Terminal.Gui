@@ -59,12 +59,6 @@ public class Responder : IDisposable {
 	public virtual bool CanFocus { get; set; }
 
 	/// <summary>
-	/// Gets or sets a value indicating whether this <see cref="Responder"/> has focus.
-	/// </summary>
-	/// <value><c>true</c> if has focus; otherwise, <c>false</c>.</value>
-	public virtual bool HasFocus { get; }
-
-	/// <summary>
 	/// Gets or sets a value indicating whether this <see cref="Responder"/> and all its child controls are displayed.
 	/// </summary>
 	public virtual bool Visible { get; set; } = true;
