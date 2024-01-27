@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text;
 using Wcwidth;
 
@@ -38,12 +38,14 @@ public static class RuneExtensions {
 	/// </remarks>
 	/// <param name="rune"></param>
 	/// <returns></returns>
-	public static bool IsCombiningMark (this System.Text.Rune rune)
+	public static bool IsCombiningMark (this Rune rune)
 	{
-		UnicodeCategory category = Rune.GetUnicodeCategory (rune);
-		return Rune.GetUnicodeCategory (rune) == UnicodeCategory.NonSpacingMark
-			|| category == UnicodeCategory.SpacingCombiningMark
-			|| category == UnicodeCategory.EnclosingMark;
+		return Rune.GetUnicodeCategory ( rune ) switch {
+			       UnicodeCategory.NonSpacingMark => true,
+			       UnicodeCategory.SpacingCombiningMark => true,
+			       UnicodeCategory.EnclosingMark => true,
+			       _ => false
+		       };
 	}
 
 	/// <summary>
