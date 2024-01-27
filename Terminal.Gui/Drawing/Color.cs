@@ -17,7 +17,7 @@ namespace Terminal.Gui;
 /// <seealso cref="ColorName" />
 [JsonConverter (typeof (ColorJsonConverter))]
 [StructLayout (LayoutKind.Explicit)]
-public readonly partial record struct Color : ISpanParsable<Color>, IUtf8SpanParsable<Color>, ISpanFormattable, IUtf8SpanFormattable, IMinMaxValue<Color> {
+public readonly partial record struct Color : ISpanParsable<Color>, IUtf8SpanParsable<Color>, ISpanFormattable, IUtf8SpanFormattable, IMinMaxValue<Color>, IEqualityOperators<Color, Color, bool> {
 
 	/// <summary>The value of the alpha channel component</summary>
 	/// <remarks>
