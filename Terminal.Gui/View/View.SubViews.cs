@@ -1,4 +1,5 @@
-﻿namespace Terminal.Gui;
+#nullable enable
+namespace Terminal.Gui;
 
 public partial class View {
     private static readonly IList<View> _empty = new List<View> (0).AsReadOnly ();
