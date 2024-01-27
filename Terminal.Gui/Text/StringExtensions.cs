@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 namespace Terminal.Gui;
 /// <summary>
@@ -14,10 +14,10 @@ public static class StringExtensions {
 	/// <param name="str">The text to repeat.</param>
 	/// <param name="n">Number of times to repeat the text.</param>
 	/// <returns>
-	///  The text repeated if <paramref name="n"/> is greater than zero, 
+	///  The text repeated if <paramref name="n"/> is greater than zero,
 	///  otherwise <see langword="null"/>.
 	/// </returns>
-	public static string? Repeat (this string str, int n)
+	public static string? Repeat (this string? str, int n)
 	{
 		if (n <= 0) {
 			return null;
