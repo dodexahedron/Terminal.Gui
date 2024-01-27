@@ -183,29 +183,30 @@ public partial class View : Responder, ISupportInitializeNotification {
 	public virtual bool Enabled {
 		get => _enabled;
 		set {
-			if (_enabled != value) {
-				if (value) {
-					if (SuperView is null or { Enabled: true }) {
-						_enabled = true;
-					}
-				} else {
-					_enabled = false;
-				}
-				if (!value && HasFocus) {
-					SetHasFocus (false, this);
-				}
-				OnEnabledChanged ();
-				SetNeedsDisplay ();
+			if ( _enabled == value )
+				return;
 
-				if (_subviews != null) {
-					foreach (var view in _subviews) {
-						if (!value) {
-							view._oldEnabled = view.Enabled;
-							view.Enabled = false;
-						} else {
-							view.Enabled = view._oldEnabled;
-							view._addingView = false;
-						}
+			if (value) {
+				if (SuperView is null or { Enabled: true }) {
+					_enabled = true;
+				}
+			} else {
+				_enabled = false;
+			}
+			if (!value && HasFocus) {
+				SetHasFocus (false, this);
+			}
+			OnEnabledChanged ();
+			SetNeedsDisplay ();
+
+			if (_subviews != null) {
+				foreach (var view in _subviews) {
+					if (!value) {
+						view._oldEnabled = view.Enabled;
+						view.Enabled = false;
+					} else {
+						view.Enabled = view._oldEnabled;
+						view._addingView = false;
 					}
 				}
 			}
