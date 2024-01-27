@@ -224,40 +224,35 @@ public partial class View : Responder, ISupportInitializeNotification {
 	private bool _visible = true;
 
 	/// <summary>
-	///   Gets a value indicating whether this <see cref="View" /> will be displayed or sets a value indicating whether this <see cref="View" />
-	///   should be displayed when possible.
+	///   Gets a value indicating whether this <see cref="View" /> will be displayed.
 	/// </summary>
 	/// <remarks>
 	///   Value returned by the getter is the binary AND of this <see cref="View" />'s last explicitly set visibility and the Visible property of
 	///   <see cref="SuperView" />.
-	///   <para />
-	///   Setter evaluates the result of the getter and, if value is the same, performs no action. If value is different, sets visibility of this
-	///   object.
 	/// </remarks>
-	public virtual bool Visible {
-		get => _visible && (SuperView?.Visible ?? true);
-		set {
-			if (Visible == value)
-				return;
+	public virtual bool Visible => _visible && (SuperView?.Visible ?? true);
 
-			_visible = value;
+	public virtual void SetDesiredVisibility (bool value) {
+		if (Visible == value)
+			return;
 
-			// TODO: Raise a new VisibleChanging event.
-			// TODO: Consider subscribing newly-added subviews to one or both of these events.
-			// TODO: Consider whether recursive getter is necessary or not after events are in place.
-			if (!value) {
-				if (HasFocus) {
-					SetHasFocus (false, this);
-				}
+		_visible = value;
 
-				if (ClearOnVisibleFalse) {
-					Clear ();
-				}
+		// TODO: Raise a new VisibleChanging event.
+		// TODO: Consider subscribing newly-added subviews to one or both of these events.
+		// TODO: Consider whether recursive getter is necessary or not after events are in place.
+		if (!value) {
+			if (HasFocus) {
+				SetHasFocus (false, this);
 			}
 
-			OnVisibleChanged ();
-			SetNeedsDisplay ();
+			if (ClearOnVisibleFalse) {
+				Clear ();
+			}
 		}
+
+		OnVisibleChanged (!value, value);
+		SetNeedsDisplay ();
 	}
 
 	/// <summary>
