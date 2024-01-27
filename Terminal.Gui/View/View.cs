@@ -228,19 +228,20 @@ public partial class View : Responder, ISupportInitializeNotification {
 	public virtual bool Visible {
 		get => _visible;
 		set {
-			if (_visible != value) {
-				_visible = value;
-				if (!value) {
-					if (HasFocus) {
-						SetHasFocus (false, this);
-					}
-					if (ClearOnVisibleFalse) {
-						Clear ();
-					}
+			if (_visible == value)
+				return;
+
+			_visible = value;
+			if (!value) {
+				if (HasFocus) {
+					SetHasFocus (false, this);
 				}
-				OnVisibleChanged ();
-				SetNeedsDisplay ();
+				if (ClearOnVisibleFalse) {
+					Clear ();
+				}
 			}
+			OnVisibleChanged ();
+			SetNeedsDisplay ();
 		}
 	}
 
