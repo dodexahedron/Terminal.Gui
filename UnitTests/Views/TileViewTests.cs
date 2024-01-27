@@ -1665,9 +1665,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = true;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (true);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1687,9 +1687,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = true;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (true);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1709,9 +1709,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = false;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (false);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1731,9 +1731,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = false;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (false);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1753,9 +1753,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = false;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (false);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1775,9 +1775,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = true;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (true);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1800,9 +1800,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = false;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (false);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1846,9 +1846,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = true;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (true);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1868,9 +1868,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = true;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (true);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1890,9 +1890,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = false;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (false);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1912,9 +1912,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = false;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (false);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1934,9 +1934,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = true;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = false;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (true);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (false);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1956,9 +1956,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = true;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (true);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();
@@ -1981,9 +1981,9 @@ public class TileViewTests {
 
 		TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
-		tileView.Tiles.ElementAt (0).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (1).ContentView.Visible = false;
-		tileView.Tiles.ElementAt (2).ContentView.Visible = false;
+		tileView.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (false);
+		tileView.Tiles.ElementAt (2).ContentView.SetDesiredVisibility (false);
 		tileView.LayoutSubviews ();
 
 		tileView.Draw ();

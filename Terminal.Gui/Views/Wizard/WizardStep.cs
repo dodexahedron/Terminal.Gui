@@ -156,8 +156,8 @@ public class WizardStep : FrameView {
 			}
 
 		}
-		contentView.Visible = contentView.InternalSubviews?.Count > 0;
-		helpTextView.Visible = helpTextView.Text.Length > 0;
+		contentView.SetDesiredVisibility (contentView.InternalSubviews?.Count > 0);
+		helpTextView.SetDesiredVisibility (helpTextView.Text.Length > 0);
 	}
 
 	/// <summary>

@@ -15,7 +15,6 @@ public class ResponderTests {
 		Assert.NotNull (r);
 		Assert.Equal ("Terminal.Gui.Responder", r.ToString ());
 		Assert.False (r.CanFocus);
-		Assert.True (r.Visible);
 	}
 
 	[Fact]

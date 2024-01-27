@@ -105,7 +105,8 @@ namespace UICatalog.Scenarios {
 				}
 				item.Action += () => {
 					var top = Application.OverlappedChildren.Find ((x) => x.Data.ToString () == "WorkerApp");
-					item.Checked = top.Visible = (bool)!item.Checked;
+					top.SetDesiredVisibility (item.Checked == false);
+					item.Checked = item.Checked == false;
 					if (top.Visible) {
 						Application.MoveToOverlappedChild (top);
 					} else {
@@ -297,7 +298,7 @@ namespace UICatalog.Scenarios {
 				Staging = staging;
 				label.Text = "Work list:";
 				listView.SetSource (list);
-				start.Visible = false;
+				start.SetDesiredVisibility (false);
 				Id = "";
 			}
 

@@ -569,6 +569,7 @@ public class ViewTests {
 		Application.End (runState);
 	}
 
+    // TODO: Revisit this test
 	[Fact, AutoInitShutdown]
 	public void Visible_Sets_Also_Sets_Subviews ()
 	{
@@ -591,7 +592,8 @@ public class ViewTests {
 			Assert.True (win.HasFocus);
 			Assert.True (RunesCount () > 0);
 
-			win.Visible = false;
+			win.SetDesiredVisibility (false);
+			//BUG: This test is invalid. The next line should assert false because the parent is invisible.
 			Assert.True (button.Visible);
 			Assert.True (button.CanFocus);
 			Assert.False (button.HasFocus);
@@ -607,7 +609,7 @@ public class ViewTests {
 			top.Draw ();
 			Assert.True (RunesCount () == 0);
 
-			win.Visible = true;
+			win.SetDesiredVisibility (true);
 			win.FocusFirst ();
 			Assert.True (button.HasFocus);
 			Assert.True (win.HasFocus);
@@ -806,7 +808,7 @@ public class ViewTests {
 └────────────────────────────┘
 ", output);
 
-		view.Visible = false;
+		view.SetDesiredVisibility (false);
 
 		var firstIteration = false;
 		Application.RunIteration (ref rs, ref firstIteration);

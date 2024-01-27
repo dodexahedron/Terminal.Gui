@@ -417,9 +417,9 @@ public class ScrollView : View {
 	private void SetContentBottomRightCornerVisibility ()
 	{
 		if (_showHorizontalScrollIndicator && _showVerticalScrollIndicator) {
-			_contentBottomRightCorner.Visible = true;
+			_contentBottomRightCorner.SetDesiredVisibility (true);
 		} else if (_horizontal.IsAdded || _vertical.IsAdded) {
-			_contentBottomRightCorner.Visible = false;
+			_contentBottomRightCorner.SetDesiredVisibility (false);
 		}
 	}
 

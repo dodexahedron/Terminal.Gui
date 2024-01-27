@@ -236,16 +236,16 @@ public partial class View : Responder, ISupportInitializeNotification {
 		init => _visible = value && Visible;
 	}
 
-	public virtual void SetDesiredVisibility (bool value) {
-		if (Visible == value)
+	public virtual void SetDesiredVisibility (bool desiredVisibility) {
+		if (Visible == desiredVisibility)
 			return;
 
-		_visible = value;
+		_visible = desiredVisibility;
 
 		// TODO: Raise a new VisibleChanging event.
 		// TODO: Consider subscribing newly-added subviews to one or both of these events.
 		// TODO: Consider whether recursive getter is necessary or not after events are in place.
-		if (!value) {
+		if (!desiredVisibility) {
 			if (HasFocus) {
 				SetHasFocus (false, this);
 			}
@@ -255,7 +255,7 @@ public partial class View : Responder, ISupportInitializeNotification {
 			}
 		}
 
-		OnVisibleChanged (!value, value);
+		OnVisibleChanged (!desiredVisibility, desiredVisibility);
 		SetNeedsDisplay ();
 	}
 
@@ -306,10 +306,12 @@ public partial class View : Responder, ISupportInitializeNotification {
 	/// <summary>
 	/// Event fired when the <see cref="Visible"/> value is being changed.
 	/// </summary>
-	public event EventHandler VisibleChanged;
+	public event EventHandler<VisibleChangedEventArgs> VisibleChanged;
 
 	/// <inheritdoc/>
-	public override void OnVisibleChanged () => VisibleChanged?.Invoke (this, EventArgs.Empty);
+	protected void OnVisibleChanged (bool changedFrom, bool changedTo) {
+		VisibleChanged?.Invoke (this, new());
+	}
 
 	private bool CanBeVisible (View view)
 	{
@@ -595,4 +597,7 @@ public partial class View : Responder, ISupportInitializeNotification {
 		Initialized?.Invoke (this, EventArgs.Empty);
 	}
 	#endregion Constructors and Initialization
+public class VisibleChangedEventArgs : EventArgs {
+    public bool ChangedFrom { get; init; }
+    public bool ChangedTo { get; init; }
 }

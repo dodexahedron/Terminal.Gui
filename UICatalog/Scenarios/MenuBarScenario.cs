@@ -187,7 +187,7 @@ public class MenuBarScenario : Scenario {
 			Text = "Toggle Menu._Visible",
 		};
 		hideBtn.Clicked += (s, e) => {
-			menuBar.Visible = !menuBar.Visible;
+			menuBar.SetDesiredVisibility (!menuBar.Visible);
 		};
 		Application.Top.Add (hideBtn);
 

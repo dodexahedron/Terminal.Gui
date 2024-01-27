@@ -106,7 +106,7 @@ public class Buttons : Scenario {
 			// Now this throw a InvalidOperationException on the TopologicalSort method as is expected.
 			//Win.Remove (removeButton);
 
-			removeButton.Visible = false;
+			removeButton.SetDesiredVisibility (false);
 		};
 
 		var computedFrame = new FrameView ("Computed Layout") {

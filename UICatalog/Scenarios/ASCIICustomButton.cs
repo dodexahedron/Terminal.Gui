@@ -133,8 +133,8 @@ namespace UICatalog.Scenarios {
 
 			public override bool OnEnter (View view)
 			{
-				border.Visible = false;
-				fill.Visible = true;
+				border.SetDesiredVisibility (false);
+				fill.SetDesiredVisibility (true);
 				PointerEnter.Invoke (this);
 				view = this;
 				return base.OnEnter (view);
@@ -142,8 +142,8 @@ namespace UICatalog.Scenarios {
 
 			public override bool OnLeave (View view)
 			{
-				border.Visible = true;
-				fill.Visible = false;
+				border.SetDesiredVisibility (true);
+				fill.SetDesiredVisibility (false);
 				if (view == null)
 					view = this;
 				return base.OnLeave (view);

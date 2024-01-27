@@ -643,7 +643,8 @@ namespace UICatalog.Scenarios {
 			item.CheckType |= MenuItemCheckStyle.Checked;
 			item.Checked = _textView.Visible;
 			item.Action += () => {
-				_textView.Visible = (bool)(item.Checked = !item.Checked);
+			       // TODO: Things like the next line should be handled differently after #3209
+				_textView.SetDesiredVisibility ((bool)(item.Checked = !item.Checked));
 				if (_textView.Visible) {
 					_textView.SetFocus ();
 				}

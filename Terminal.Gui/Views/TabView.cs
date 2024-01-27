@@ -371,7 +371,7 @@ public class TabView : View {
 
 			// if tab view is width <= 3 don't render any tabs
 			if (maxWidth == 0) {
-				tab.Visible = true;
+				tab.SetDesiredVisibility (true);
 				tab.MouseClick += Tab_MouseClick;
 				yield return new TabToRender (i, tab, string.Empty, Equals (SelectedTab, tab), 0);
 				break;
@@ -387,12 +387,12 @@ public class TabView : View {
 
 			// if there is not enough space for this tab
 			if (i + tabTextWidth >= bounds.Width) {
-				tab.Visible = false;
+				tab.SetDesiredVisibility (false);
 				break;
 			}
 
 			// there is enough space!
-			tab.Visible = true;
+			tab.SetDesiredVisibility (true);
 			tab.MouseClick += Tab_MouseClick;
 			yield return new TabToRender (i, tab, text, Equals (SelectedTab, tab), tabTextWidth);
 			i += tabTextWidth + 1;
@@ -404,7 +404,7 @@ public class TabView : View {
 		if (_tabLocations != null) {
 			foreach (var tabToRender in _tabLocations) {
 				tabToRender.Tab.MouseClick -= Tab_MouseClick;
-				tabToRender.Tab.Visible = false;
+				tabToRender.Tab.SetDesiredVisibility (false);
 			}
 			_tabLocations = null;
 		}
@@ -823,12 +823,12 @@ public class TabView : View {
 				_leftScrollIndicator.Y = y;
 
 				// indicate that
-				_leftScrollIndicator.Visible = true;
+				_leftScrollIndicator.SetDesiredVisibility (true);
 				// Ensures this is clicked instead of the first tab
 				BringSubviewToFront (_leftScrollIndicator);
 				_leftScrollIndicator.Draw ();
 			} else {
-				_leftScrollIndicator.Visible = false;
+				_leftScrollIndicator.SetDesiredVisibility (false);
 			}
 
 			// if there are more tabs to the right not visible
@@ -837,12 +837,12 @@ public class TabView : View {
 				_rightScrollIndicator.Y = y;
 
 				// indicate that
-				_rightScrollIndicator.Visible = true;
+				_rightScrollIndicator.SetDesiredVisibility (true);
 				// Ensures this is clicked instead of the last tab if under this
 				BringSubviewToFront (_rightScrollIndicator);
 				_rightScrollIndicator.Draw ();
 			} else {
-				_rightScrollIndicator.Visible = false;
+				_rightScrollIndicator.SetDesiredVisibility (false);
 			}
 		}
 

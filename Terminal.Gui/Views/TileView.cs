@@ -681,7 +681,7 @@ namespace Terminal.Gui {
 			}
 
 			foreach (var line in _splitterLines) {
-				line.Visible = true;
+				line.SetDesiredVisibility (true);
 			}
 
 			for (int i = 0; i < _tiles.Count; i++) {
@@ -695,9 +695,9 @@ namespace Terminal.Gui {
 					// e.g. when hiding panels 0 and 1 of a 3 panel 
 					// container
 					if (candidate.Visible) {
-						candidate.Visible = false;
+						candidate.SetDesiredVisibility (false);
 					} else {
-						_splitterLines [Math.Min (i, _splitterLines.Count - 1)].Visible = false;
+						_splitterLines [Math.Min (i, _splitterLines.Count - 1)].SetDesiredVisibility (false);
 					}
 
 				}

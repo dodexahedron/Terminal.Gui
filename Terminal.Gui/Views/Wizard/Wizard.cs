@@ -418,7 +418,7 @@ public class Wizard : Dialog {
 
 		// Hide all but the new step
 		foreach (var step in steps) {
-			step.Visible = step == newStep;
+			step.SetDesiredVisibility (step == newStep);
 			step.ShowHide ();
 		}
 
@@ -452,7 +452,7 @@ public class Wizard : Dialog {
 
 		// Configure the Back button
 		backBtn.Text = CurrentStep.BackButtonText != string.Empty ? CurrentStep.BackButtonText : Strings.wzBack; // "_Back";
-		backBtn.Visible = CurrentStep != GetFirstStep ();
+		backBtn.SetDesiredVisibility (CurrentStep != GetFirstStep ());
 
 		// Configure the Next/Finished button
 		if (CurrentStep == GetLastStep ()) {

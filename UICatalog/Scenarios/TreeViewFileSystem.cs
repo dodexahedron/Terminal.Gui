@@ -215,7 +215,7 @@ public class TreeViewFileSystem : Scenario {
 		public DetailsFrame (FileSystemIconProvider iconProvider)
 		{
 			Title = "Details";
-			Visible = true;
+			SetDesiredVisibility (true);
 			CanFocus = true;
 			_iconProvider = iconProvider;
 		}

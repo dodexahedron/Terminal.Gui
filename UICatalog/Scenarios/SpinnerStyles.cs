@@ -130,7 +130,7 @@ namespace UICatalog.Scenarios {
 						delayField.Text = DEFAULT_DELAY.ToString ();
 					SetCustom ();
 				} else {
-					spinner.Visible = true;
+					spinner.SetDesiredVisibility (true);
 					spinner.Style = (SpinnerStyle)Activator.CreateInstance(styleDict [e.Item].Value);
 					delayField.Text = spinner.SpinDelay.ToString ();
 					ckbBounce.Checked = spinner.SpinBounce;
@@ -153,7 +153,7 @@ namespace UICatalog.Scenarios {
 			void SetCustom ()
 			{
 				if (customField.Text.Length > 0) {
-					spinner.Visible = true;
+					spinner.SetDesiredVisibility (true);
 					if (ushort.TryParse (delayField.Text, out var d))
 						spinner.SpinDelay = d;
 					else {
@@ -166,7 +166,7 @@ namespace UICatalog.Scenarios {
 					}
 					spinner.Sequence = str.ToArray ();
 				} else {
-					spinner.Visible = false;
+					spinner.SetDesiredVisibility (false);
 				}
 			}
 

@@ -144,7 +144,7 @@ public class FileDialog : Dialog {
 
 		Initialized += (s, e) => {
 			splitContainer.SetSplitterPos (0, 30);
-			splitContainer.Tiles.ElementAt (0).ContentView.Visible = false;
+			splitContainer.Tiles.ElementAt (0).ContentView.SetDesiredVisibility (false);
 		};
 		//			this.splitContainer.Border.BorderStyle = BorderStyle.None;
 
@@ -212,7 +212,7 @@ public class FileDialog : Dialog {
 			var tile = splitContainer.Tiles.ElementAt (0);
 
 			var newState = !tile.ContentView.Visible;
-			tile.ContentView.Visible = newState;
+			tile.ContentView.SetDesiredVisibility (newState);
 			btnToggleSplitterCollapse.Text = GetToggleSplitterText (newState);
 			LayoutSubviews ();
 		};
@@ -901,9 +901,9 @@ public class FileDialog : Dialog {
 
 	void UpdateNavigationVisibility ()
 	{
-		btnBack.Visible = history.CanBack ();
-		btnForward.Visible = history.CanForward ();
-		btnUp.Visible = history.CanUp ();
+		btnBack.SetDesiredVisibility (history.CanBack ());
+		btnForward.SetDesiredVisibility (history.CanForward ());
+		btnUp.SetDesiredVisibility (history.CanUp ());
 	}
 
 	void TableView_SelectedCellChanged (object sender, SelectedCellChangedEventArgs obj)
@@ -1411,7 +1411,7 @@ public class FileDialog : Dialog {
 				}
 
 				Application.Invoke (() => {
-					Parent.spinnerView.Visible = false;
+					Parent.spinnerView.SetDesiredVisibility (false);
 				});
 			}
 		}
@@ -1428,7 +1428,7 @@ public class FileDialog : Dialog {
 				);
 				Parent.WriteStateToTableView ();
 
-				Parent.spinnerView.Visible = true;
+				Parent.spinnerView.SetDesiredVisibility (true);
 				Parent.spinnerView.SetNeedsDisplay ();
 			});
 		}

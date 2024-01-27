@@ -2734,7 +2734,7 @@ wo
 		Assert.True (menu.NewKeyDownEvent (menu.Key));
 		Assert.True (menu.IsMenuOpen);
 
-		menu.Visible = false;
+		menu.SetDesiredVisibility (false);
 		Assert.False (menu.IsMenuOpen);
 
 		Assert.True (menu.NewKeyDownEvent (menu.Key));
@@ -2772,7 +2772,7 @@ wo
 		w.X = 0;
 		w.Y = 0;
 
-		w.Visible = true;
+		w.SetDesiredVisibility (true);
 		// TODO: When https: //github.com/gui-cs/Terminal.Gui/issues/3136 is fixed, 
 		// TODO: uncomment this.
 		//w.Modal = false;
@@ -2781,14 +2781,14 @@ wo
 		menuBar.Height = 1;
 		menuBar.X = 0;
 		menuBar.Y = 0;
-		menuBar.Visible = true;
+		menuBar.SetDesiredVisibility (true);
 		w.Add (menuBar);
 
 		menuBar2.Width = Dim.Fill (0);
 		menuBar2.Height = 1;
 		menuBar2.X = 0;
 		menuBar2.Y = 4;
-		menuBar2.Visible = true;
+		menuBar2.SetDesiredVisibility (true);
 		w.Add (menuBar2);
 
 

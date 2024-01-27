@@ -115,7 +115,7 @@ namespace UICatalog.Scenarios {
 			workArea.Add (root);
 
 			if (numberOfViews == 1) {
-				root.Tiles.ElementAt (1).ContentView.Visible = false;
+				root.Tiles.ElementAt (1).ContentView.SetDesiredVisibility (false);
 			}
 
 			if (numberOfViews > 2) {

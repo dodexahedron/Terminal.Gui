@@ -124,7 +124,7 @@ namespace UICatalog.Scenarios {
 				Started = true;
 				StartBtnClick?.Invoke ();
 				Application.Invoke(()=>{
-					Spinner.Visible = true;
+					Spinner.SetDesiredVisibility (true);
 					ActivityProgressBar.Width = Dim.Fill () - Spinner.Width;
 					this.LayoutSubviews();
 				});
@@ -136,7 +136,7 @@ namespace UICatalog.Scenarios {
 				StopBtnClick?.Invoke ();
 
 				Application.Invoke(()=>{
-					Spinner.Visible = false;
+					Spinner.SetDesiredVisibility (false);
 					ActivityProgressBar.Width = Dim.Fill () - Spinner.Width;
 					this.LayoutSubviews();
 				});
@@ -144,7 +144,7 @@ namespace UICatalog.Scenarios {
 
 			internal void Pulse ()
 			{
-				Spinner.Visible = true;
+				Spinner.SetDesiredVisibility (true);
 				if (PulseBtnClick != null) {
 					PulseBtnClick?.Invoke ();
 

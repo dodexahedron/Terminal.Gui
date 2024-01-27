@@ -101,7 +101,7 @@ public class ScrollBarView : View {
 		Host = host;
 		CanFocus = false;
 		Enabled = host.Enabled;
-		Visible = host.Visible;
+		SetDesiredVisibility (host.Visible);
 		//Host.CanFocusChanged += Host_CanFocusChanged;
 		Host.EnabledChanged += Host_EnabledChanged;
 		Host.VisibleChanged += Host_VisibleChanged;
@@ -213,9 +213,9 @@ public class ScrollBarView : View {
 			if (IsInitialized) {
 				SetNeedsLayout ();
 				if (value) {
-					Visible = true;
+					SetDesiredVisibility (true);
 				} else {
-					Visible = false;
+					SetDesiredVisibility (false);
 					Position = 0;
 				}
 				SetWidthHeight ();
@@ -295,11 +295,11 @@ public class ScrollBarView : View {
 	void Host_VisibleChanged (object sender, EventArgs e)
 	{
 		if (!Host.Visible) {
-			Visible = Host.Visible;
+			SetDesiredVisibility (Host.Visible);
 			if (_otherScrollBarView != null) {
-				_otherScrollBarView.Visible = Visible;
+				_otherScrollBarView.SetDesiredVisibility (Visible);
 			}
-			_contentBottomRightCorner.Visible = Visible;
+			_contentBottomRightCorner.SetDesiredVisibility (Visible);
 		} else {
 			ShowHideScrollBars ();
 		}
@@ -397,9 +397,9 @@ public class ScrollBarView : View {
 	{
 		if (!_hosted || _hosted && !_autoHideScrollBars) {
 			if (_contentBottomRightCorner != null && _contentBottomRightCorner.Visible) {
-				_contentBottomRightCorner.Visible = false;
+				_contentBottomRightCorner.SetDesiredVisibility (false);
 			} else if (_otherScrollBarView != null && _otherScrollBarView._contentBottomRightCorner != null && _otherScrollBarView._contentBottomRightCorner.Visible) {
-				_otherScrollBarView._contentBottomRightCorner.Visible = false;
+				_otherScrollBarView._contentBottomRightCorner.SetDesiredVisibility (false);
 			}
 			return;
 		}
@@ -417,29 +417,29 @@ public class ScrollBarView : View {
 
 		if (_showBothScrollIndicator) {
 			if (_contentBottomRightCorner != null) {
-				_contentBottomRightCorner.Visible = true;
+				_contentBottomRightCorner.SetDesiredVisibility (true);
 			} else if (_otherScrollBarView != null && _otherScrollBarView._contentBottomRightCorner != null) {
-				_otherScrollBarView._contentBottomRightCorner.Visible = true;
+				_otherScrollBarView._contentBottomRightCorner.SetDesiredVisibility (true);
 			}
 		} else if (!_showScrollIndicator) {
 			if (_contentBottomRightCorner != null) {
-				_contentBottomRightCorner.Visible = false;
+				_contentBottomRightCorner.SetDesiredVisibility (false);
 			} else if (_otherScrollBarView != null && _otherScrollBarView._contentBottomRightCorner != null) {
-				_otherScrollBarView._contentBottomRightCorner.Visible = false;
+				_otherScrollBarView._contentBottomRightCorner.SetDesiredVisibility (false);
 			}
 			if (Application.MouseGrabView != null && Application.MouseGrabView == this) {
 				Application.UngrabMouse ();
 			}
 		} else if (_contentBottomRightCorner != null) {
-			_contentBottomRightCorner.Visible = false;
+			_contentBottomRightCorner.SetDesiredVisibility (false);
 		} else if (_otherScrollBarView != null && _otherScrollBarView._contentBottomRightCorner != null) {
-			_otherScrollBarView._contentBottomRightCorner.Visible = false;
+			_otherScrollBarView._contentBottomRightCorner.SetDesiredVisibility (false);
 		}
 		if (Host?.Visible == true && _showScrollIndicator && !Visible) {
-			Visible = true;
+			SetDesiredVisibility (true);
 		}
 		if (Host?.Visible == true && _otherScrollBarView?._showScrollIndicator == true && !_otherScrollBarView.Visible) {
-			_otherScrollBarView.Visible = true;
+			_otherScrollBarView.SetDesiredVisibility (true);
 		}
 
 		if (!redraw) {
@@ -468,20 +468,20 @@ public class ScrollBarView : View {
 				scrollBarView.ShowScrollIndicator = false;
 			}
 			if (scrollBarView.Visible) {
-				scrollBarView.Visible = false;
+				scrollBarView.SetDesiredVisibility (false);
 			}
 		} else if (barsize > 0 && barsize == scrollBarView._size && scrollBarView.OtherScrollBarView != null && pending) {
 			if (scrollBarView._showScrollIndicator) {
 				scrollBarView.ShowScrollIndicator = false;
 			}
 			if (scrollBarView.Visible) {
-				scrollBarView.Visible = false;
+				scrollBarView.SetDesiredVisibility (false);
 			}
 			if (scrollBarView.OtherScrollBarView != null && scrollBarView._showBothScrollIndicator) {
 				scrollBarView.OtherScrollBarView.ShowScrollIndicator = false;
 			}
 			if (scrollBarView.OtherScrollBarView.Visible) {
-				scrollBarView.OtherScrollBarView.Visible = false;
+				scrollBarView.OtherScrollBarView.SetDesiredVisibility (false);
 			}
 		} else if (barsize > 0 && barsize == _size && scrollBarView.OtherScrollBarView != null && !pending) {
 			pending = true;
@@ -491,14 +491,14 @@ public class ScrollBarView : View {
 					scrollBarView.OtherScrollBarView.ShowScrollIndicator = true;
 				}
 				if (!scrollBarView.OtherScrollBarView.Visible) {
-					scrollBarView.OtherScrollBarView.Visible = true;
+					scrollBarView.OtherScrollBarView.SetDesiredVisibility (true);
 				}
 			}
 			if (!scrollBarView._showScrollIndicator) {
 				scrollBarView.ShowScrollIndicator = true;
 			}
 			if (!scrollBarView.Visible) {
-				scrollBarView.Visible = true;
+				scrollBarView.SetDesiredVisibility (true);
 			}
 		}
 

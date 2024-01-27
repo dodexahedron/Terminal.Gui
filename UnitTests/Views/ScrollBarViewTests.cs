@@ -1073,7 +1073,7 @@ This is a test             ", output);
 
 		clicked = false;
 
-		sbv.Visible = true;
+		sbv.SetDesiredVisibility (true);
 		Assert.Equal (5, sbv.Size);
 		Assert.False (sbv.ShowScrollIndicator);
 		Assert.True (sbv.Visible);
@@ -1123,7 +1123,7 @@ This is a tes░
 This is a tes▼
 ", output);
 
-		sbv.Visible = false;
+		sbv.SetDesiredVisibility (false);
 		Assert.False (sbv.Visible);
 		Application.Top.Draw ();
 		TestHelpers.AssertDriverContentsWithFrameAre (@"
@@ -1135,7 +1135,7 @@ This is a test
 This is a test
 ", output);
 
-		sbv.Visible = true;
+		sbv.SetDesiredVisibility (true);
 		Assert.True (sbv.Visible);
 		Application.Top.Draw ();
 		TestHelpers.AssertDriverContentsWithFrameAre (@"
@@ -1148,7 +1148,7 @@ This is a tes▼
 ", output);
 
 		sbv.ClearOnVisibleFalse = true;
-		sbv.Visible = false;
+		sbv.SetDesiredVisibility (false);
 		Assert.False (sbv.Visible);
 		TestHelpers.AssertDriverContentsWithFrameAre (@"
 This is a tes

@@ -124,7 +124,7 @@ namespace UICatalog.Scenarios {
 				// Now this throw a InvalidOperationException on the TopologicalSort method as is expected.
 				//Win.Remove (removeLabel);
 
-				removeLabel.Visible = false;
+				removeLabel.SetDesiredVisibility (false);
 				Win.SetNeedsDisplay ();
 			};
 

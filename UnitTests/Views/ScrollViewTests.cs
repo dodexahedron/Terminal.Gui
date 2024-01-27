@@ -447,7 +447,7 @@ namespace Terminal.Gui.ViewsTests {
 			{
 				Border.LineStyle = LineStyle.None;
 				Border.Thickness = new Thickness (0);
-				labelFill.Visible = true;
+				labelFill.SetDesiredVisibility (true);
 				view = this;
 				return base.OnEnter (view);
 			}
@@ -456,7 +456,7 @@ namespace Terminal.Gui.ViewsTests {
 			{
 				Border.LineStyle = LineStyle.Single;
 				Border.Thickness = new Thickness (1);
-				labelFill.Visible = false;
+				labelFill.SetDesiredVisibility (false);
 				if (view == null)
 					view = this;
 				return base.OnLeave (view);

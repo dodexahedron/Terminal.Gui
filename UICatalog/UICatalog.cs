@@ -353,7 +353,7 @@ class UICatalogApp {
 					}
 				}),
 				new StatusItem (Key.F10, "~F10~ Status Bar", () => {
-					StatusBar.Visible = !StatusBar.Visible;
+					StatusBar.SetDesiredVisibility (!StatusBar.Visible);
 					//ContentPane!.Height = Dim.Fill(StatusBar.Visible ? 1 : 0);
 					LayoutSubviews ();
 					SetSubViewNeedsDisplay ();
@@ -787,7 +787,7 @@ class UICatalogApp {
 			int height = ShowStatusBar ? 1 : 0; // + (MenuBar.Visible ? 1 : 0);
 							    //ContentPane.Height = Dim.Fill (height);
 
-			StatusBar.Visible = ShowStatusBar;
+			StatusBar.SetDesiredVisibility (ShowStatusBar);
 
 			Application.Top.SetNeedsDisplay ();
 		}

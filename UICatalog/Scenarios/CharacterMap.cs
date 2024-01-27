@@ -628,10 +628,10 @@ class CharMap : ScrollView {
 			} catch (HttpRequestException e) {
 				(s as Dialog).Text = e.Message;
 				Application.Invoke (() => {
-					spinner.Visible = false;
+					spinner.SetDesiredVisibility (false);
 					errorLabel.Text = e.Message;
 					errorLabel.ColorScheme = Colors.ColorSchemes ["Error"];
-					errorLabel.Visible = true;
+					errorLabel.SetDesiredVisibility (true);
 				});
 			}
 			(s as Dialog)?.RequestStop ();

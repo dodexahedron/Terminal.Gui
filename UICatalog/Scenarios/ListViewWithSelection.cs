@@ -40,7 +40,7 @@ namespace UICatalog.Scenarios {
 				X = Pos.Right (_allowMarkingCB) + 1,
 				Y = 0,
 				Height = 1,
-				Visible = (bool)_allowMarkingCB.Checked
+				Visible = _allowMarkingCB.Checked == true
 			};
 			Win.Add (_allowMultipleCB);
 			_allowMultipleCB.Toggled += AllowMultipleCB_Toggled;
@@ -124,7 +124,7 @@ namespace UICatalog.Scenarios {
 		private void AllowMarkingCB_Toggled (object sender, ToggleEventArgs e)
 		{
 			_listView.AllowsMarking = (bool)!e.OldValue;
-			_allowMultipleCB.Visible = _listView.AllowsMarking;
+			_allowMultipleCB.SetDesiredVisibility (_listView.AllowsMarking);
 			Win.SetNeedsDisplay ();
 		}
 
