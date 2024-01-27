@@ -226,9 +226,9 @@ public partial class View : Responder, ISupportInitializeNotification {
 	/// Gets or sets a value indicating whether this <see cref="View"/> and all its child controls are displayed.
 	/// </summary>
 	public virtual bool Visible {
-		get => _visible;
+		get => _visible && (SuperView?.Visible ?? true);
 		set {
-			if (_visible == value)
+			if (Visible == value)
 				return;
 
 			_visible = value;
