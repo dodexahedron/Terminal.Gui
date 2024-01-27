@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 namespace Terminal.Gui;
 
 public partial class View {
@@ -35,8 +35,9 @@ public partial class View {
     ///   The Views that have been added to this view can be retrieved via the <see cref="Subviews" /> property. See also
     ///   <seealso cref="Remove(View)" /> <seealso cref="RemoveAll" />
     /// </remarks>
-    public virtual void Add (View view) {
-        if (view == null) {
+    public virtual void Add (View? view) {
+        if (view is null) {
+	        // BUG: This really should throw if a null reference is provided
             return;
         }
 
