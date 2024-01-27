@@ -140,7 +140,7 @@ public partial class View {
 
     /// <summary>Method invoked when a subview is being added to this view.</summary>
     /// <param name="e">Event where <see cref="ViewEventArgs.View" /> is the subview being added.</param>
-    public virtual void OnAdded (SuperViewChangedEventArgs e) {
+    private void OnAdded (SuperViewChangedEventArgs e) {
         var view = e.Child;
         view.IsAdded = true;
         view.OnResizeNeeded ();
@@ -149,7 +149,7 @@ public partial class View {
 
     /// <summary>Method invoked when a subview is being removed from this view.</summary>
     /// <param name="e">Event args describing the subview being removed.</param>
-    public virtual void OnRemoved (SuperViewChangedEventArgs e) {
+    private void OnRemoved (SuperViewChangedEventArgs e) {
         var view = e.Child;
         view.IsAdded = false;
         view.Removed?.Invoke (this, e);
