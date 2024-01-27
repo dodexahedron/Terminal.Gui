@@ -129,9 +129,12 @@ namespace Terminal.Gui;
 #endregion API Docs
 
 public partial class View : Responder, ISupportInitializeNotification {
-	bool _oldEnabled;
+	/// <summary>
+	/// Previous value of Enabled
+	/// </summary>
+	private bool _oldEnabled;
 
-	string _title = string.Empty;
+	private string _title = string.Empty;
 
 	/// <summary>
 	/// Points to the current driver in use by the view, it is a convenience property
@@ -291,7 +294,7 @@ public partial class View : Responder, ISupportInitializeNotification {
 	/// <inheritdoc/>
 	public override void OnVisibleChanged () => VisibleChanged?.Invoke (this, EventArgs.Empty);
 
-	bool CanBeVisible (View view)
+	private bool CanBeVisible (View view)
 	{
 		if (!view.Visible) {
 			return false;
@@ -480,10 +483,10 @@ public partial class View : Responder, ISupportInitializeNotification {
 	/// <param name="rect"></param>
 	/// <param name="layoutStyle"></param>
 	/// <param name="direction"></param>
-	void SetInitialProperties (string text,
-				   Rect rect,
-				   LayoutStyle layoutStyle = LayoutStyle.Computed,
-				   TextDirection direction = TextDirection.LeftRight_TopBottom)
+	private void SetInitialProperties (string text,
+	                                   Rect rect,
+	                                   LayoutStyle layoutStyle = LayoutStyle.Computed,
+	                                   TextDirection direction = TextDirection.LeftRight_TopBottom)
 	{
 		TextFormatter = new TextFormatter ();
 		TextFormatter.HotKeyChanged += TextFormatter_HotKeyChanged;
