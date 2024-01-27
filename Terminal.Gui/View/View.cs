@@ -185,11 +185,11 @@ public partial class View : Responder, ISupportInitializeNotification {
 		set {
 			if (_enabled != value) {
 				if (value) {
-					if (SuperView == null || SuperView?.Enabled == true) {
-						_enabled = value;
+					if (SuperView is null or { Enabled: true }) {
+						_enabled = true;
 					}
 				} else {
-					_enabled = value;
+					_enabled = false;
 				}
 				if (!value && HasFocus) {
 					SetHasFocus (false, this);
