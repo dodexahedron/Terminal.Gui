@@ -1,10 +1,10 @@
-using System;
 using System.ComponentModel;
 using System.Diagnostics;
 
 namespace Terminal.Gui;
 
 #region API Docs
+
 /// <summary>
 /// View is the base class for all views on the screen and represents a visible element that can render itself and
 /// contains zero or more nested views, called SubViews. View provides basic functionality for layout, positioning,
@@ -126,6 +126,7 @@ namespace Terminal.Gui;
 /// </para>
 /// ///
 /// </remarks>
+
 #endregion API Docs
 
 public partial class View : Responder, ISupportInitializeNotification {
@@ -168,11 +169,11 @@ public partial class View : Responder, ISupportInitializeNotification {
 				var old = _title;
 				_title = value;
 				SetNeedsDisplay ();
-#if DEBUG
+			#if DEBUG
 				if (_title != null && string.IsNullOrEmpty (Id)) {
 					Id = _title;
 				}
-#endif // DEBUG
+			#endif // DEBUG
 				OnTitleChanged (old, _title);
 			}
 		}
@@ -186,19 +187,22 @@ public partial class View : Responder, ISupportInitializeNotification {
 	public virtual bool Enabled {
 		get => _enabled;
 		set {
-			if ( _enabled == value )
+			if (_enabled == value)
 				return;
 
 			if (value) {
 				if (SuperView is null or { Enabled: true }) {
 					_enabled = true;
 				}
-			} else {
+			}
+			else {
 				_enabled = false;
 			}
+
 			if (!value && HasFocus) {
 				SetHasFocus (false, this);
 			}
+
 			OnEnabledChanged ();
 			SetNeedsDisplay ();
 
@@ -207,7 +211,8 @@ public partial class View : Responder, ISupportInitializeNotification {
 					if (!value) {
 						view._oldEnabled = view.Enabled;
 						view.Enabled = false;
-					} else {
+					}
+					else {
 						view.Enabled = view._oldEnabled;
 						view._addingView = false;
 					}
@@ -266,10 +271,10 @@ public partial class View : Responder, ISupportInitializeNotification {
 	/// <param name="oldTitle">The <see cref="View.Title"/> that is/has been replaced.</param>
 	/// <param name="newTitle">The new <see cref="View.Title"/> to be replaced.</param>
 	/// <returns>`true` if an event handler canceled the Title change.</returns>
-	public virtual bool OnTitleChanging (string oldTitle, string newTitle)
-	{
+	public virtual bool OnTitleChanging (string oldTitle, string newTitle) {
 		var args = new TitleEventArgs (oldTitle, newTitle);
 		TitleChanging?.Invoke (this, args);
+
 		return args.Cancel;
 	}
 
@@ -284,8 +289,7 @@ public partial class View : Responder, ISupportInitializeNotification {
 	/// </summary>
 	/// <param name="oldTitle">The <see cref="View.Title"/> that is/has been replaced.</param>
 	/// <param name="newTitle">The new <see cref="View.Title"/> to be replaced.</param>
-	public virtual void OnTitleChanged (string oldTitle, string newTitle)
-	{
+	public virtual void OnTitleChanged (string oldTitle, string newTitle) {
 		var args = new TitleEventArgs (oldTitle, newTitle);
 		TitleChanged?.Invoke (this, args);
 	}
@@ -309,15 +313,13 @@ public partial class View : Responder, ISupportInitializeNotification {
 	public event EventHandler<VisibleChangedEventArgs> VisibleChanged;
 
 	/// <inheritdoc/>
-	protected void OnVisibleChanged (bool changedFrom, bool changedTo) {
-		VisibleChanged?.Invoke (this, new());
-	}
+	protected void OnVisibleChanged (bool changedFrom, bool changedTo) { VisibleChanged?.Invoke (this, new ()); }
 
-	private bool CanBeVisible (View view)
-	{
+	private bool CanBeVisible (View view) {
 		if (!view.Visible) {
 			return false;
 		}
+
 		for (var c = view.SuperView; c != null; c = c.SuperView) {
 			if (!c.Visible) {
 				return false;
@@ -334,8 +336,7 @@ public partial class View : Responder, ISupportInitializeNotification {
 	public override string ToString () => $"{GetType ().Name}({Id}){Frame}";
 
 	/// <inheritdoc/>
-	protected override void Dispose (bool disposing)
-	{
+	protected override void Dispose (bool disposing) {
 		LineCanvas.Dispose ();
 
 		Margin?.Dispose ();
@@ -346,7 +347,7 @@ public partial class View : Responder, ISupportInitializeNotification {
 		Padding = null;
 
 		for (var i = InternalSubviews.Count - 1; i >= 0; i--) {
-			var subview = InternalSubviews [i];
+			var subview = InternalSubviews[ i ];
 			Remove (subview);
 			subview.Dispose ();
 		}
@@ -355,7 +356,8 @@ public partial class View : Responder, ISupportInitializeNotification {
 		Debug.Assert (InternalSubviews.Count == 0);
 	}
 
-	#region Constructors and Initialization
+#region Constructors and Initialization
+
 	/// <summary>
 	/// Initializes a new instance of a <see cref="View"/> class with the absolute
 	/// dimensions specified in the <paramref name="frame"/> parameter.
@@ -502,11 +504,12 @@ public partial class View : Responder, ISupportInitializeNotification {
 	/// <param name="rect"></param>
 	/// <param name="layoutStyle"></param>
 	/// <param name="direction"></param>
-	private void SetInitialProperties (string text,
-	                                   Rect rect,
-	                                   LayoutStyle layoutStyle = LayoutStyle.Computed,
-	                                   TextDirection direction = TextDirection.LeftRight_TopBottom)
-	{
+	private void SetInitialProperties (
+		string text,
+		Rect rect,
+		LayoutStyle layoutStyle = LayoutStyle.Computed,
+		TextDirection direction = TextDirection.LeftRight_TopBottom
+	) {
 		TextFormatter = new TextFormatter ();
 		TextFormatter.HotKeyChanged += TextFormatter_HotKeyChanged;
 		TextDirection = direction;
@@ -558,8 +561,7 @@ public partial class View : Responder, ISupportInitializeNotification {
 	///         instead of on every run.
 	///         </para>
 	/// </remarks>
-	public virtual void BeginInit ()
-	{
+	public virtual void BeginInit () {
 		if (!IsInitialized) {
 			_oldCanFocus = CanFocus;
 			_oldTabIndex = _tabIndex;
@@ -578,9 +580,9 @@ public partial class View : Responder, ISupportInitializeNotification {
 	/// <summary>
 	/// Signals the View that initialization is ending. See <see cref="ISupportInitialize"/>.
 	/// </summary>
-	public void EndInit ()
-	{
+	public void EndInit () {
 		IsInitialized = true;
+
 		// These calls were moved from BeginInit as they access Bounds which is indeterminate until EndInit is called.
 		UpdateTextDirection (TextDirection);
 		UpdateTextFormatterText ();
@@ -594,9 +596,13 @@ public partial class View : Responder, ISupportInitializeNotification {
 				}
 			}
 		}
+
 		Initialized?.Invoke (this, EventArgs.Empty);
 	}
-	#endregion Constructors and Initialization
+
+#endregion Constructors and Initialization
+}
+
 public class VisibleChangedEventArgs : EventArgs {
     public bool ChangedFrom { get; init; }
     public bool ChangedTo { get; init; }
