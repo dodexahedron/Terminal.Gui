@@ -64,16 +64,6 @@ public class Responder : IDisposable {
 	/// <value><c>true</c> if has focus; otherwise, <c>false</c>.</value>
 	public virtual bool HasFocus { get; }
 
-	private bool _enabled = true;
-
-	/// <summary>
-	/// Gets or sets a value indicating whether this <see cref="Responder"/> can respond to user interaction.
-	/// </summary>
-	public virtual bool Enabled {
-		get => _enabled;
-		set => _enabled = value;
-	}
-
 	/// <summary>
 	/// Gets or sets a value indicating whether this <see cref="Responder"/> and all its child controls are displayed.
 	/// </summary>

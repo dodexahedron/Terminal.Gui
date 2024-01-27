@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 
@@ -175,17 +175,21 @@ public partial class View : Responder, ISupportInitializeNotification {
 		}
 	}
 
-	/// <inheritdoc/>
-	public override bool Enabled {
-		get => base.Enabled;
+	private bool _enabled = true;
+
+	/// <summary>
+	/// Gets or sets a value indicating whether this <see cref="View"/> can respond to user interaction.
+	/// </summary>
+	public virtual bool Enabled {
+		get => _enabled;
 		set {
-			if (base.Enabled != value) {
+			if (_enabled != value) {
 				if (value) {
 					if (SuperView == null || SuperView?.Enabled == true) {
-						base.Enabled = value;
+						_enabled = value;
 					}
 				} else {
-					base.Enabled = value;
+					_enabled = value;
 				}
 				if (!value && HasFocus) {
 					SetHasFocus (false, this);

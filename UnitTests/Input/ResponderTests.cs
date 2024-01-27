@@ -16,7 +16,6 @@ public class ResponderTests {
 		Assert.Equal ("Terminal.Gui.Responder", r.ToString ());
 		Assert.False (r.CanFocus);
 		Assert.False (r.HasFocus);
-		Assert.True (r.Enabled);
 		Assert.True (r.Visible);
 		r.Dispose ();
 	}
