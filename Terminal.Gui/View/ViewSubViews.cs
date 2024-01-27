@@ -1,16 +1,14 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Terminal.Gui;
 
 public partial class View {
-	static readonly IList<View> _empty = new List<View> (0).AsReadOnly ();
+	private static readonly IList<View> _empty = new List<View> (0).AsReadOnly ();
 
 	internal bool _addingView;
-
-	List<View> _subviews; // This is null, and allocated on demand.
-
-	View _superView;
+	private List<View> _subviews; // This is null, and allocated on demand.
+	private View _superView;
 
 	/// <summary>
 	/// Returns the container for this view, or null if this view has not been added to a container.
@@ -183,8 +181,7 @@ public partial class View {
 		view.Removed?.Invoke (this, e);
 	}
 
-
-	void PerformActionForSubview (View subview, Action<View> action)
+	private void PerformActionForSubview (View subview, Action<View> action)
 	{
 		if (_subviews.Contains (subview)) {
 			action (subview);
@@ -283,7 +280,7 @@ public partial class View {
 	/// </summary>
 	public event EventHandler<FocusEventArgs> Leave;
 
-	Direction _focusDirection;
+	private Direction _focusDirection;
 
 	internal Direction FocusDirection {
 		get => SuperView?.FocusDirection ?? _focusDirection;
@@ -305,7 +302,7 @@ public partial class View {
 	/// <value><c>true</c> if has focus; otherwise, <c>false</c>.</value>
 	public bool HasFocus => _hasFocus;
 
-	void SetHasFocus (bool value, View view, bool force = false)
+	private void SetHasFocus (bool value, View view, bool force = false)
 	{
 		if (_hasFocus != value || force) {
 			_hasFocus = value;
@@ -334,7 +331,7 @@ public partial class View {
 	/// <inheritdoc/>
 	public override void OnCanFocusChanged () => CanFocusChanged?.Invoke (this, EventArgs.Empty);
 
-	bool _oldCanFocus;
+	private bool _oldCanFocus;
 
 	/// <inheritdoc/>
 	public override bool CanFocus {
@@ -458,7 +455,7 @@ public partial class View {
 	/// Causes the specified subview to have focus.
 	/// </summary>
 	/// <param name="view">View.</param>
-	void SetFocus (View view)
+	private void SetFocus (View view)
 	{
 		if (view == null) {
 			return;
@@ -684,7 +681,7 @@ public partial class View {
 		return false;
 	}
 
-	View GetMostFocused (View view)
+	private View GetMostFocused (View view)
 	{
 		if (view == null) {
 			return null;

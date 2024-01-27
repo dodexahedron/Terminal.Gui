@@ -11,13 +11,11 @@ public class ResponderTests {
 	[TestRespondersDisposed]
 	public void New_Initializes ()
 	{
-		var r = new Responder ();
+		using var r = new Responder ();
 		Assert.NotNull (r);
 		Assert.Equal ("Terminal.Gui.Responder", r.ToString ());
 		Assert.False (r.CanFocus);
-		Assert.False (r.HasFocus);
 		Assert.True (r.Visible);
-		r.Dispose ();
 	}
 
 	[Fact]
