@@ -39,14 +39,8 @@ public partial class View {
             return;
         }
 
-        if (_subviews == null) {
-            _subviews = new ();
-        }
-
-        if (_tabIndexes == null) {
-            _tabIndexes = new ();
-        }
-
+        _subviews ??= [];
+        _tabIndexes ??= [];
         _subviews.Add (view);
         _tabIndexes.Add (view);
         view._superView = this;
