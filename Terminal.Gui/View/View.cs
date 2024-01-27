@@ -222,9 +222,18 @@ public partial class View : Responder, ISupportInitializeNotification {
 	public bool ClearOnVisibleFalse { get; set; } = true;
 
 	private bool _visible = true;
+
 	/// <summary>
-	/// Gets or sets a value indicating whether this <see cref="View"/> and all its child controls are displayed.
+	///   Gets a value indicating whether this <see cref="View" /> will be displayed or sets a value indicating whether this <see cref="View" />
+	///   should be displayed when possible.
 	/// </summary>
+	/// <remarks>
+	///   Value returned by the getter is the binary AND of this <see cref="View" />'s last explicitly set visibility and the Visible property of
+	///   <see cref="SuperView" />.
+	///   <para />
+	///   Setter evaluates the result of the getter and, if value is the same, performs no action. If value is different, sets visibility of this
+	///   object.
+	/// </remarks>
 	public virtual bool Visible {
 		get => _visible && (SuperView?.Visible ?? true);
 		set {
