@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 namespace Terminal.Gui;
 
 public partial class View {
@@ -45,8 +45,12 @@ public partial class View {
         _tabIndexes ??= [];
         _subviews.Add (view);
         _tabIndexes.Add (view);
+
+        // TODO: Even though it's the same class, we shouldn't be directly setting the other one's private fields.
         view._superView = this;
+        // TODO: This whole thing should get collapsed to a switch.
         if (view.CanFocus) {
+	        // TODO: Investigate this boolean field and eliminate if possible. Replace with something else if it's important.
             _addingView = true;
             // TODO: This also looks like stuff that should not be done from the current instance.
             if (SuperView is { CanFocus: false }) {
@@ -56,6 +60,7 @@ public partial class View {
             }
 
             CanFocus = true;
+            // TODO: More touching others inappropriately
             view._tabIndex = _tabIndexes.IndexOf (view);
             _addingView = false;
         }
