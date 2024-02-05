@@ -1,8 +1,5 @@
-using System.Collections.Generic;
-using Xunit;
 
 // Alias Console to MockConsole so we don't accidentally use Console
-using Console = Terminal.Gui.FakeConsole;
 
 namespace Terminal.Gui.InputTests;
 
@@ -24,11 +21,11 @@ public class ResponderTests {
 		var r = new View ();
 
 		//Assert.False (r.OnKeyDown (new KeyEventArgs () { Key = Key.Unknown }));
-		Assert.False (r.OnKeyDown (new Key () { KeyCode = KeyCode.Null }));
-		Assert.False (r.OnKeyUp (new Key () { KeyCode = KeyCode.Null }));
-		Assert.False (r.MouseEvent (new MouseEvent () { Flags = MouseFlags.AllEvents }));
-		Assert.False (r.OnMouseEnter (new MouseEvent () { Flags = MouseFlags.AllEvents }));
-		Assert.False (r.OnMouseLeave (new MouseEvent () { Flags = MouseFlags.AllEvents }));
+		Assert.False (r.OnKeyDown (new Key { KeyCode = KeyCode.Null }));
+		Assert.False (r.OnKeyUp (new Key { KeyCode = KeyCode.Null }));
+		Assert.False (r.MouseEvent (new MouseEvent { Flags = MouseFlags.AllEvents }));
+		Assert.False (r.OnMouseEnter (new MouseEvent { Flags = MouseFlags.AllEvents }));
+		Assert.False (r.OnMouseLeave (new MouseEvent { Flags = MouseFlags.AllEvents }));
 
 		var v = new View ();
 		Assert.False (r.OnEnter (v));
@@ -45,7 +42,7 @@ public class ResponderTests {
 	public void KeyPressed_Handled_True_Cancels_KeyPress ()
 	{
 		var r = new View ();
-		var args = new Key () { KeyCode = KeyCode.Null };
+		var args = new Key { KeyCode = KeyCode.Null };
 
 		Assert.False (r.OnKeyDown (args));
 		Assert.False (args.Handled);
@@ -62,7 +59,6 @@ public class ResponderTests {
 	[TestRespondersDisposed]
 	public void Dispose_Works ()
 	{
-
 		var r = new Responder ();
 #if DEBUG_IDISPOSABLE
 		Assert.Single (Responder.Instances);
@@ -74,31 +70,26 @@ public class ResponderTests {
 #endif
 	}
 
-	public class DerivedView : View {
-		public DerivedView () { }
-
-		public override bool OnKeyDown (Key keyEvent)
-		{
-			return true;
-		}
-	}
-
 	[Fact]
 	[TestRespondersDisposed]
 	public void IsOverridden_False_IfNotOverridden ()
 	{
 		// MouseEvent IS defined on Responder but NOT overridden
-		Assert.False (Responder.IsOverridden (new Responder () { }, "MouseEvent"));
+		Assert.False (Responder.IsOverridden (new Responder (), "MouseEvent"));
 
 		// MouseEvent is defined on Responder and NOT overrident on View
-		Assert.False (Responder.IsOverridden (new View () { Text = "View does not override MouseEvent" }, "MouseEvent"));
-		Assert.False (Responder.IsOverridden (new DerivedView () { Text = "DerivedView does not override MouseEvent" }, "MouseEvent"));
+		Assert.False (Responder.IsOverridden (new View { Text = "View does not override MouseEvent" },
+			"MouseEvent"));
+		Assert.False (Responder.IsOverridden (
+			new DerivedView { Text = "DerivedView does not override MouseEvent" }, "MouseEvent"));
 
 		// MouseEvent is NOT defined on DerivedView 
-		Assert.False (Responder.IsOverridden (new DerivedView () { Text = "DerivedView does not override MouseEvent" }, "MouseEvent"));
+		Assert.False (Responder.IsOverridden (
+			new DerivedView { Text = "DerivedView does not override MouseEvent" }, "MouseEvent"));
 
 		// OnKeyDown is defined on View and NOT overrident on Button
-		Assert.False (Responder.IsOverridden (new Button () { Text = "Button does not override OnKeyDown" }, "OnKeyDown"));
+		Assert.False (Responder.IsOverridden (new Button { Text = "Button does not override OnKeyDown" },
+			"OnKeyDown"));
 
 #if DEBUG_IDISPOSABLE
 		// HACK: Force clean up of Responders to avoid having to Dispose all the Views created above.
@@ -112,19 +103,24 @@ public class ResponderTests {
 	public void IsOverridden_True_IfOverridden ()
 	{
 		// MouseEvent is defined on Responder IS overriden on ScrollBarView (but not View)
-		Assert.True (Responder.IsOverridden (new ScrollBarView () { Text = "ScrollBarView overrides MouseEvent" }, "MouseEvent"));
+		Assert.True (Responder.IsOverridden (new ScrollBarView { Text = "ScrollBarView overrides MouseEvent" },
+			"MouseEvent"));
 
 		// OnKeyDown is defined on View
-		Assert.False (Responder.IsOverridden (new View () { Text = "View overrides OnKeyDown" }, "OnKeyDown"));
+		Assert.False (Responder.IsOverridden (new View { Text = "View overrides OnKeyDown" }, "OnKeyDown"));
 
 		// OnKeyDown is defined on DerivedView
-		Assert.True (Responder.IsOverridden (new DerivedView () { Text = "DerivedView overrides OnKeyDown" }, "OnKeyDown"));
+		Assert.True (Responder.IsOverridden (new DerivedView { Text = "DerivedView overrides OnKeyDown" },
+			"OnKeyDown"));
 
 		// ScrollBarView overrides both MouseEvent (from Responder) and Redraw (from View)
-		Assert.True (Responder.IsOverridden (new ScrollBarView () { Text = "ScrollBarView overrides MouseEvent" }, "MouseEvent"));
-		Assert.True (Responder.IsOverridden (new ScrollBarView () { Text = "ScrollBarView overrides OnDrawContent" }, "OnDrawContent"));
+		Assert.True (Responder.IsOverridden (new ScrollBarView { Text = "ScrollBarView overrides MouseEvent" },
+			"MouseEvent"));
+		Assert.True (Responder.IsOverridden (
+			new ScrollBarView { Text = "ScrollBarView overrides OnDrawContent" }, "OnDrawContent"));
 
-		Assert.True (Responder.IsOverridden (new Button () { Text = "Button overrides MouseEvent" }, "MouseEvent"));
+		Assert.True (Responder.IsOverridden (new Button { Text = "Button overrides MouseEvent" },
+			"MouseEvent"));
 #if DEBUG_IDISPOSABLE
 		// HACK: Force clean up of Responders to avoid having to Dispose all the Views created above.
 		Responder.Instances.Clear ();
@@ -138,15 +134,15 @@ public class ResponderTests {
 		// Only clear before because need to test after assert
 		Responder.Instances.Clear ();
 
-		var container1 = new View () { Id = "Container1" };
+		var container1 = new View { Id = "Container1" };
 
-		var view = new View () { Id = "View" };
+		var view = new View { Id = "View" };
 		container1.Add (view);
 		Assert.Equal (container1, view.SuperView);
 
 		Assert.Single (container1.Subviews);
 
-		var container2 = new View () { Id = "Container2" };
+		var container2 = new View { Id = "Container2" };
 
 		container2.Add (view);
 		Assert.Equal (container2, view.SuperView);
@@ -177,21 +173,21 @@ public class ResponderTests {
 		// Only clear before because need to test after assert
 		Responder.Instances.Clear ();
 
-		var container1 = new View () { Id = "Container1" };
+		var container1 = new View { Id = "Container1" };
 
-		var view = new View () { Id = "View" };
+		var view = new View { Id = "View" };
 		container1.Add (view);
 		Assert.Equal (container1, view.SuperView);
 		Assert.Single (container1.Subviews);
 
-		var container2 = new View () { Id = "Container2" };
+		var container2 = new View { Id = "Container2" };
 		var count = 0;
 
 		view.Disposing += View_Disposing;
 		container2.Add (view);
 		Assert.Equal (container2, view.SuperView);
 
-		void View_Disposing (object sender, System.EventArgs e)
+		void View_Disposing (object sender, EventArgs e)
 		{
 			count++;
 			Assert.Equal (view, sender);
@@ -217,15 +213,15 @@ public class ResponderTests {
 		// Only clear before because need to test after assert
 		Responder.Instances.Clear ();
 
-		var container1 = new View () { Id = "Container1" };
+		var container1 = new View { Id = "Container1" };
 		var count = 0;
 
-		var view = new View () { Id = "View" };
+		var view = new View { Id = "View" };
 		view.Disposing += View_Disposing;
 		container1.Add (view);
 		Assert.Equal (container1, view.SuperView);
 
-		void View_Disposing (object sender, System.EventArgs e)
+		void View_Disposing (object sender, EventArgs e)
 		{
 			count++;
 			Assert.Equal (view, sender);
@@ -234,7 +230,7 @@ public class ResponderTests {
 
 		Assert.Single (container1.Subviews);
 
-		var container2 = new View () { Id = "Container2" };
+		var container2 = new View { Id = "Container2" };
 
 		container2.Add (view);
 		Assert.Equal (container2, view.SuperView);
@@ -249,5 +245,9 @@ public class ResponderTests {
 		container1.Dispose ();
 
 		Assert.Empty (Responder.Instances);
+	}
+
+	public class DerivedView : View {
+		public override bool OnKeyDown (Key keyEvent) => true;
 	}
 }
