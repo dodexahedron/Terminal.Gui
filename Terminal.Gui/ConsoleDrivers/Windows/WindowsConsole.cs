@@ -1,5 +1,4 @@
 #nullable enable
-
 using System.ComponentModel;
 
 namespace Terminal.Gui.ConsoleDrivers.Windows;
@@ -11,9 +10,9 @@ internal class WindowsConsole {
     private nint _outputHandle;
     private nint _screenBuffer;
     private readonly uint _originalConsoleMode;
-    private CursorVisibility? _initialCursorVisibility = null;
-    private CursorVisibility? _currentCursorVisibility = null;
-    private CursorVisibility? _pendingCursorVisibility = null;
+    private CursorVisibility? _initialCursorVisibility;
+    private CursorVisibility? _currentCursorVisibility;
+    private CursorVisibility? _pendingCursorVisibility;
     private readonly StringBuilder _stringBuilder = new ( 256 * 1024 );
 
     public WindowsConsole () {
@@ -42,7 +41,7 @@ internal class WindowsConsole {
                 ci[ i++ ] = new () {
                                        Char = new () { UnicodeChar = info.Char },
                                        Attributes = (ushort)( (int)info.Attribute.Foreground.GetClosestNamedColor () | ( (int)info.Attribute.Background.GetClosestNamedColor () << 4 ) )
-                                    };
+                                   };
             }
 
             result = WriteConsoleOutput (_screenBuffer, ci, bufferSize, new () { X = window.Left, Y = window.Top }, ref window);
