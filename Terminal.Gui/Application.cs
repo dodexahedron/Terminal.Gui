@@ -357,7 +357,7 @@ public static partial class Application {
 			throw new InvalidOperationException ("Only one Overlapped Container is allowed.");
 		}
 
-		// Ensure the mouse is ungrabed.
+		// Ensure the mouse is un-grabbed.
 		MouseGrabView = null;
 
 		var rs = new RunState (Toplevel);
