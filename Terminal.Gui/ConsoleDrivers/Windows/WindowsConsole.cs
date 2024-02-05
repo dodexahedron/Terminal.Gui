@@ -659,7 +659,8 @@ internal class WindowsConsole {
         object lpReserved
     );
 
-    [DllImport ( "kernel32.dll" )] private static extern bool SetConsoleCursorPosition (nint hConsoleOutput, Coord dwCursorPosition);
+    [DllImport ( "kernel32.dll" )]
+    private static extern bool SetConsoleCursorPosition (nint hConsoleOutput, Coord dwCursorPosition);
 
     [StructLayout ( LayoutKind.Sequential )]
     public struct ConsoleCursorInfo {
@@ -667,10 +668,14 @@ internal class WindowsConsole {
         public bool bVisible;
     }
 
-    [DllImport ( "kernel32.dll", SetLastError = true )] private static extern bool SetConsoleCursorInfo (nint hConsoleOutput, [In] ref ConsoleCursorInfo lpConsoleCursorInfo);
-    [DllImport ( "kernel32.dll", SetLastError = true )] private static extern bool GetConsoleCursorInfo (nint hConsoleOutput, out ConsoleCursorInfo lpConsoleCursorInfo);
-    [DllImport ( "kernel32.dll" )] private static extern bool GetConsoleMode (nint hConsoleHandle, out uint lpMode);
-    [DllImport ( "kernel32.dll" )] private static extern bool SetConsoleMode (nint hConsoleHandle, uint dwMode);
+    [DllImport ( "kernel32.dll", SetLastError = true )]
+    private static extern bool SetConsoleCursorInfo (nint hConsoleOutput, [In] ref ConsoleCursorInfo lpConsoleCursorInfo);
+    [DllImport ( "kernel32.dll", SetLastError = true )]
+    private static extern bool GetConsoleCursorInfo (nint hConsoleOutput, out ConsoleCursorInfo lpConsoleCursorInfo);
+    [DllImport ( "kernel32.dll" )]
+    private static extern bool GetConsoleMode (nint hConsoleHandle, out uint lpMode);
+    [DllImport ( "kernel32.dll" )]
+    private static extern bool SetConsoleMode (nint hConsoleHandle, uint dwMode);
 
     [DllImport ( "kernel32.dll", SetLastError = true )]
     private static extern nint CreateConsoleScreenBuffer (
@@ -682,8 +687,10 @@ internal class WindowsConsole {
     );
 
     internal static nint INVALID_HANDLE_VALUE = new ( -1 );
-    [DllImport ( "kernel32.dll", SetLastError = true )] private static extern bool SetConsoleActiveScreenBuffer (nint Handle);
-    [DllImport ( "kernel32.dll", SetLastError = true )] private static extern bool GetNumberOfConsoleInputEvents (nint handle, out uint lpcNumberOfEvents);
+    [DllImport ( "kernel32.dll", SetLastError = true )]
+    private static extern bool SetConsoleActiveScreenBuffer (nint Handle);
+    [DllImport ( "kernel32.dll", SetLastError = true )]
+    private static extern bool GetNumberOfConsoleInputEvents (nint handle, out uint lpcNumberOfEvents);
 
     public InputRecord[] ReadConsoleInput ( ) {
         const int bufferSize = 1;
