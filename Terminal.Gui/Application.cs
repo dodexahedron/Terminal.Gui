@@ -352,9 +352,8 @@ public static partial class Application {
 	/// </remarks>
 	public static RunState Begin (Toplevel Toplevel)
 	{
-		if (Toplevel == null) {
-			throw new ArgumentNullException (nameof (Toplevel));
-		} else if (Toplevel.IsOverlappedContainer && OverlappedTop != Toplevel && OverlappedTop != null) {
+		ArgumentNullException.ThrowIfNull( Toplevel, nameof( Toplevel ) );
+		if (Toplevel.IsOverlappedContainer && OverlappedTop != Toplevel && OverlappedTop != null) {
 			throw new InvalidOperationException ("Only one Overlapped Container is allowed.");
 		}
 
