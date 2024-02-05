@@ -23,7 +23,9 @@
     <VersionSuffix></VersionSuffix>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>$(DefineConstants);TRACE;DEBUG;DEBUG_IDISPOSABLE</DefineConstants>
+    <DefineConstants>$(DefineConstants);DEBUG_IDISPOSABLE</DefineConstants>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup Condition="$(OS.ToLower().StartsWith('win'))">
