@@ -119,7 +119,7 @@ public static partial class Application {
 	/// called with either `driver` or `driverName` specified.
 	/// </remarks>
 	[SerializableConfigurationProperty (Scope = typeof (SettingsScope))]
-	public static string ForceDriver { get; set; } = string.Empty;
+	public static string ForceDriver { get; set; }
 
 	/// <summary>
 	/// Gets or sets whether <see cref="Application.Driver"/> will be forced to output only the 16 colors defined in <see cref="ColorName"/>.
@@ -185,7 +185,7 @@ public static partial class Application {
 	public static void Init (ConsoleDriver driver = null, string driverName = null) => InternalInit (() => new Toplevel (), driver, driverName);
 
 	internal static bool _initialized;
-	internal static int _mainThreadId = -1;
+	internal static int _mainThreadId;
 
 	// INTERNAL function for initializing an app with a Toplevel factory object, driver, and mainloop.
 	//
@@ -905,7 +905,7 @@ public static partial class Application {
 	/// </summary>
 	// BUGBUG: Techncally, this is not the full lst of TopLevels. THere be dragons hwre. E.g. see how Toplevel.Id is used. What
 	// about TopLevels that are just a SubView of another View?
-	internal static readonly Stack<Toplevel> _topLevels = new Stack<Toplevel> ();
+	internal static readonly Stack<Toplevel> _topLevels;
 
 	/// <summary>
 	/// The <see cref="Toplevel"/> object used for the application on startup (<seealso cref="Application.Top"/>)
@@ -1357,7 +1357,7 @@ public static partial class Application {
 	#endregion Mouse handling
 
 	#region Keyboard handling
-	static Key _alternateForwardKey = Key.Empty; // Defined in config.json
+	static Key _alternateForwardKey; // Defined in config.json
 
 	/// <summary>
 	/// Alternative key to navigate forwards through views. Ctrl+Tab is the primary key.
@@ -1382,7 +1382,7 @@ public static partial class Application {
 		}
 	}
 
-	static Key _alternateBackwardKey = Key.Empty; // Defined in config.json
+	static Key _alternateBackwardKey; // Defined in config.json
 
 	/// <summary>
 	/// Alternative key to navigate backwards through views. Shift+Ctrl+Tab is the primary key.
@@ -1407,7 +1407,20 @@ public static partial class Application {
 		}
 	}
 
-	static Key _quitKey = Key.Empty; // Defined in config.json
+	static Key _quitKey; // Defined in config.json
+
+	static Application( )
+	{
+		ForceDriver = string.Empty;
+		Force16Colors = false;
+		_initialized = false;
+		_mainThreadId = -1;
+		EndAfterFirstIteration = false;
+		_topLevels = new();
+		_alternateForwardKey = Key.Empty;
+		_alternateBackwardKey = Key.Empty;
+		_quitKey = Key.Empty;
+	}
 
 	/// <summary>
 	/// Gets or sets the key to quit the application.
