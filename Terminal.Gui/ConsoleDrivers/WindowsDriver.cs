@@ -13,17 +13,9 @@
 // the WindowsConsole.EventType.WindowBufferSize event. However, on Init the window size is
 // still incorrect so we still need this hack.
 #define HACK_CHECK_WINCHANGED
-
-using System.Text;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Diagnostics;
-using Terminal.Gui.ConsoleDrivers;
-using static Unix.Terminal.Delegates;
 using static Terminal.Gui.ConsoleDrivers.ConsoleKeyMapping;
 
 namespace Terminal.Gui;

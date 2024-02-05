@@ -91,6 +91,10 @@
     <Using Include="JetBrains.Annotations.PureAttribute">
       <Alias>PureAttribute</Alias>
     </Using>
+    <Using Include="Terminal.Gui.ConsoleDrivers" />
+    <Using Include="Unix.Terminal.Delegates">
+      <Static>True</Static>
+    </Using>
   </ItemGroup>
   <!-- =================================================================== -->
   <!-- Nuget  -->
