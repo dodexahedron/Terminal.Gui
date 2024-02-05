@@ -6,12 +6,12 @@
 // HACK:
 // WindowsConsole/Terminal has two issues:
 // 1) Tearing can occur when the console is resized.
-// 2) The values provided during Init (and the first WindowsConsole.EventType.WindowBufferSize) are not correct.
+// 2) The values provided during Init (and the first EventType.WindowBufferSize) are not correct.
 //
-// If HACK_CHECK_WINCHANGED is defined then we ignore WindowsConsole.EventType.WindowBufferSize events
+// If HACK_CHECK_WINCHANGED is defined then we ignore EventType.WindowBufferSize events
 // and instead check the console size every 500ms in a thread in WidowsMainLoop. 
 // As of Windows 11 23H2 25947.1000 and/or WT 1.19.2682 tearing no longer occurs when using 
-// the WindowsConsole.EventType.WindowBufferSize event. However, on Init the window size is
+// the EventType.WindowBufferSize event. However, on Init the window size is
 // still incorrect, so we still need this hack.
 // HACK_CHECK_WINCHANGED is automatically defined for the project if the MSBuild OS property begins with "win".
 
@@ -22,8 +22,8 @@ using static Terminal.Gui.ConsoleDrivers.ConsoleKeyMapping;
 namespace Terminal.Gui.ConsoleDrivers;
 
 internal class WindowsDriver : ConsoleDriver {
-	WindowsConsole.ExtendedCharInfo [] _outputBuffer;
-	WindowsConsole.SmallRect _damageRegion;
+	ExtendedCharInfo [] _outputBuffer;
+	SmallRect _damageRegion;
 
 	public WindowsConsole WinConsole { get; private set; }
 
@@ -63,7 +63,7 @@ internal class WindowsDriver : ConsoleDriver {
 					Cols = winSize.Width;
 					Rows = winSize.Height;
 				}
-				WindowsConsole.SmallRect.MakeEmpty (ref _damageRegion);
+				SmallRect.MakeEmpty (ref _damageRegion);
 
 				if (_isWindowsTerminal) {
 					Console.Out.Write (EscSeqUtils.CSI_SaveCursorAndActivateAltBufferNoBackscroll);
@@ -78,9 +78,9 @@ internal class WindowsDriver : ConsoleDriver {
 
 		CurrentAttribute = new Attribute (Color.White, Color.Black);
 
-		_outputBuffer = new WindowsConsole.ExtendedCharInfo [Rows * Cols];
+		_outputBuffer = new ExtendedCharInfo [Rows * Cols];
 		Clip = new Rect (0, 0, Cols, Rows);
-		_damageRegion = new WindowsConsole.SmallRect () {
+		_damageRegion = new SmallRect () {
 			Top = 0,
 			Left = 0,
 			Bottom = (short)Rows,
@@ -97,7 +97,7 @@ internal class WindowsDriver : ConsoleDriver {
 	}
 
 #if HACK_CHECK_WINCHANGED
-	private void ChangeWin (Object s, SizeChangedEventArgs e)
+	private void ChangeWin (object s, SizeChangedEventArgs e)
 	{
 		var w = e.Size.Width;
 		if (w == Cols - 3 && e.Size.Height < Rows) {
@@ -123,7 +123,7 @@ internal class WindowsDriver : ConsoleDriver {
 #endif
 
 
-	KeyCode MapKey (WindowsConsole.ConsoleKeyInfoEx keyInfoEx)
+	KeyCode MapKey (ConsoleKeyInfoEx keyInfoEx)
 	{
 		var keyInfo = keyInfoEx.ConsoleKeyInfo;
 		switch (keyInfo.Key) {
@@ -296,10 +296,10 @@ internal class WindowsDriver : ConsoleDriver {
 		return MapToKeyCodeModifiers (keyInfo.Modifiers, (KeyCode)(keyInfo.KeyChar));
 	}
 
-	internal void ProcessInput (WindowsConsole.InputRecord inputEvent)
+	internal void ProcessInput (InputRecord inputEvent)
 	{
 		switch (inputEvent.EventType) {
-		case WindowsConsole.EventType.Key:
+		case EventType.Key:
 			if (inputEvent.KeyEvent.wVirtualKeyCode == (VK)ConsoleKey.Packet) {
 				// Used to pass Unicode characters as if they were keystrokes.
 				// The VK_PACKET key is the low word of a 32-bit
@@ -324,7 +324,7 @@ internal class WindowsDriver : ConsoleDriver {
 
 			break;
 
-		case WindowsConsole.EventType.Mouse:
+		case EventType.Mouse:
 			var me = ToDriverMouse (inputEvent.MouseEvent);
 			OnMouseEvent (new MouseEventEventArgs (me));
 			if (_processButtonClick) {
@@ -336,11 +336,11 @@ internal class WindowsDriver : ConsoleDriver {
 			}
 			break;
 
-		case WindowsConsole.EventType.Focus:
+		case EventType.Focus:
 			break;
 
 #if !HACK_CHECK_WINCHANGED
-		case WindowsConsole.EventType.WindowBufferSize:
+		case EventType.WindowBufferSize:
 			
 			Cols = inputEvent.WindowBufferSizeEvent._size.X;
 			Rows = inputEvent.WindowBufferSizeEvent._size.Y;
@@ -352,7 +352,7 @@ internal class WindowsDriver : ConsoleDriver {
 		}
 	}
 
-	WindowsConsole.ButtonState? _lastMouseButtonPressed = null;
+	ButtonState? _lastMouseButtonPressed = null;
 	bool _isButtonPressed = false;
 	bool _isButtonReleased = false;
 	bool _isButtonDoubleClicked = false;
@@ -361,7 +361,7 @@ internal class WindowsDriver : ConsoleDriver {
 	bool _isOneFingerDoubleClicked = false;
 	bool _processButtonClick;
 
-	MouseEvent ToDriverMouse (WindowsConsole.MouseEventRecord mouseEvent)
+	MouseEvent ToDriverMouse (MouseEventRecord mouseEvent)
 	{
 		MouseFlags mouseFlag = MouseFlags.AllEvents;
 
@@ -392,18 +392,18 @@ internal class WindowsDriver : ConsoleDriver {
 		};
 
 		if ((mouseEvent.ButtonState != 0 && mouseEvent.EventFlags == 0 && _lastMouseButtonPressed == null && !_isButtonDoubleClicked) ||
-		     (_lastMouseButtonPressed == null && mouseEvent.EventFlags.HasFlag (WindowsConsole.EventFlags.MouseMoved) &&
+		     (_lastMouseButtonPressed == null && mouseEvent.EventFlags.HasFlag (EventFlags.MouseMoved) &&
 		     mouseEvent.ButtonState != 0 && !_isButtonReleased && !_isButtonDoubleClicked)) {
 			switch (mouseEvent.ButtonState) {
-			case WindowsConsole.ButtonState.Button1Pressed:
+			case ButtonState.Button1Pressed:
 				mouseFlag = MouseFlags.Button1Pressed;
 				break;
 
-			case WindowsConsole.ButtonState.Button2Pressed:
+			case ButtonState.Button2Pressed:
 				mouseFlag = MouseFlags.Button2Pressed;
 				break;
 
-			case WindowsConsole.ButtonState.RightmostButtonPressed:
+			case ButtonState.RightmostButtonPressed:
 				mouseFlag = MouseFlags.Button3Pressed;
 				break;
 			}
@@ -412,7 +412,7 @@ internal class WindowsDriver : ConsoleDriver {
 				_point = p;
 			}
 
-			if (mouseEvent.EventFlags == WindowsConsole.EventFlags.MouseMoved) {
+			if (mouseEvent.EventFlags == EventFlags.MouseMoved) {
 				mouseFlag |= MouseFlags.ReportMousePosition;
 				_isButtonReleased = false;
 				_processButtonClick = false;
@@ -430,15 +430,15 @@ internal class WindowsDriver : ConsoleDriver {
 		} else if (_lastMouseButtonPressed != null && mouseEvent.EventFlags == 0
 		      && !_isButtonReleased && !_isButtonDoubleClicked && !_isOneFingerDoubleClicked) {
 			switch (_lastMouseButtonPressed) {
-			case WindowsConsole.ButtonState.Button1Pressed:
+			case ButtonState.Button1Pressed:
 				mouseFlag = MouseFlags.Button1Released;
 				break;
 
-			case WindowsConsole.ButtonState.Button2Pressed:
+			case ButtonState.Button2Pressed:
 				mouseFlag = MouseFlags.Button2Released;
 				break;
 
-			case WindowsConsole.ButtonState.RightmostButtonPressed:
+			case ButtonState.RightmostButtonPressed:
 				mouseFlag = MouseFlags.Button3Released;
 				break;
 			}
@@ -449,42 +449,42 @@ internal class WindowsDriver : ConsoleDriver {
 			} else {
 				_point = null;
 			}
-		} else if (mouseEvent.EventFlags == WindowsConsole.EventFlags.MouseMoved
+		} else if (mouseEvent.EventFlags == EventFlags.MouseMoved
 		      && !_isOneFingerDoubleClicked && _isButtonReleased && p == _point) {
 
 			mouseFlag = ProcessButtonClick (mouseEvent);
 
-		} else if (mouseEvent.EventFlags.HasFlag (WindowsConsole.EventFlags.DoubleClick)) {
+		} else if (mouseEvent.EventFlags.HasFlag (EventFlags.DoubleClick)) {
 			switch (mouseEvent.ButtonState) {
-			case WindowsConsole.ButtonState.Button1Pressed:
+			case ButtonState.Button1Pressed:
 				mouseFlag = MouseFlags.Button1DoubleClicked;
 				break;
 
-			case WindowsConsole.ButtonState.Button2Pressed:
+			case ButtonState.Button2Pressed:
 				mouseFlag = MouseFlags.Button2DoubleClicked;
 				break;
 
-			case WindowsConsole.ButtonState.RightmostButtonPressed:
+			case ButtonState.RightmostButtonPressed:
 				mouseFlag = MouseFlags.Button3DoubleClicked;
 				break;
 			}
 			_isButtonDoubleClicked = true;
 		} else if (mouseEvent.EventFlags == 0 && mouseEvent.ButtonState != 0 && _isButtonDoubleClicked) {
 			switch (mouseEvent.ButtonState) {
-			case WindowsConsole.ButtonState.Button1Pressed:
+			case ButtonState.Button1Pressed:
 				mouseFlag = MouseFlags.Button1TripleClicked;
 				break;
 
-			case WindowsConsole.ButtonState.Button2Pressed:
+			case ButtonState.Button2Pressed:
 				mouseFlag = MouseFlags.Button2TripleClicked;
 				break;
 
-			case WindowsConsole.ButtonState.RightmostButtonPressed:
+			case ButtonState.RightmostButtonPressed:
 				mouseFlag = MouseFlags.Button3TripleClicked;
 				break;
 			}
 			_isButtonDoubleClicked = false;
-		} else if (mouseEvent.EventFlags == WindowsConsole.EventFlags.MouseWheeled) {
+		} else if (mouseEvent.EventFlags == EventFlags.MouseWheeled) {
 			switch ((int)mouseEvent.ButtonState) {
 			case int v when v > 0:
 				mouseFlag = MouseFlags.WheeledUp;
@@ -495,8 +495,8 @@ internal class WindowsDriver : ConsoleDriver {
 				break;
 			}
 
-		} else if (mouseEvent.EventFlags == WindowsConsole.EventFlags.MouseWheeled &&
-		      mouseEvent.ControlKeyState == WindowsConsole.ControlKeyState.ShiftPressed) {
+		} else if (mouseEvent.EventFlags == EventFlags.MouseWheeled &&
+		      mouseEvent.ControlKeyState == ControlKeyState.ShiftPressed) {
 			switch ((int)mouseEvent.ButtonState) {
 			case int v when v > 0:
 				mouseFlag = MouseFlags.WheeledLeft;
@@ -507,7 +507,7 @@ internal class WindowsDriver : ConsoleDriver {
 				break;
 			}
 
-		} else if (mouseEvent.EventFlags == WindowsConsole.EventFlags.MouseHorizontalWheeled) {
+		} else if (mouseEvent.EventFlags == EventFlags.MouseHorizontalWheeled) {
 			switch ((int)mouseEvent.ButtonState) {
 			case int v when v < 0:
 				mouseFlag = MouseFlags.WheeledLeft;
@@ -518,7 +518,7 @@ internal class WindowsDriver : ConsoleDriver {
 				break;
 			}
 
-		} else if (mouseEvent.EventFlags == WindowsConsole.EventFlags.MouseMoved) {
+		} else if (mouseEvent.EventFlags == EventFlags.MouseMoved) {
 			mouseFlag = MouseFlags.ReportMousePosition;
 			if (mouseEvent.MousePosition.X != _pointMove.X || mouseEvent.MousePosition.Y != _pointMove.Y) {
 				_pointMove = new Point (mouseEvent.MousePosition.X, mouseEvent.MousePosition.Y);
@@ -539,19 +539,19 @@ internal class WindowsDriver : ConsoleDriver {
 		};
 	}
 
-	MouseFlags ProcessButtonClick (WindowsConsole.MouseEventRecord mouseEvent)
+	MouseFlags ProcessButtonClick (MouseEventRecord mouseEvent)
 	{
 		MouseFlags mouseFlag = 0;
 		switch (_lastMouseButtonPressed) {
-		case WindowsConsole.ButtonState.Button1Pressed:
+		case ButtonState.Button1Pressed:
 			mouseFlag = MouseFlags.Button1Clicked;
 			break;
 
-		case WindowsConsole.ButtonState.Button2Pressed:
+		case ButtonState.Button2Pressed:
 			mouseFlag = MouseFlags.Button2Clicked;
 			break;
 
-		case WindowsConsole.ButtonState.RightmostButtonPressed:
+		case ButtonState.RightmostButtonPressed:
 			mouseFlag = MouseFlags.Button3Clicked;
 			break;
 		}
@@ -594,55 +594,55 @@ internal class WindowsDriver : ConsoleDriver {
 		}
 	}
 
-	static MouseFlags SetControlKeyStates (WindowsConsole.MouseEventRecord mouseEvent, MouseFlags mouseFlag)
+	static MouseFlags SetControlKeyStates (MouseEventRecord mouseEvent, MouseFlags mouseFlag)
 	{
-		if (mouseEvent.ControlKeyState.HasFlag (WindowsConsole.ControlKeyState.RightControlPressed) ||
-		    mouseEvent.ControlKeyState.HasFlag (WindowsConsole.ControlKeyState.LeftControlPressed)) {
+		if (mouseEvent.ControlKeyState.HasFlag (ControlKeyState.RightControlPressed) ||
+		    mouseEvent.ControlKeyState.HasFlag (ControlKeyState.LeftControlPressed)) {
 			mouseFlag |= MouseFlags.ButtonCtrl;
 		}
 
-		if (mouseEvent.ControlKeyState.HasFlag (WindowsConsole.ControlKeyState.ShiftPressed)) {
+		if (mouseEvent.ControlKeyState.HasFlag (ControlKeyState.ShiftPressed)) {
 			mouseFlag |= MouseFlags.ButtonShift;
 		}
 
-		if (mouseEvent.ControlKeyState.HasFlag (WindowsConsole.ControlKeyState.RightAltPressed) ||
-		     mouseEvent.ControlKeyState.HasFlag (WindowsConsole.ControlKeyState.LeftAltPressed)) {
+		if (mouseEvent.ControlKeyState.HasFlag (ControlKeyState.RightAltPressed) ||
+		     mouseEvent.ControlKeyState.HasFlag (ControlKeyState.LeftAltPressed)) {
 			mouseFlag |= MouseFlags.ButtonAlt;
 		}
 		return mouseFlag;
 	}
 
-	public WindowsConsole.ConsoleKeyInfoEx ToConsoleKeyInfoEx (WindowsConsole.KeyEventRecord keyEvent)
+	public ConsoleKeyInfoEx ToConsoleKeyInfoEx (KeyEventRecord keyEvent)
 	{
 		var state = keyEvent.dwControlKeyState;
 
-		var shift = (state & WindowsConsole.ControlKeyState.ShiftPressed) != 0;
-		var alt = (state & (WindowsConsole.ControlKeyState.LeftAltPressed | WindowsConsole.ControlKeyState.RightAltPressed)) != 0;
-		var control = (state & (WindowsConsole.ControlKeyState.LeftControlPressed | WindowsConsole.ControlKeyState.RightControlPressed)) != 0;
-		var capslock = (state & WindowsConsole.ControlKeyState.CapslockOn) != 0;
-		var numlock = (state & WindowsConsole.ControlKeyState.NumlockOn) != 0;
-		var scrolllock = (state & WindowsConsole.ControlKeyState.ScrolllockOn) != 0;
+		var shift = (state & ControlKeyState.ShiftPressed) != 0;
+		var alt = (state & (ControlKeyState.LeftAltPressed | ControlKeyState.RightAltPressed)) != 0;
+		var control = (state & (ControlKeyState.LeftControlPressed | ControlKeyState.RightControlPressed)) != 0;
+		var capslock = (state & ControlKeyState.CapslockOn) != 0;
+		var numlock = (state & ControlKeyState.NumlockOn) != 0;
+		var scrolllock = (state & ControlKeyState.ScrolllockOn) != 0;
 
 		var cki = new ConsoleKeyInfo (keyEvent.UnicodeChar, (ConsoleKey)keyEvent.wVirtualKeyCode, shift, alt, control);
-		return new WindowsConsole.ConsoleKeyInfoEx (cki, capslock, numlock, scrolllock);
+		return new ConsoleKeyInfoEx (cki, capslock, numlock, scrolllock);
 	}
 
-	public WindowsConsole.KeyEventRecord FromVKPacketToKeyEventRecord (WindowsConsole.KeyEventRecord keyEvent)
+	public KeyEventRecord FromVKPacketToKeyEventRecord (KeyEventRecord keyEvent)
 	{
 		if (keyEvent.wVirtualKeyCode != (VK)ConsoleKey.Packet) {
 			return keyEvent;
 		}
 
 		var mod = new ConsoleModifiers ();
-		if (keyEvent.dwControlKeyState.HasFlag (WindowsConsole.ControlKeyState.ShiftPressed)) {
+		if (keyEvent.dwControlKeyState.HasFlag (ControlKeyState.ShiftPressed)) {
 			mod |= ConsoleModifiers.Shift;
 		}
-		if (keyEvent.dwControlKeyState.HasFlag (WindowsConsole.ControlKeyState.RightAltPressed) ||
-		    keyEvent.dwControlKeyState.HasFlag (WindowsConsole.ControlKeyState.LeftAltPressed)) {
+		if (keyEvent.dwControlKeyState.HasFlag (ControlKeyState.RightAltPressed) ||
+		    keyEvent.dwControlKeyState.HasFlag (ControlKeyState.LeftAltPressed)) {
 			mod |= ConsoleModifiers.Alt;
 		}
-		if (keyEvent.dwControlKeyState.HasFlag (WindowsConsole.ControlKeyState.LeftControlPressed) ||
-		    keyEvent.dwControlKeyState.HasFlag (WindowsConsole.ControlKeyState.RightControlPressed)) {
+		if (keyEvent.dwControlKeyState.HasFlag (ControlKeyState.LeftControlPressed) ||
+		    keyEvent.dwControlKeyState.HasFlag (ControlKeyState.RightControlPressed)) {
 			mod |= ConsoleModifiers.Control;
 		}
 		var cKeyInfo = new ConsoleKeyInfo (keyEvent.UnicodeChar, (ConsoleKey)keyEvent.wVirtualKeyCode,
@@ -650,7 +650,7 @@ internal class WindowsDriver : ConsoleDriver {
 		cKeyInfo = DecodeVKPacketToKConsoleKeyInfo (cKeyInfo);
 		var scanCode = GetScanCodeFromConsoleKeyInfo (cKeyInfo);
 
-		return new WindowsConsole.KeyEventRecord {
+		return new KeyEventRecord {
 			UnicodeChar = cKeyInfo.KeyChar,
 			bKeyDown = keyEvent.bKeyDown,
 			dwControlKeyState = keyEvent.dwControlKeyState,
@@ -667,9 +667,9 @@ internal class WindowsDriver : ConsoleDriver {
 
 	void ResizeScreen ()
 	{
-		_outputBuffer = new WindowsConsole.ExtendedCharInfo [Rows * Cols];
+		_outputBuffer = new ExtendedCharInfo [Rows * Cols];
 		Clip = new Rect (0, 0, Cols, Rows);
-		_damageRegion = new WindowsConsole.SmallRect () {
+		_damageRegion = new SmallRect () {
 			Top = 0,
 			Left = 0,
 			Bottom = (short)Rows,
@@ -687,7 +687,7 @@ internal class WindowsDriver : ConsoleDriver {
 			return;
 		}
 
-		var bufferCoords = new WindowsConsole.Coord () {
+		var bufferCoords = new Coord () {
 			X = (short)Clip.Width,
 			Y = (short)Clip.Height
 		};
@@ -723,7 +723,7 @@ internal class WindowsDriver : ConsoleDriver {
 			}
 		}
 
-		_damageRegion = new WindowsConsole.SmallRect () {
+		_damageRegion = new SmallRect () {
 			Top = 0,
 			Left = 0,
 			Bottom = (short)Rows,
@@ -736,7 +736,7 @@ internal class WindowsDriver : ConsoleDriver {
 				throw new System.ComponentModel.Win32Exception (err);
 			}
 		}
-		WindowsConsole.SmallRect.MakeEmpty (ref _damageRegion);
+		SmallRect.MakeEmpty (ref _damageRegion);
 	}
 
 	public override void Refresh ()
@@ -758,7 +758,7 @@ internal class WindowsDriver : ConsoleDriver {
 		}
 
 		SetCursorVisibility (_cachedCursorVisibility);
-		var position = new WindowsConsole.Coord () {
+		var position = new Coord () {
 			X = (short)Col,
 			Y = (short)Row
 		};
@@ -790,28 +790,28 @@ internal class WindowsDriver : ConsoleDriver {
 
 	public override void SendKeys (char keyChar, ConsoleKey key, bool shift, bool alt, bool control)
 	{
-		WindowsConsole.InputRecord input = new WindowsConsole.InputRecord {
-			EventType = WindowsConsole.EventType.Key
+		InputRecord input = new InputRecord {
+			EventType = EventType.Key
 		};
 
-		WindowsConsole.KeyEventRecord keyEvent = new WindowsConsole.KeyEventRecord {
+		KeyEventRecord keyEvent = new KeyEventRecord {
 			bKeyDown = true
 		};
-		WindowsConsole.ControlKeyState controlKey = new WindowsConsole.ControlKeyState ();
+		ControlKeyState controlKey = new ControlKeyState ();
 		if (shift) {
-			controlKey |= WindowsConsole.ControlKeyState.ShiftPressed;
+			controlKey |= ControlKeyState.ShiftPressed;
 			keyEvent.UnicodeChar = '\0';
 			keyEvent.wVirtualKeyCode = VK.SHIFT;
 		}
 		if (alt) {
-			controlKey |= WindowsConsole.ControlKeyState.LeftAltPressed;
-			controlKey |= WindowsConsole.ControlKeyState.RightAltPressed;
+			controlKey |= ControlKeyState.LeftAltPressed;
+			controlKey |= ControlKeyState.RightAltPressed;
 			keyEvent.UnicodeChar = '\0';
 			keyEvent.wVirtualKeyCode = VK.MENU;
 		}
 		if (control) {
-			controlKey |= WindowsConsole.ControlKeyState.LeftControlPressed;
-			controlKey |= WindowsConsole.ControlKeyState.RightControlPressed;
+			controlKey |= ControlKeyState.LeftControlPressed;
+			controlKey |= ControlKeyState.RightControlPressed;
 			keyEvent.UnicodeChar = '\0';
 			keyEvent.wVirtualKeyCode = VK.CONTROL;
 		}

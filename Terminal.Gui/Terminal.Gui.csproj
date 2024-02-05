@@ -103,6 +103,7 @@
     </Using>
     <Using Include="Terminal.Gui.ConsoleDrivers" />
     <Using Include="Terminal.Gui.ConsoleDrivers.Windows" />
+    <Using Include="Terminal.Gui.ConsoleDrivers.Windows.NativeTypes" />
     <Using Include="Unix.Terminal.Delegates">
       <Static>True</Static>
     </Using>
