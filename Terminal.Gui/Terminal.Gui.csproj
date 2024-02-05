@@ -26,6 +26,9 @@
     <DefineConstants>$(DefineConstants);TRACE;DEBUG;DEBUG_IDISPOSABLE</DefineConstants>
     <DebugType>portable</DebugType>
   </PropertyGroup>
+  <PropertyGroup Condition="$(OS.ToLower().StartsWith('win'))">
+    <DefineConstants>$(DefineConstants);HACK_CHECK_WINCHANGED</DefineConstants>
+  </PropertyGroup>
   <!-- =================================================================== -->
   <!-- Configuration Manager -->
   <!-- =================================================================== -->

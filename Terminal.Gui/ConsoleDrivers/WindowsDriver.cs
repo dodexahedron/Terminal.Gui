@@ -12,7 +12,6 @@
 // As of Windows 11 23H2 25947.1000 and/or WT 1.19.2682 tearing no longer occurs when using 
 // the WindowsConsole.EventType.WindowBufferSize event. However, on Init the window size is
 // still incorrect so we still need this hack.
-#define HACK_CHECK_WINCHANGED
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
