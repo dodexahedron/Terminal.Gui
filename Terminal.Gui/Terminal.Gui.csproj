@@ -83,6 +83,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Using Include="JetBrains.Annotations.PureAttribute">
+      <Alias>PureAttribute</Alias>
+    </Using>
     <Using Include="System.Text" />
     <Using Include="System.Diagnostics.CodeAnalysis" />
     <Using Include="JetBrains.Annotations" />
