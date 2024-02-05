@@ -14,7 +14,6 @@
 // still incorrect, so we still need this hack.
 // HACK_CHECK_WINCHANGED is automatically defined for the project if the MSBuild OS property begins with "win".
 using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
 using static Terminal.Gui.ConsoleDrivers.ConsoleKeyMapping;
 

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <!-- =================================================================== -->
   <!-- Version numbers -->
   <!-- Automatically updated by gitversion (run `dotnet-gitversion /updateprojectfiles`)  -->
@@ -93,6 +93,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Using Include="System.Runtime.InteropServices" />
     <Using Include="System.Text" />
     <Using Include="System.Diagnostics.CodeAnalysis" />
     <Using Include="System.Globalization" />
