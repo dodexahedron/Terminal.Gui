@@ -1119,7 +1119,6 @@ internal class WindowsDriver : ConsoleDriver {
 
 			ResizeScreen ();
 			ClearContents ();
-			TerminalResized.Invoke ();
 			break;
 #endif
 		}
