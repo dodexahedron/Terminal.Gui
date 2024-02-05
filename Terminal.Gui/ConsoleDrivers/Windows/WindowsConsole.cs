@@ -5,8 +5,8 @@ using System.ComponentModel;
 namespace Terminal.Gui.ConsoleDrivers.Windows;
 
 internal class WindowsConsole {
-    private const int STD_OUTPUT_HANDLE = -11;
-    private const int STD_INPUT_HANDLE = -10;
+    private const int StdOutputHandle = -11;
+    private const int StdInputHandle = -10;
     private nint _inputHandle;
     private nint _outputHandle;
     private nint _screenBuffer;
@@ -17,8 +17,8 @@ internal class WindowsConsole {
     private readonly StringBuilder _stringBuilder = new ( 256 * 1024 );
 
     public WindowsConsole ( ) {
-        _inputHandle = GetStdHandle ( STD_INPUT_HANDLE );
-        _outputHandle = GetStdHandle ( STD_OUTPUT_HANDLE );
+        _inputHandle = GetStdHandle ( StdInputHandle );
+        _outputHandle = GetStdHandle ( StdOutputHandle );
         _originalConsoleMode = ConsoleMode;
         uint newConsoleMode = _originalConsoleMode;
         newConsoleMode |= (uint)( ConsoleModes.EnableMouseInput | ConsoleModes.EnableExtendedFlags );
