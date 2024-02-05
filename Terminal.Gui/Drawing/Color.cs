@@ -160,7 +160,7 @@ public readonly partial record struct Color : ISpanParsable<Color>, IUtf8SpanPar
 	///   color match to the true color when no exact value is found.
 	/// </summary>
 	/// <remarks>
-	///   Get returns the <see cref="GetClosestNamedColor" /> of the closest 24-bit color value. Set sets the RGB value using a hard-coded map.
+	///   Get returns the <see cref="ColorName" /> of the closest 24-bit color value. Set sets the RGB value using a hard-coded map.
 	/// </remarks>
 	public AnsiColorCode GetAnsiColorCode () => ColorExtensions.ColorNameToAnsiColorMap [GetClosestNamedColor ()];
 
@@ -177,7 +177,7 @@ public readonly partial record struct Color : ISpanParsable<Color>, IUtf8SpanPar
 	///   Determines if the closest named <see cref="Color" /> to <see langword="this" /> is the provided <paramref name="namedColor" />.
 	/// </summary>
 	/// <param name="namedColor">
-	///   The <see cref="GetClosestNamedColor" /> to check if this <see cref="Color" /> is closer to than any other configured named color.
+	///   The <see cref="ColorName" /> to check if this <see cref="Color" /> is closer to than any other configured named color.
 	/// </param>
 	/// <returns>
 	///   <see langword="true" /> if the closest named color is the provided value.
@@ -196,10 +196,10 @@ public readonly partial record struct Color : ISpanParsable<Color>, IUtf8SpanPar
 	///   Determines if the closest named <see cref="Color" /> to <paramref name="color" />/> is the provided <paramref name="namedColor" />.
 	/// </summary>
 	/// <param name="color">
-	///   The color to test against the <see cref="GetClosestNamedColor" /> value in <paramref name="namedColor" />.
+	///   The color to test against the <see cref="ColorName" /> value in <paramref name="namedColor" />.
 	/// </param>
 	/// <param name="namedColor">
-	///   The <see cref="GetClosestNamedColor" /> to check if this <see cref="Color" /> is closer to than any other configured named color.
+	///   The <see cref="ColorName" /> to check if this <see cref="Color" /> is closer to than any other configured named color.
 	/// </param>
 	/// <returns>
 	///   <see langword="true" /> if the closest named color to <paramref name="color" /> is the provided value.
@@ -220,15 +220,15 @@ public readonly partial record struct Color : ISpanParsable<Color>, IUtf8SpanPar
 	/// <param name="inputColor"></param>
 	/// <remarks>
 	///   Distance is defined here as the Euclidean distance between each color interpreted as a <see cref="Vector3" />.
-	///   <para />
-	///   The order of the values in the passed Vector3 must be
 	/// </remarks>
-	/// <returns></returns>
+    [Pure]
 	[SkipLocalsInit]
 	internal static ColorName GetClosestNamedColor (Color inputColor) => ColorExtensions.ColorToNameMap.MinBy (pair => CalculateColorDistance (inputColor, pair.Key)).Value;
 
+    [Pure]
 	[SkipLocalsInit]
-	static float CalculateColorDistance (in Vector4 color1, in Vector4 color2) => Vector4.Distance (color1, color2);
+	[MethodImpl (MethodImplOptions.AggressiveInlining)]
+	internal static float CalculateColorDistance (in Vector4 color1, in Vector4 color2) => Vector4.Distance (color1, color2);
 
 	#region Legacy Color Names
 	/// <summary>The black color.</summary>

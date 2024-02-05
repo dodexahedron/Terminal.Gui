@@ -1,5 +1,5 @@
-﻿#nullable enable
-using System.Globalization;
+#nullable enable
+using System.Numerics;
 using System.Text.Json.Serialization;
 
 namespace Terminal.Gui;
@@ -12,9 +12,6 @@ namespace Terminal.Gui;
 /// ColorScheme objects are immutable. Once constructed, the properties cannot be changed.
 /// To change a ColorScheme, create a new one with the desired values,
 /// using the <see cref="ColorScheme(ColorScheme)"/> constructor.
-/// </para>
-/// <para>
-/// See also: <see cref="ColorSchemesConfiguration.ColorSchemes"/>.
 /// </para>
 /// </remarks>
 [JsonConverter (typeof (ColorSchemeJsonConverter))]
@@ -34,7 +31,7 @@ public class ColorScheme : IEquatable<ColorScheme> {
 	/// Creates a new instance, initialized with the values from <paramref name="scheme"/>.
 	/// </summary>
 	/// <param name="scheme">The scheme to initialize the new instance with.</param>
-	public ColorScheme (ColorScheme scheme)
+	public ColorScheme (ColorScheme? scheme)
 	{
 		if (scheme is null) {
 			throw new ArgumentNullException (nameof (scheme));
@@ -182,7 +179,7 @@ public static class Colors {
 	///         TopLevel
 	///         </term>
 	///         <description>
-	///         The application Toplevel color scheme; used for the <see cref="Toplevel"/> View.
+	///         The application TopLevel color scheme; used for the <see cref="Toplevel"/> View.
 	///         </description>
 	/// </item>
 	/// <item>
