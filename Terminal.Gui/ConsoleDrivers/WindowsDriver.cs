@@ -8,10 +8,10 @@
 // 2) The values provided during Init (and the first WindowsConsole.EventType.WindowBufferSize) are not correct.
 //
 // If HACK_CHECK_WINCHANGED is defined then we ignore WindowsConsole.EventType.WindowBufferSize events
-// and instead check the console size every every 500ms in a thread in WidowsMainLoop. 
+// and instead check the console size every 500ms in a thread in WidowsMainLoop. 
 // As of Windows 11 23H2 25947.1000 and/or WT 1.19.2682 tearing no longer occurs when using 
 // the WindowsConsole.EventType.WindowBufferSize event. However, on Init the window size is
-// still incorrect so we still need this hack.
+// still incorrect, so we still need this hack.
 // HACK_CHECK_WINCHANGED is automatically defined for the project if the MSBuild OS property begins with "win".
 using System.ComponentModel;
 using System.Runtime.InteropServices;
