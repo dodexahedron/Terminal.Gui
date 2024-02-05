@@ -85,6 +85,12 @@
   </ItemGroup>
   <ItemGroup>
     <Using Include="System.Text" />
+    <Using Include="System.Diagnostics.CodeAnalysis" />
+    <Using Include="System.Globalization" />
+    <Using Include="JetBrains.Annotations" />
+    <Using Include="JetBrains.Annotations.PureAttribute">
+      <Alias>PureAttribute</Alias>
+    </Using>
   </ItemGroup>
   <!-- =================================================================== -->
   <!-- Nuget  -->
