@@ -320,7 +320,7 @@ public readonly partial record struct Color {
 	/// </summary>
 	/// <param name="text">
 	///   The text to analyze. Formats supported are "#RGB", "#RRGGBB", "#ARGB", "#AARRGGBB", "rgb(r,g,b)", "rgb(r,g,b,a)", "rgba(r,g,b)",
-	///   "rgba(r,g,b,a)", and any of the <see cref="GetClosestNamedColor" /> string values.
+	///   "rgba(r,g,b,a)", and any of the <see cref="ColorName" /> string values.
 	/// </param>
 	/// <param name="formatProvider">
 	///   Optional <see cref="IFormatProvider" /> to provide formatting services for the input text.
@@ -346,7 +346,7 @@ public readonly partial record struct Color {
 	/// </summary>
 	/// <param name="text">
 	///   The text to analyze. Formats supported are "#RGB", "#RRGGBB", "#ARGB", "#AARRGGBB", "rgb(r,g,b)", "rgb(r,g,b,a)", "rgba(r,g,b)",
-	///   "rgba(r,g,b,a)", and any of the <see cref="GetClosestNamedColor" /> string values.
+	///   "rgba(r,g,b,a)", and any of the <see cref="ColorName" /> string values.
 	/// </param>
 	/// <param name="formatProvider">
 	///   If specified and not <see langword="null" />, will be passed to <see cref="Parse(System.ReadOnlySpan{char},System.IFormatProvider?)" />.
