@@ -122,12 +122,7 @@ namespace Terminal.Gui {
 		/// the Application has been initialized will cause an error
 		/// </summary>
 		public override ColorScheme ColorScheme {
-			get {
-				if (colorScheme == null) {
-					colorScheme = Colors.ColorSchemes ["Menu"];
-				}
-				return colorScheme;
-			}
+			get { return colorScheme ??= Colors.ColorSchemes[ "Menu" ]; }
 			set {
 				colorScheme = value;
 			}
