@@ -7,7 +7,8 @@ namespace Terminal.Gui.ConsoleDrivers.Windows;
 internal class WindowsConsole {
     private const int STD_OUTPUT_HANDLE = -11;
     private const int STD_INPUT_HANDLE = -10;
-    private nint _inputHandle, _outputHandle;
+    private nint _inputHandle;
+    private nint _outputHandle;
     private nint _screenBuffer;
     private readonly uint _originalConsoleMode;
     private CursorVisibility? _initialCursorVisibility = null;
