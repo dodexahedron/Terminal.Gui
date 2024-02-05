@@ -47,6 +47,8 @@
   </ItemGroup>
   <ItemGroup>
     <Using Include="Terminal.Gui" />
+    <Using Include="Terminal.Gui.ConsoleDrivers" />
+    <Using Include="Terminal.Gui.ConsoleDrivers.Windows" />
     <Using Include="Xunit" />
   </ItemGroup>
   <PropertyGroup Label="FineCodeCoverage">

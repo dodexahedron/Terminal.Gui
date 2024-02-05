@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <!-- =================================================================== -->
   <!-- Version numbers -->
   <!-- Automatically updated by gitversion (run `dotnet-gitversion /updateprojectfiles`)  -->
@@ -102,6 +102,7 @@
       <Alias>PureAttribute</Alias>
     </Using>
     <Using Include="Terminal.Gui.ConsoleDrivers" />
+    <Using Include="Terminal.Gui.ConsoleDrivers.Windows" />
     <Using Include="Unix.Terminal.Delegates">
       <Static>True</Static>
     </Using>
