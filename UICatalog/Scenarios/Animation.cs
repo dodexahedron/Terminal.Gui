@@ -62,7 +62,8 @@ public class Animation : Scenario {
 					imageView.NextFrame ();
 					imageView.SetNeedsDisplay ();
 				});
-
+				// TODO: Fix this.
+				// ReSharper disable once AsyncApostle.AsyncWait
 				Task.Delay (100).Wait ();
 			}
 		});

@@ -1723,7 +1723,9 @@ internal class WindowsMainLoop : IMainLoopDriver {
 
 			// Check if the window size changed every half second. 
 			// We do this to minimize the weird tearing seen on Windows when resizing the console
+			// TODO: Do this in a timer or some other alternative, rather than hot-looping with a sync pause
 			while (_mainLoop != null) {
+				// ReSharper disable once AsyncApostle.AsyncWait
 				Task.Delay (500).Wait ();
 				_windowSize = _winConsole.GetConsoleBufferWindow (out _);
 				if (_windowSize != Size.Empty && (_windowSize.Width != _consoleDriver.Cols

@@ -1398,6 +1398,8 @@ public class FileDialog : Dialog {
 			lock (Parent._onlyOneSearchLock) {
 				while (!_cancel && !_finished) {
 					try {
+						// TODO: Fix this.
+						// ReSharper disable once AsyncApostle.AsyncWait
 						Task.Delay (250).Wait (_token.Token);
 					} catch (OperationCanceledException) {
 						_cancel = true;

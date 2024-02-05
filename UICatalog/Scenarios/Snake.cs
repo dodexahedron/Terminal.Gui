@@ -46,6 +46,8 @@ namespace UICatalog.Scenarios {
 					var wait = state.SleepAfterAdvancingState - sw.ElapsedMilliseconds;
 
 					if (wait > 0) {
+						// TODO: Fix this.
+						// ReSharper disable once AsyncApostle.AsyncWait
 						Task.Delay ((int)wait).Wait ();
 					}
 				}
