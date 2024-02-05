@@ -127,7 +127,7 @@ public static partial class Application {
 	/// supports TrueColor.
 	/// </summary>
 	[SerializableConfigurationProperty (Scope = typeof (SettingsScope))]
-	public static bool Force16Colors { get; set; } = false;
+	public static bool Force16Colors { get; set; }
 
 	// For Unit testing - ignores UseSystemConsole
 	internal static bool _forceFakeConsole;
@@ -184,7 +184,7 @@ public static partial class Application {
 	/// <param name="driverName">The short name (e.g. "net", "windows", "ansi", "fake", or "curses") of the <see cref="ConsoleDriver"/> to use. If neither <paramref name="driver"/> or <paramref name="driverName"/> are specified the default driver for the platform will be used.</param>
 	public static void Init (ConsoleDriver driver = null, string driverName = null) => InternalInit (() => new Toplevel (), driver, driverName);
 
-	internal static bool _initialized = false;
+	internal static bool _initialized;
 	internal static int _mainThreadId = -1;
 
 	// INTERNAL function for initializing an app with a Toplevel factory object, driver, and mainloop.
@@ -635,7 +635,7 @@ public static partial class Application {
 	/// Set to true to cause <see cref="End"/> to be called after the first iteration.
 	/// Set to false (the default) to cause the application to continue running until Application.RequestStop () is called.
 	/// </summary>
-	public static bool EndAfterFirstIteration { get; set; } = false;
+	public static bool EndAfterFirstIteration { get; set; }
 
 	//
 	// provides the sync context set while executing code in Terminal.Gui, to let
