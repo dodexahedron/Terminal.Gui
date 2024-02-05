@@ -239,7 +239,7 @@ public static partial class Application {
 				}
 			} else {
 				var drivers = GetDriverTypes ();
-				var driverType = drivers.FirstOrDefault (t => t.Name.ToLower () == ForceDriver.ToLower ());
+				var driverType = drivers.FirstOrDefault (t => string.Equals( t.Name, ForceDriver, StringComparison.OrdinalIgnoreCase ));
 				if (driverType != null) {
 					Driver = (ConsoleDriver)Activator.CreateInstance (driverType);
 				} else {
