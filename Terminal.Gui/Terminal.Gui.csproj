@@ -15,7 +15,7 @@
     <VersionSuffix></VersionSuffix>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>TRACE;DEBUG_IDISPOSABLE</DefineConstants>
+    <DefineConstants>$(DefineConstants);TRACE;DEBUG;DEBUG_IDISPOSABLE</DefineConstants>
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <PropertyGroup>
