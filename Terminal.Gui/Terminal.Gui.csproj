@@ -20,18 +20,32 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <ImplicitUsings>enable</ImplicitUsings>
     <OutputType>Library</OutputType>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>portable</DebugType>
-    <Optimize>true</Optimize>
     <VersionSuffix></VersionSuffix>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DefineConstants>$(DefineConstants);DEBUG_IDISPOSABLE</DefineConstants>
-    <DefineDebug>true</DefineDebug>
-    <DefineTrace>true</DefineTrace>
-    <DebugType>portable</DebugType>
-  </PropertyGroup>
+  
+    
+  <!-- =================================================================================== -->
+  <!-- Configuration-specific (Release/Debug) Properties -->
+  <!-- =================================================================================== -->
+  <Choose>
+    <When Condition=" '$(Configuration)' == 'Release' ">
+      <PropertyGroup>
+        <DefineDebug>false</DefineDebug>
+        <DefineTrace>false</DefineTrace>
+        <DefineConstants>$(DefineConstants);RELEASE</DefineConstants>
+        <Optimize>true</Optimize>
+        <TieredPGO>true</TieredPGO>
+      </PropertyGroup>
+    </When>
+    <When Condition=" '$(Configuration)' == 'Debug' ">
+      <PropertyGroup>
+        <DefineConstants>$(DefineConstants);DEBUG_IDISPOSABLE</DefineConstants>
+        <DefineDebug>true</DefineDebug>
+        <DefineTrace>true</DefineTrace>
+      </PropertyGroup>
+    </When>
+  </Choose>
   <!-- =================================================================== -->
   <!-- Configuration Manager -->
   <!-- =================================================================== -->
