@@ -1,12 +1,11 @@
 #nullable enable
 using System.ComponentModel;
+using Microsoft.Win32.SafeHandles;
 
 namespace Terminal.Gui.ConsoleDrivers.Windows;
 
 internal partial class WindowsConsole {
-    private const int StdOutputHandle = -11;
-    private const int StdInputHandle = -10;
-    private nint _inputHandle;
+	private nint _inputHandle;
     private nint _outputHandle;
     private nint _screenBuffer;
     private readonly uint _originalConsoleMode;
@@ -16,8 +15,8 @@ internal partial class WindowsConsole {
     private readonly StringBuilder _stringBuilder = new ( 256 * 1024 );
 
     public WindowsConsole () {
-        _inputHandle = GetStdHandle (StdInputHandle);
-        _outputHandle = GetStdHandle (StdOutputHandle);
+        _inputHandle = NativeMethods.GetStdHandle ( NativeMethods.StdInputHandle);
+        _outputHandle = NativeMethods.GetStdHandle (NativeMethods.StdOutputHandle);
         _originalConsoleMode = ConsoleMode;
         uint newConsoleMode = _originalConsoleMode;
         newConsoleMode |= (uint)( ConsoleModes.EnableMouseInput | ConsoleModes.EnableExtendedFlags );
@@ -44,7 +43,7 @@ internal partial class WindowsConsole {
                                    };
             }
 
-            result = WriteConsoleOutput (_screenBuffer, ci, bufferSize, new () { X = window.Left, Y = window.Top }, ref window);
+            result = NativeMethods.WriteConsoleOutput (_screenBuffer, ci, bufferSize, new () { X = window.Left, Y = window.Top }, ref window);
         }
         else {
             _stringBuilder.Clear ();
@@ -76,7 +75,7 @@ internal partial class WindowsConsole {
 
             var s = _stringBuilder.ToString ();
 
-            result = WriteConsole (_screenBuffer, s, (uint)s.Length, out _, null);
+            result = NativeMethods.WriteConsole (_screenBuffer, s, (uint)s.Length, out _, null);
         }
 
         if (!result) {
@@ -90,14 +89,14 @@ internal partial class WindowsConsole {
     }
 
     public void ReadFromConsoleOutput (Size size, Coord coords, ref SmallRect window) {
-        _screenBuffer = CreateConsoleScreenBuffer (
+        _screenBuffer = NativeMethods.CreateConsoleScreenBuffer (
                                                    DesiredAccess.GenericRead | DesiredAccess.GenericWrite,
                                                    ShareMode.FileShareRead | ShareMode.FileShareWrite,
                                                    nint.Zero,
                                                    1,
                                                    nint.Zero
                                                   );
-        if (_screenBuffer == INVALID_HANDLE_VALUE) {
+        if (_screenBuffer == NativeMethods.INVALID_HANDLE_VALUE ) {
             int err = Marshal.GetLastWin32Error ();
 
             if (err != 0) {
@@ -109,18 +108,18 @@ internal partial class WindowsConsole {
             _initialCursorVisibility = visibility;
         }
 
-        if (!SetConsoleActiveScreenBuffer (_screenBuffer)) {
+        if (!NativeMethods.SetConsoleActiveScreenBuffer (_screenBuffer)) {
             throw new Win32Exception (Marshal.GetLastWin32Error ());
         }
 
         _originalStdOutChars = new CharInfo [size.Height * size.Width];
 
-        if (!ReadConsoleOutput (_screenBuffer, _originalStdOutChars, coords, new () { X = 0, Y = 0 }, ref window)) {
+        if (!NativeMethods.ReadConsoleOutput (_screenBuffer, _originalStdOutChars, coords, new () { X = 0, Y = 0 }, ref window)) {
             throw new Win32Exception (Marshal.GetLastWin32Error ());
         }
     }
 
-    public bool SetCursorPosition (Coord position) { return SetConsoleCursorPosition (_screenBuffer, position); }
+    public bool SetCursorPosition (Coord position) { return NativeMethods.SetConsoleCursorPosition (_screenBuffer, position); }
 
     public void SetInitialCursorVisibility () {
         if (_initialCursorVisibility.HasValue == false && GetCursorVisibility (out CursorVisibility visibility)) {
@@ -135,7 +134,7 @@ internal partial class WindowsConsole {
             return false;
         }
 
-        if (!GetConsoleCursorInfo (_screenBuffer, out ConsoleCursorInfo info)) {
+        if (!NativeMethods.GetConsoleCursorInfo (_screenBuffer, out ConsoleCursorInfo info)) {
             int err = Marshal.GetLastWin32Error ();
             if (err != 0) {
                 throw new Win32Exception (err);
@@ -189,7 +188,7 @@ internal partial class WindowsConsole {
                                                  bVisible = ( (uint)visibility & 0xFF00 ) != 0
                                              };
 
-            if (!SetConsoleCursorInfo (_screenBuffer, ref info)) {
+            if (!NativeMethods.SetConsoleCursorInfo (_screenBuffer, ref info)) {
                 return false;
             }
 
@@ -207,13 +206,13 @@ internal partial class WindowsConsole {
         SetConsoleOutputWindow (out _);
 
         ConsoleMode = _originalConsoleMode;
-        if (!SetConsoleActiveScreenBuffer (_outputHandle)) {
+        if (!NativeMethods.SetConsoleActiveScreenBuffer (_outputHandle)) {
             int err = Marshal.GetLastWin32Error ();
             Console.WriteLine ("Error: {0}", err);
         }
 
         if (_screenBuffer != nint.Zero) {
-            CloseHandle (_screenBuffer);
+			NativeMethods.CloseHandle (_screenBuffer);
         }
 
         _screenBuffer = nint.Zero;
@@ -228,7 +227,7 @@ internal partial class WindowsConsole {
 
         var csbi = new CONSOLE_SCREEN_BUFFER_INFOEX ();
         csbi.cbSize = (uint)Marshal.SizeOf (csbi);
-        if (!GetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
+        if (!NativeMethods.GetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
             //throw new System.ComponentModel.Win32Exception (Marshal.GetLastWin32Error ());
             position = Point.Empty;
 
@@ -246,7 +245,7 @@ internal partial class WindowsConsole {
     internal Size GetConsoleOutputWindow (out Point position) {
         var csbi = new CONSOLE_SCREEN_BUFFER_INFOEX ();
         csbi.cbSize = (uint)Marshal.SizeOf (csbi);
-        if (!GetConsoleScreenBufferInfoEx (_outputHandle, ref csbi)) {
+        if (!NativeMethods.GetConsoleScreenBufferInfoEx (_outputHandle, ref csbi)) {
             throw new Win32Exception (Marshal.GetLastWin32Error ());
         }
 
@@ -257,27 +256,32 @@ internal partial class WindowsConsole {
 
         return sz;
     }
+    internal void ShowWindow (int state)
+    {
+        IntPtr thisConsole = NativeMethods.GetConsoleWindow ();
+        NativeMethods.ShowWindow (thisConsole, state);
+    }
 
     internal Size SetConsoleWindow (short cols, short rows) {
         var csbi = new CONSOLE_SCREEN_BUFFER_INFOEX ();
         csbi.cbSize = (uint)Marshal.SizeOf (csbi);
 
-        if (!GetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
+        if (!NativeMethods.GetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
             throw new Win32Exception (Marshal.GetLastWin32Error ());
         }
 
-        Coord maxWinSize = GetLargestConsoleWindowSize (_screenBuffer);
+        Coord maxWinSize = NativeMethods.GetLargestConsoleWindowSize (_screenBuffer);
         short newCols = Math.Min (cols, maxWinSize.X);
         short newRows = Math.Min (rows, maxWinSize.Y);
         csbi.dwSize = new ( newCols, Math.Max (newRows, (short)1) );
         csbi.srWindow = new ( 0, 0, newCols, newRows );
         csbi.dwMaximumWindowSize = new ( newCols, newRows );
-        if (!SetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
+        if (!NativeMethods.SetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
             throw new Win32Exception (Marshal.GetLastWin32Error ());
         }
 
         var winRect = new SmallRect (0, 0, (short)( newCols - 1 ), (short)Math.Max (newRows - 1, 0));
-        if (!SetConsoleWindowInfo (_outputHandle, true, ref winRect)) {
+        if (!NativeMethods.SetConsoleWindowInfo (_outputHandle, true, ref winRect)) {
             //throw new System.ComponentModel.Win32Exception (Marshal.GetLastWin32Error ());
             return new ( cols, rows );
         }
@@ -288,7 +292,7 @@ internal partial class WindowsConsole {
     }
 
     private void SetConsoleOutputWindow (CONSOLE_SCREEN_BUFFER_INFOEX csbi) {
-        if (_screenBuffer != nint.Zero && !SetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
+        if (_screenBuffer != nint.Zero && !NativeMethods.SetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
             throw new Win32Exception (Marshal.GetLastWin32Error ());
         }
     }
@@ -302,7 +306,7 @@ internal partial class WindowsConsole {
 
         var csbi = new CONSOLE_SCREEN_BUFFER_INFOEX ();
         csbi.cbSize = (uint)Marshal.SizeOf (csbi);
-        if (!GetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
+        if (!NativeMethods.GetConsoleScreenBufferInfoEx (_screenBuffer, ref csbi)) {
             throw new Win32Exception (Marshal.GetLastWin32Error ());
         }
 
@@ -312,11 +316,11 @@ internal partial class WindowsConsole {
         position = new ( csbi.srWindow.Left, csbi.srWindow.Top );
         SetConsoleOutputWindow (csbi);
         var winRect = new SmallRect (0, 0, (short)( sz.Width - 1 ), (short)Math.Max (sz.Height - 1, 0));
-        if (!SetConsoleScreenBufferInfoEx (_outputHandle, ref csbi)) {
+        if (!NativeMethods.SetConsoleScreenBufferInfoEx (_outputHandle, ref csbi)) {
             throw new Win32Exception (Marshal.GetLastWin32Error ());
         }
 
-        if (!SetConsoleWindowInfo (_outputHandle, true, ref winRect)) {
+        if (!NativeMethods.SetConsoleWindowInfo (_outputHandle, true, ref winRect)) {
             throw new Win32Exception (Marshal.GetLastWin32Error ());
         }
 
@@ -325,91 +329,18 @@ internal partial class WindowsConsole {
 
     private uint ConsoleMode {
         get {
-            GetConsoleMode (_inputHandle, out uint v);
+			NativeMethods.GetConsoleMode (_inputHandle, out uint v);
 
             return v;
         }
-        set => SetConsoleMode (_inputHandle, value);
+        set => NativeMethods.SetConsoleMode (_inputHandle, value);
     }
 
-    [DllImport ("kernel32.dll", SetLastError = true)]
-    private static extern nint GetStdHandle (int nStdHandle);
-    [DllImport ( "kernel32.dll", SetLastError = true )]
-    private static extern bool CloseHandle (nint handle);
-
-    [DllImport ("kernel32.dll", EntryPoint = "ReadConsoleInputW", CharSet = CharSet.Unicode)]
-    public static extern bool ReadConsoleInput (
-        nint hConsoleInput,
-        nint lpBuffer,
-        uint nLength,
-        out uint lpNumberOfEventsRead
-    );
-
-    [DllImport ("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    private static extern bool ReadConsoleOutput (
-        nint hConsoleOutput,
-        [Out] CharInfo[] lpBuffer,
-        Coord dwBufferSize,
-        Coord dwBufferCoord,
-        ref SmallRect lpReadRegion
-    );
-
-    // TODO: This API is obsolete. See https://learn.microsoft.com/en-us/windows/console/writeconsoleoutput
-    [DllImport ("kernel32.dll", EntryPoint = "WriteConsoleOutputW", SetLastError = true, CharSet = CharSet.Unicode)]
-    private static extern bool WriteConsoleOutput (
-        nint hConsoleOutput,
-        CharInfo[] lpBuffer,
-        Coord dwBufferSize,
-        Coord dwBufferCoord,
-        ref SmallRect lpWriteRegion
-    );
-
-    [DllImport ("kernel32.dll", EntryPoint = "WriteConsole", SetLastError = true, CharSet = CharSet.Unicode)]
-    private static extern bool WriteConsole (
-        nint hConsoleOutput,
-        string lpbufer,
-        uint NumberOfCharsToWriten,
-        out uint lpNumberOfCharsWritten,
-        object lpReserved
-    );
-
-    [DllImport ("kernel32.dll")]
-    private static extern bool SetConsoleCursorPosition (nint hConsoleOutput, Coord dwCursorPosition);
-
-    [DllImport ("kernel32.dll", SetLastError = true)]
-    private static extern bool SetConsoleCursorInfo (nint hConsoleOutput, [In] ref ConsoleCursorInfo lpConsoleCursorInfo);
-
-    [DllImport ("kernel32.dll", SetLastError = true)]
-    private static extern bool GetConsoleCursorInfo (nint hConsoleOutput, out ConsoleCursorInfo lpConsoleCursorInfo);
-
-    [DllImport ("kernel32.dll")]
-    private static extern bool GetConsoleMode (nint hConsoleHandle, out uint lpMode);
-
-    [DllImport ("kernel32.dll")]
-    private static extern bool SetConsoleMode (nint hConsoleHandle, uint dwMode);
-
-    [DllImport ("kernel32.dll", SetLastError = true)]
-    private static extern nint CreateConsoleScreenBuffer (
-        DesiredAccess dwDesiredAccess,
-        ShareMode dwShareMode,
-        nint secutiryAttributes,
-        uint flags,
-        nint screenBufferData
-    );
-
-    internal static nint INVALID_HANDLE_VALUE = new ( -1 );
-
-    [DllImport ("kernel32.dll", SetLastError = true)]
-    private static extern bool SetConsoleActiveScreenBuffer (nint Handle);
-
-    [DllImport ("kernel32.dll", SetLastError = true)]
-    private static extern bool GetNumberOfConsoleInputEvents (nint handle, out uint lpcNumberOfEvents);
-
-    public InputRecord[] ReadConsoleInput () {
+	public InputRecord [ ] ReadConsoleInput () {
         const int bufferSize = 1;
         nint pRecord = Marshal.AllocHGlobal (Marshal.SizeOf<InputRecord> () * bufferSize);
         try {
-            ReadConsoleInput (
+			NativeMethods.ReadConsoleInput (
                               _inputHandle,
                               pRecord,
                               bufferSize,
@@ -426,40 +357,4 @@ internal partial class WindowsConsole {
             Marshal.FreeHGlobal (pRecord);
         }
     }
-#if false // Not needed on the constructor. Perhaps could be used on resizing. To study.                                                                                     
-                [DllImport ("kernel32.dll", ExactSpelling = true)]
-                static extern IntPtr GetConsoleWindow ();
-
-                [DllImport ("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-                static extern bool ShowWindow (IntPtr hWnd, int nCmdShow);
-
-                public const int HIDE = 0;
-                public const int MAXIMIZE = 3;
-                public const int MINIMIZE = 6;
-                public const int RESTORE = 9;
-
-                internal void ShowWindow (int state)
-                {
-                        IntPtr thisConsole = GetConsoleWindow ();
-                        ShowWindow (thisConsole, state);
-                }
-#endif
-
-    [DllImport ("kernel32.dll", SetLastError = true)]
-    private static extern bool GetConsoleScreenBufferInfoEx (nint hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFOEX csbi);
-
-    [DllImport ("kernel32.dll", SetLastError = true)]
-    private static extern bool SetConsoleScreenBufferInfoEx (nint hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFOEX ConsoleScreenBufferInfo);
-
-    [DllImport ("kernel32.dll", SetLastError = true)]
-    private static extern bool SetConsoleWindowInfo (
-        nint hConsoleOutput,
-        bool bAbsolute,
-        [In] ref SmallRect lpConsoleWindow
-    );
-
-    [DllImport ("kernel32.dll", SetLastError = true)]
-    private static extern Coord GetLargestConsoleWindowSize (
-        nint hConsoleOutput
-    );
 }
