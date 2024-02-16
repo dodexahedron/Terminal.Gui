@@ -1,4 +1,4 @@
-﻿namespace Terminal.Gui;
+namespace Terminal.Gui;
 
 public partial class View
 {
@@ -399,8 +399,8 @@ public partial class View
         if (_subviews is { } && SubViewNeedsDisplay)
         {
             IEnumerable<View> subviewsNeedingDraw = _subviews.Where (
-                                                                     view => view.Visible
-                                                                             && (view.NeedsDisplay || view.SubViewNeedsDisplay || view.LayoutNeeded)
+                                                                     static view => view.Visible
+                                                                                    && (view.NeedsDisplay || view.SubViewNeedsDisplay || view.LayoutNeeded)
                                                                     );
 
             foreach (View view in subviewsNeedingDraw)
