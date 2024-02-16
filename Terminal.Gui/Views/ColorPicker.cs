@@ -16,6 +16,7 @@ public class ColorEventArgs : EventArgs
 }
 
 /// <summary>The <see cref="ColorPicker"/> <see cref="View"/> Color picker.</summary>
+[MustDisposeResource]
 public class ColorPicker : View
 {
     /// <summary>Columns of color boxes</summary>
