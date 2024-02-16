@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Terminal.Gui;
 
@@ -268,10 +268,10 @@ public class Thickness : IEquatable<Thickness>
     /// <returns></returns>
     public Rect GetInside (Rect rect)
     {
-        int x = rect.X + Left;
-        int y = rect.Y + Top;
-        int width = Math.Max (0, rect.Size.Width - Horizontal);
-        int height = Math.Max (0, rect.Size.Height - Vertical);
+        int x = Math.Clamp (rect.X + Left, 0, short.MaxValue);
+        int y = Math.Clamp (rect.Y + Top, 0, short.MaxValue);
+        int width = Math.Clamp (rect.Size.Width - Horizontal, 0, short.MaxValue);
+        int height = Math.Clamp (rect.Size.Height - Vertical, 0, short.MaxValue);
 
         return new Rect (new Point (x, y), new Size (width, height));
     }
