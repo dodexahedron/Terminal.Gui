@@ -273,7 +273,7 @@ public class Thickness : IEquatable<Thickness>
         int width = Math.Clamp (rect.Size.Width - Horizontal, 0, short.MaxValue);
         int height = Math.Clamp (rect.Size.Height - Vertical, 0, short.MaxValue);
 
-        return new Rect (new Point (x, y), new Size (width, height));
+        return new (x, y, width, height);
     }
 
     /// <inheritdoc/>
