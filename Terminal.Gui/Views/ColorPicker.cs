@@ -20,10 +20,10 @@ public class ColorEventArgs : EventArgs
 public class ColorPicker : View
 {
     /// <summary>Columns of color boxes</summary>
-    private readonly int _cols = 8;
+    private const int NumberOfColumns = 8;
 
     /// <summary>Rows of color boxes</summary>
-    private readonly int _rows = 2;
+    private const int NumberOfRows = 2;
 
     private int _boxHeight = 2;
     private int _boxWidth = 4;
@@ -63,10 +63,10 @@ public class ColorPicker : View
     /// <summary>Cursor for the selected color.</summary>
     public Point Cursor
     {
-        get => new (_selectColorIndex % _cols, _selectColorIndex / _cols);
+        get => new (_selectColorIndex % NumberOfColumns, _selectColorIndex / NumberOfColumns);
         set
         {
-            int colorIndex = value.Y * _cols + value.X;
+            int colorIndex = value.Y * NumberOfColumns + value.X;
             SelectedColor = (ColorName)colorIndex;
         }
     }
@@ -115,9 +115,9 @@ public class ColorPicker : View
     /// <returns></returns>
     public virtual bool MoveDown ()
     {
-        if (Cursor.Y < _rows - 1)
+        if (Cursor.Y < NumberOfRows - 1)
         {
-            SelectedColor += _cols;
+            SelectedColor += NumberOfColumns;
         }
 
         return true;
@@ -139,7 +139,7 @@ public class ColorPicker : View
     /// <returns></returns>
     public virtual bool MoveRight ()
     {
-        if (Cursor.X < _cols - 1)
+        if (Cursor.X < NumberOfColumns - 1)
         {
             SelectedColor++;
         }
@@ -153,7 +153,7 @@ public class ColorPicker : View
     {
         if (Cursor.Y > 0)
         {
-            SelectedColor -= _cols;
+            SelectedColor -= NumberOfColumns;
         }
 
         return true;
@@ -171,7 +171,7 @@ public class ColorPicker : View
         {
             for (var x = 0; x < Bounds.Width / BoxWidth; x++)
             {
-                int foregroundColorIndex = y == 0 ? colorIndex + _cols : colorIndex - _cols;
+                int foregroundColorIndex = y == 0 ? colorIndex + NumberOfColumns : colorIndex - NumberOfColumns;
                 Driver.SetAttribute (new Attribute ((ColorName)foregroundColorIndex, (ColorName)colorIndex));
                 bool selected = x == Cursor.X && y == Cursor.Y;
                 DrawColorBox (x, y, selected);
