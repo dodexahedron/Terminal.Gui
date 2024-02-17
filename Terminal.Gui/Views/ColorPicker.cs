@@ -30,7 +30,19 @@ public class ColorPicker : View
     private int _selectColorIndex = (int)Color.Black;
 
     /// <summary>Initializes a new instance of <see cref="ColorPicker"/>.</summary>
-    public ColorPicker () { SetInitialProperties (); }
+    public ColorPicker ()
+    {
+        CanFocus = true;
+        AddCommands ();
+        AddKeyBindings ();
+
+        LayoutStarted += (o, a) =>
+                         {
+                             Thickness thickness = GetAdornmentsThickness ();
+                             Width = NumberOfColumns * BoxWidth + thickness.Vertical;
+                             Height = NumberOfRows * BoxHeight + thickness.Horizontal;
+                         };
+    }
 
     /// <summary>Height of a color box</summary>
     public int BoxHeight
@@ -267,19 +279,5 @@ public class ColorPicker : View
         {
             AddRune (p.Key.X, p.Key.Y, p.Value);
         }
-    }
-
-    private void SetInitialProperties ()
-    {
-        CanFocus = true;
-        AddCommands ();
-        AddKeyBindings ();
-
-        LayoutStarted += (o, a) =>
-                         {
-                             Thickness thickness = GetAdornmentsThickness ();
-                             Width = _cols * BoxWidth + thickness.Vertical;
-                             Height = _rows * BoxHeight + thickness.Horizontal;
-                         };
     }
 }
