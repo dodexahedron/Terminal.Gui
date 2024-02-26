@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 namespace Terminal.Gui;
 
 /// <summary>Extension methods for <see cref="StraightLine"/> (including collections).</summary>
@@ -20,12 +20,12 @@ public static class StraightLineExtensions
         Orientation orientation
     )
     {
-        List<StraightLine> toReturn = new ();
-
         if (length == 0)
         {
             return collection;
         }
+
+        List<StraightLine> toReturn = [];
 
         foreach (StraightLine l in collection)
         {
