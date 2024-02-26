@@ -1,4 +1,6 @@
 ﻿#nullable enable
+using System.Numerics;
+
 namespace Terminal.Gui;
 
 // TODO: Add events that notify when StraightLine changes to enable dynamic layout
@@ -14,7 +16,7 @@ public record StraightLine (
     Orientation Orientation,
     LineStyle Style,
     Attribute? Attribute = default
-    )
+    ) : IEqualityOperators<StraightLine, StraightLine, bool>
 {
 
     /// <summary>Gets or sets the color of the line.</summary>
