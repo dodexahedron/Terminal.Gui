@@ -1,4 +1,4 @@
-namespace Terminal.Gui;
+﻿namespace Terminal.Gui;
 
 /// <summary>Extension methods for <see cref="StraightLine"/> (including collections).</summary>
 public static class StraightLineExtensions
@@ -158,7 +158,7 @@ public static class StraightLineExtensions
     /// <param name="from">Point on varying axis to start at</param>
     /// <param name="length">Length of line to return</param>
     /// <returns>The new line</returns>
-    private static StraightLine CreateLineFromDiff (StraightLine l, int from, int length)
+    private static StraightLine CreateLineFromDiff (in StraightLine l, int from, int length)
     {
         var start = new Point (
                                l.Orientation == Orientation.Horizontal ? from : l.Start.X,
@@ -182,7 +182,7 @@ public static class StraightLineExtensions
     /// <param name="length">Length of the line</param>
     /// <param name="orientation">Orientation of the line</param>
     /// <returns>The maximum x or y (whichever is differing) point on the line, controlling for negative lengths. </returns>
-    private static int GetLineEndOnDiffAxis (Point start, int length, Orientation orientation)
+    private static int GetLineEndOnDiffAxis (in Point start, int length, Orientation orientation)
     {
         // NOTE: I'm not a fan of this exception being thrown by a private method.
         // Seems like we should be validating before calling a method the consumer can't even see.
@@ -214,7 +214,7 @@ public static class StraightLineExtensions
     /// <param name="length">Length of the line</param>
     /// <param name="orientation">Orientation of the line</param>
     /// <returns>The minimum x or y (whichever is differing) point on the line, controlling for negative lengths. </returns>
-    private static int GetLineStartOnDiffAxis (Point start, int length, Orientation orientation)
+    private static int GetLineStartOnDiffAxis (in Point start, int length, Orientation orientation)
     {
         if (length == 0)
         {
