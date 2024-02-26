@@ -46,8 +46,7 @@ public class Ruler
         else
         {
             string vrule =
-                _vTemplate.Repeat ((int)Math.Ceiling ((Length + 2) / (double)_vTemplate.Length))
-                    [start..(Length + start)];
+                _vTemplate.Repeat ((int)Math.Ceiling ((Length + 2) / (double)_vTemplate.Length)) [start..(Length + start)];
 
             for (int r = location.Y; r < location.Y + Length; r++)
             {
