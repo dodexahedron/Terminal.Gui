@@ -34,21 +34,21 @@ public readonly partial record struct Color
     ///     Use <see cref="implicit operator Vector4(Color)"/> to maintain full value.
     /// </remarks>
     [Pure]
-    public static explicit operator Vector3 (Color color) { return new Vector3 (color.R, color.G, color.B); }
+    public static explicit operator Vector3 (Color color) { return new (color.R, color.G, color.B); }
 
     /// <summary>
     ///     Implicit conversion from <see langword="int"/> to <see cref="Color"/>, via the <see cref="Color(int)"/>
     ///     costructor.
     /// </summary>
     [Pure]
-    public static implicit operator Color (int rgba) { return new Color (rgba); }
+    public static implicit operator Color (int rgba) { return new (rgba); }
 
     /// <summary>
     ///     Implicit conversion from <see langword="uint"/> to <see cref="Color"/>, via the <see cref="Color(uint)"/>
     ///     costructor.
     /// </summary>
     [Pure]
-    public static implicit operator Color (uint u) { return new Color (u); }
+    public static implicit operator Color (uint u) { return new (u); }
 
     /// <summary>
     ///     Implicit conversion from <see cref="GetClosestNamedColor (Color)"/> to <see cref="Color"/> via lookup from
@@ -63,14 +63,14 @@ public readonly partial record struct Color
     ///     <see cref="G"/>,<see cref="B"/>), via <see cref="Color(int,int,int,int)"/>.
     /// </summary>
     [Pure]
-    public static implicit operator Color (Vector4 v) { return new Color ((byte)v.X, (byte)v.Y, (byte)v.Z, (byte)v.W); }
+    public static implicit operator Color (Vector4 v) { return new ((byte)v.X, (byte)v.Y, (byte)v.Z, (byte)v.W); }
 
     /// <summary>
     ///     Implicit conversion from <see cref="Vector3"/>, where <see cref="Vector3.X"/> = <see cref="R"/>,
     ///     <see cref="Vector3.Y"/> = <see cref="G"/>, and <see cref="Vector3.Z"/> = <see cref="B"/>.
     /// </summary>
     [Pure]
-    public static implicit operator Color (Vector3 v) { return new Color ((byte)v.X, (byte)v.Y, (byte)v.Z); }
+    public static implicit operator Color (Vector3 v) { return new ((byte)v.X, (byte)v.Y, (byte)v.Z); }
 
     /// <summary>
     ///     Implicit conversion from <see cref="Color"/> to <see langword="int"/> by returning the value of the
@@ -91,5 +91,5 @@ public readonly partial record struct Color
     ///     <see cref="Vector3.Y"/> = <see cref="G"/>, and <see cref="Vector3.Z"/> = <see cref="B"/>.
     /// </summary>
     [Pure]
-    public static implicit operator Vector4 (Color color) { return new Vector4 (color.R, color.G, color.B, color.A); }
+    public static implicit operator Vector4 (Color color) { return new (color.R, color.G, color.B, color.A); }
 }
