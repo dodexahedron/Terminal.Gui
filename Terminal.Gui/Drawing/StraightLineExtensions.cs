@@ -1,4 +1,5 @@
-﻿namespace Terminal.Gui;
+#nullable enable
+namespace Terminal.Gui;
 
 /// <summary>Extension methods for <see cref="StraightLine"/> (including collections).</summary>
 public static class StraightLineExtensions
