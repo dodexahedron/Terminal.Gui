@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System.Buffers;
 
 namespace Terminal.Gui;
@@ -137,7 +137,7 @@ public static class StringExtensions
     /// <param name="bytes">The enumerable byte to convert.</param>
     /// <param name="encoding">The encoding to be used.</param>
     /// <returns></returns>
-    public static string ToString (IEnumerable<byte> bytes, Encoding? encoding = null)
+    public static string ToString (this IEnumerable<byte> bytes, Encoding? encoding = null)
     {
         encoding ??= Encoding.UTF8;
 
