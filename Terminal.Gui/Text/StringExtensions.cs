@@ -102,6 +102,11 @@ public static class StringExtensions
             return str;
         }
 
+        if (str is { Length: 1 })
+        {
+            return new (str [0], n);
+        }
+
         return new StringBuilder (str.Length * n)
                .Insert (0, str, n)
                .ToString ();
