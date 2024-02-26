@@ -43,6 +43,9 @@ public record StraightLine (
     {
         get
         {
+            // PERF: Improvements likely possible here.
+            // We can almost certainly do this more cleanly and/or more efficiently.
+            // At minimum, recalculating it on every call seems wasteful.
             // 0 and 1/-1 Length means a size (width or height) of 1
             int size = Math.Max (1, Math.Abs (Length));
 
