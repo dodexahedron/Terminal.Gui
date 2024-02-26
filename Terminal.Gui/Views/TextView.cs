@@ -926,7 +926,7 @@ internal class TextModel
 
     private void Append (List<byte> line)
     {
-        var str = StringExtensions.ToString (line.ToArray ());
+        var str = StringExtensions.ToString (line);
         _lines.Add (StringToRuneCells (str));
     }
 
@@ -6428,7 +6428,7 @@ public class TextView : View
             offset += cell.Rune.Encode (encoded, offset);
         }
 
-        return StringExtensions.ToString (encoded);
+        return StringExtensions.ToString (new ReadOnlySpan<byte> (encoded));
     }
 
     private void TextView_Initialized (object sender, EventArgs e)

@@ -624,9 +624,9 @@ public class RuneTests
                 Assert.False (RuneExtensions.CanBeEncodedAsRune (Encoding.Unicode.GetBytes (str.ToCharArray ())));
             }
         }
-        else if (text is byte [])
+        else if (text is byte [] textAsByteArray)
         {
-            str = StringExtensions.ToString ((byte [])text);
+            str = StringExtensions.ToString (new ReadOnlySpan<byte> (textAsByteArray));
 
             if (canBeEncodedAsRune)
             {
