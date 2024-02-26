@@ -24,10 +24,7 @@ public class Ruler
     /// <param name="start">The start value of the ruler.</param>
     public void Draw (Point location, int start = 0)
     {
-        if (start < 0)
-        {
-            throw new ArgumentException ("start must be greater than or equal to 0");
-        }
+        ArgumentOutOfRangeException.ThrowIfLessThan (start, 0);
 
         if (Length < 1)
         {
