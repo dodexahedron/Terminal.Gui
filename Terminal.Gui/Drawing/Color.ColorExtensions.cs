@@ -1,3 +1,4 @@
+#nullable enable
 using System.Collections.Frozen;
 
 namespace Terminal.Gui;
