@@ -609,12 +609,8 @@ public class RuneTests
     [InlineData (new byte [] { 0xf0, 0x9f, 0x8d, 0x95 }, true)]
     public void Test_CanBeEncodedAsRune_Extension (object text, bool canBeEncodedAsRune)
     {
-        string str;
-
-        if (text is string)
+        if (text is string str)
         {
-            str = (string)text;
-
             if (canBeEncodedAsRune)
             {
                 Assert.True (RuneExtensions.CanBeEncodedAsRune (Encoding.Unicode.GetBytes (str.ToCharArray ())));
