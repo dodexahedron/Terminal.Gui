@@ -127,16 +127,10 @@ public static class StringExtensions
     /// <summary>Converts a <see cref="Rune"/> generic collection into a string.</summary>
     /// <param name="runes">The enumerable rune to convert.</param>
     /// <returns></returns>
+    // NOTE: This can go away.
     public static string ToString (IEnumerable<Rune> runes)
     {
-        var str = string.Empty;
-
-        foreach (Rune rune in runes)
-        {
-            str += rune.ToString ();
-        }
-
-        return str;
+        return string.Concat (runes);
     }
 
     /// <summary>Converts a byte generic collection into a string in the provided encoding (default is UTF8)</summary>
