@@ -22,6 +22,8 @@ public class Ruler
     /// <summary>Draws the <see cref="Ruler"/>.</summary>
     /// <param name="location">The location to start drawing the ruler, in screen-relative coordinates.</param>
     /// <param name="start">The start value of the ruler.</param>
+    /// <remarks>Immediately returns without performing any work if the <see cref="Length" /> property is less than 1.</remarks>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="start" /> is less than 0</exception>
     public void Draw (Point location, int start = 0)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan (start, 0);
