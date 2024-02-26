@@ -3,43 +3,34 @@ namespace Terminal.Gui;
 
 // TODO: Add events that notify when StraightLine changes to enable dynamic layout
 /// <summary>A line between two points on a horizontal or vertical <see cref="Orientation"/> and a given style/color.</summary>
-public class StraightLine
-{
-    /// <summary>Creates a new instance of the <see cref="StraightLine"/> class.</summary>
-    /// <param name="start"></param>
-    /// <param name="length"></param>
-    /// <param name="orientation"></param>
-    /// <param name="style"></param>
-    /// <param name="attribute"></param>
-    public StraightLine (
-        Point start,
-        int length,
-        Orientation orientation,
-        LineStyle style,
-        Attribute? attribute = default
+/// <param name="start"></param>
+/// <param name="length"></param>
+/// <param name="orientation"></param>
+/// <param name="style"></param>
+/// <param name="attribute"></param>
+public class StraightLine (
+    Point start,
+    int length,
+    Orientation orientation,
+    LineStyle style,
+    Attribute? attribute = default
     )
-    {
-        Start = start;
-        Length = length;
-        Orientation = orientation;
-        Style = style;
-        Attribute = attribute;
-    }
+{
 
     /// <summary>Gets or sets the color of the line.</summary>
-    public Attribute? Attribute { get; set; }
+    public Attribute? Attribute { get; set; } = attribute;
 
     /// <summary>Gets or sets the length of the line.</summary>
-    public int Length { get; set; }
+    public int Length { get; set; } = length;
 
     /// <summary>Gets or sets the orientation (horizontal or vertical) of the line.</summary>
-    public Orientation Orientation { get; set; }
+    public Orientation Orientation { get; set; } = orientation;
 
     /// <summary>Gets or sets where the line begins.</summary>
-    public Point Start { get; set; }
+    public Point Start { get; set; } = start;
 
     /// <summary>Gets or sets the line style of the line (e.g. dotted, double).</summary>
-    public LineStyle Style { get; set; }
+    public LineStyle Style { get; set; } = style;
 
     /// <summary>
     ///     Gets the rectangle that describes the bounds of the canvas. Location is the coordinates of the line that is
