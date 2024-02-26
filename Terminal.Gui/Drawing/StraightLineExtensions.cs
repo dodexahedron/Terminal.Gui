@@ -184,6 +184,8 @@ public static class StraightLineExtensions
     /// <returns>The maximum x or y (whichever is differing) point on the line, controlling for negative lengths. </returns>
     private static int GetLineEndOnDiffAxis (Point start, int length, Orientation orientation)
     {
+        // NOTE: I'm not a fan of this exception being thrown by a private method.
+        // Seems like we should be validating before calling a method the consumer can't even see.
         ArgumentOutOfRangeException.ThrowIfEqual (length, 0);
 
         int sub = length > 0 ? 1 : -1;
