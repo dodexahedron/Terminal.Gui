@@ -16,8 +16,8 @@ public class Ruler
     /// <summary>Gets or sets whether the ruler is drawn horizontally or vertically. The default is horizontally.</summary>
     public Orientation Orientation { get; set; }
 
-    private string _hTemplate { get; } = "|123456789";
-    private string _vTemplate { get; } = "-123456789";
+    private const string HTemplate = "|123456789";
+    private const string VTemplate = "-123456789";
 
     /// <summary>Draws the <see cref="Ruler"/>.</summary>
     /// <param name="location">The location to start drawing the ruler, in screen-relative coordinates.</param>
@@ -38,7 +38,7 @@ public class Ruler
             // PERF: Looks like we can probably avoid some work and garbage here.
             // See detailed comment below.
             string hrule =
-                _hTemplate.Repeat ((int)Math.Ceiling (Length + 2 / (double)_hTemplate.Length)) [start..(Length + start)];
+                HTemplate.Repeat ((int)Math.Ceiling (Length + 2 / (double)HTemplate.Length)) [start..(Length + start)];
 
             // Top
             Application.Driver.Move (location.X, location.Y);
@@ -55,7 +55,7 @@ public class Ruler
             // We could even force a string.Intern on it at that point so it's not considered garbage after use.
             // This applies to HTemplate, as well.
             string vrule =
-                _vTemplate.Repeat ((int)Math.Ceiling ((Length + 2) / (double)_vTemplate.Length)) [start..(Length + start)];
+                VTemplate.Repeat ((int)Math.Ceiling ((Length + 2) / (double)VTemplate.Length)) [start..(Length + start)];
 
             for (int r = location.Y; r < location.Y + Length; r++)
             {
