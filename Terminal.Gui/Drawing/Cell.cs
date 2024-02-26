@@ -1,4 +1,4 @@
-﻿namespace Terminal.Gui;
+namespace Terminal.Gui;
 
 /// <summary>
 ///     Represents a single row/column in a Terminal.Gui rendering surface (e.g. <see cref="LineCanvas"/> and
@@ -15,6 +15,8 @@ public class Cell
     ///     Gets or sets a value indicating whether this <see cref="T:Terminal.Gui.Cell"/> has been modified since the
     ///     last time it was drawn.
     /// </summary>
+    // INTENT: Is the setter intentionally public?
+    // Seems like maybe it shouldn't be, or that maybe this property should be automatically set when appropriate, maybe?
     public bool IsDirty { get; set; }
 
     /// <summary>The character to display. If <see cref="Rune"/> is <see langword="null"/>, then <see cref="Rune"/> is ignored.</summary>
