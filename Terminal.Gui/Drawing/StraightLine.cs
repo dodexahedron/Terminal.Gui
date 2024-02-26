@@ -3,11 +3,11 @@ namespace Terminal.Gui;
 
 // TODO: Add events that notify when StraightLine changes to enable dynamic layout
 /// <summary>A line between two points on a horizontal or vertical <see cref="Orientation"/> and a given style/color.</summary>
-/// <param name="start"></param>
-/// <param name="length"></param>
-/// <param name="orientation"></param>
-/// <param name="style"></param>
-/// <param name="attribute"></param>
+/// <param name="Start">The <see cref="Point" /> at which the <see cref="StraightLine" /> starts</param>
+/// <param name="Length">The length of the line</param>
+/// <param name="Orientation">The orientation (horizontal or vertical) of the line</param>
+/// <param name="Style">The <see cref="LineStyle"/> of the line</param>
+/// <param name="Attribute">The color of the line</param>
 public record StraightLine (
     Point Start,
     int Length,
