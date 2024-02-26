@@ -37,12 +37,12 @@ public class Ruler
         {
             // PERF: Looks like we can probably avoid some work and garbage here.
             // See detailed comment below.
-            string? hrule =
+            string? hRule =
                 HTemplate.Repeat ((int)Math.Ceiling (Length + 2 / (double)HTemplate.Length))? [start..(Length + start)];
 
             // Top
             Application.Driver.Move (location.X, location.Y);
-            Application.Driver.AddStr (hrule);
+            Application.Driver.AddStr (hRule);
         }
         else
         {
@@ -54,13 +54,13 @@ public class Ruler
             // of the Ruler.
             // We could even force a string.Intern on it at that point so it's not considered garbage after use.
             // This applies to HTemplate, as well.
-            string? vrule =
+            string? vRule =
                 VTemplate.Repeat ((int)Math.Ceiling ((Length + 2) / (double)VTemplate.Length))? [start..(Length + start)];
 
             for (int r = location.Y; r < location.Y + Length; r++)
             {
                 Application.Driver.Move (location.X, r);
-                Application.Driver.AddRune ((Rune)vrule [r - location.Y]);
+                Application.Driver.AddRune ((Rune)vRule [r - location.Y]);
             }
         }
     }
