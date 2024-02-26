@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 using System.Buffers;
 
 namespace Terminal.Gui;
@@ -116,13 +116,13 @@ public static class StringExtensions
     /// <remarks>This is a Terminal.Gui extension method to <see cref="string"/> to support TUI text manipulation.</remarks>
     /// <param name="str">The string to convert.</param>
     /// <returns></returns>
-    public static List<Rune> ToRuneList (this string str) { return str.EnumerateRunes ().ToList (); }
+    public static List<Rune> ToRuneList (this string str) { return [.. str.EnumerateRunes ()]; }
 
     /// <summary>Converts the string into a <see cref="Rune"/> array.</summary>
     /// <remarks>This is a Terminal.Gui extension method to <see cref="string"/> to support TUI text manipulation.</remarks>
     /// <param name="str">The string to convert.</param>
     /// <returns></returns>
-    public static Rune [] ToRunes (this string str) { return str.EnumerateRunes ().ToArray (); }
+    public static Rune [] ToRunes (this string str) { return [.. str.EnumerateRunes ()]; }
 
     /// <summary>Converts a <see cref="Rune"/> generic collection into a string.</summary>
     /// <param name="runes">The enumerable rune to convert.</param>
