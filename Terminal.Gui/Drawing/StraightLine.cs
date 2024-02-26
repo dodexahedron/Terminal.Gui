@@ -106,24 +106,24 @@ public record StraightLine (
 
         if (StartsAt (x, y))
         {
-            return new IntersectionDefinition (
-                                               Start,
-                                               GetTypeByLength (
-                                                                IntersectionType.StartLeft,
-                                                                IntersectionType.PassOverHorizontal,
-                                                                IntersectionType.StartRight
-                                                               ),
-                                               this
-                                              );
+            return new (
+                        Start,
+                        GetTypeByLength (
+                                         IntersectionType.StartLeft,
+                                         IntersectionType.PassOverHorizontal,
+                                         IntersectionType.StartRight
+                                        ),
+                        this
+                       );
         }
 
         if (EndsAt (x, y))
         {
-            return new IntersectionDefinition (
-                                               Start,
-                                               Length < 0 ? IntersectionType.StartRight : IntersectionType.StartLeft,
-                                               this
-                                              );
+            return new (
+                        Start,
+                        Length < 0 ? IntersectionType.StartRight : IntersectionType.StartLeft,
+                        this
+                       );
         }
 
         int xmin = Math.Min (Start.X, Start.X + Length);
@@ -131,11 +131,11 @@ public record StraightLine (
 
         if (xmin < x && xmax > x)
         {
-            return new IntersectionDefinition (
-                                               new Point (x, y),
-                                               IntersectionType.PassOverHorizontal,
-                                               this
-                                              );
+            return new (
+                        new (x, y),
+                        IntersectionType.PassOverHorizontal,
+                        this
+                       );
         }
 
         return null;
@@ -150,24 +150,24 @@ public record StraightLine (
 
         if (StartsAt (x, y))
         {
-            return new IntersectionDefinition (
-                                               Start,
-                                               GetTypeByLength (
-                                                                IntersectionType.StartUp,
-                                                                IntersectionType.PassOverVertical,
-                                                                IntersectionType.StartDown
-                                                               ),
-                                               this
-                                              );
+            return new (
+                        Start,
+                        GetTypeByLength (
+                                         IntersectionType.StartUp,
+                                         IntersectionType.PassOverVertical,
+                                         IntersectionType.StartDown
+                                        ),
+                        this
+                       );
         }
 
         if (EndsAt (x, y))
         {
-            return new IntersectionDefinition (
-                                               Start,
-                                               Length < 0 ? IntersectionType.StartDown : IntersectionType.StartUp,
-                                               this
-                                              );
+            return new (
+                        Start,
+                        Length < 0 ? IntersectionType.StartDown : IntersectionType.StartUp,
+                        this
+                       );
         }
 
         int ymin = Math.Min (Start.Y, Start.Y + Length);
@@ -175,11 +175,11 @@ public record StraightLine (
 
         if (ymin < y && ymax > y)
         {
-            return new IntersectionDefinition (
-                                               new Point (x, y),
-                                               IntersectionType.PassOverVertical,
-                                               this
-                                              );
+            return new (
+                        new (x, y),
+                        IntersectionType.PassOverVertical,
+                        this
+                       );
         }
 
         return null;
