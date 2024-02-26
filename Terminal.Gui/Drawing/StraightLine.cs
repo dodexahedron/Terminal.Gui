@@ -126,10 +126,10 @@ public record StraightLine (
                        );
         }
 
-        int xmin = Math.Min (Start.X, Start.X + Length);
-        int xmax = Math.Max (Start.X, Start.X + Length);
+        int xMin = Math.Min (Start.X, Start.X + Length);
+        int xMax = Math.Max (Start.X, Start.X + Length);
 
-        if (xmin < x && xmax > x)
+        if (xMin < x && xMax > x)
         {
             return new (
                         new (x, y),
@@ -170,10 +170,10 @@ public record StraightLine (
                        );
         }
 
-        int ymin = Math.Min (Start.Y, Start.Y + Length);
-        int ymax = Math.Max (Start.Y, Start.Y + Length);
+        int yMin = Math.Min (Start.Y, Start.Y + Length);
+        int yMax = Math.Max (Start.Y, Start.Y + Length);
 
-        if (ymin < y && ymax > y)
+        if (yMin < y && yMax > y)
         {
             return new (
                         new (x, y),
