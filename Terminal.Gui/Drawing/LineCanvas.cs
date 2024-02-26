@@ -667,6 +667,8 @@ public class LineCanvas : IDisposable
         internal Rune _thickBoth;
         internal Rune _thickH;
         internal Rune _thickV;
+
+        // BUG: SetGlyphs is virtual
         public IntersectionRuneResolver () { SetGlyphs (); }
 
         public Rune? GetRuneForIntersects (ConsoleDriver driver, IntersectionDefinition? [] intersects)

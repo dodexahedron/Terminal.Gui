@@ -7,6 +7,8 @@ public class GraphView : View
     /// <summary>Creates a new graph with a 1 to 1 graph space with absolute layout.</summary>
     public GraphView ()
     {
+        // BUG: Virtual member call in constructor.
+        // Virtual means the most-derived implementation will be called, which may be invalid or unexpected.
         CanFocus = true;
 
         AxisX = new HorizontalAxis ();
