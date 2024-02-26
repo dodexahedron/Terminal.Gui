@@ -147,6 +147,10 @@ public record StraightLine (
         return null;
     }
 
+    // INTENT: Why is this nullable?
+    // The name implies it's a boolean, but it's not.
+    // It's also private and only referenced one time, so maybe we just nuke it?
+    // If it stays, I vote it returns a boolean with the IntersectionDefinition provided via out-reference.
     private IntersectionDefinition? IntersectsVertically (int x, int y)
     {
         if (Start.X != x)
