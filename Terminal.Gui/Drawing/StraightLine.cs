@@ -65,12 +65,15 @@ public record StraightLine (
 
     internal IntersectionDefinition? Intersects (int x, int y)
     {
-        switch (Orientation)
-        {
-            case Orientation.Horizontal: return IntersectsHorizontally (x, y);
-            case Orientation.Vertical: return IntersectsVertically (x, y);
-            default: throw new ArgumentOutOfRangeException (nameof (Orientation));
-        }
+        return Orientation switch
+               {
+                   Orientation.Horizontal => IntersectsHorizontally (x, y),
+                   Orientation.Vertical => IntersectsVertically (x, y),
+                   // BUG: This is a bad exception to throw here.
+                   // This should be an InvalidOperationException.
+                   // ArgumentOutOfRangeException is for arguments, not members.
+                   _ => throw new ArgumentOutOfRangeException (nameof (Orientation))
+               };
     }
 
     private bool EndsAt (int x, int y)
