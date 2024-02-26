@@ -5,7 +5,7 @@ namespace Terminal.Gui;
 
 internal static class ColorExtensions
 {
-    private static FrozenDictionary<Color, ColorName> colorToNameMap;
+    private static FrozenDictionary<Color, ColorName> _colorToNameMap;
 
     static ColorExtensions ()
     {
@@ -30,7 +30,7 @@ internal static class ColorExtensions
         };
         ColorNameToAnsiColorMap = nameToCodeMap.ToFrozenDictionary ();
 
-        ColorToNameMap = new Dictionary<Color, ColorName>
+        _colorToNameMap = new Dictionary<Color, ColorName>
         {
             // using "Windows 10 Console/PowerShell 6" here: https://i.stack.imgur.com/9UVnC.png
             // See also: https://en.wikipedia.org/wiki/ANSI_escape_code
@@ -51,6 +51,7 @@ internal static class ColorExtensions
             { new Color (249, 241, 165), ColorName.BrightYellow },
             { new Color (242, 242, 242), ColorName.White }
         }.ToFrozenDictionary ();
+        ColorNameToColorMap = _colorToNameMap.ToFrozenDictionary (static kvp => kvp.Value, static kvp => kvp.Key);
     }
 
     /// <summary>Defines the 16 legacy color names and their corresponding ANSI color codes.</summary>
@@ -69,10 +70,10 @@ internal static class ColorExtensions
     /// </remarks>
     internal static FrozenDictionary<Color, ColorName> ColorToNameMap
     {
-        get => colorToNameMap;
+        get => _colorToNameMap;
         set
         {
-            colorToNameMap = value;
+            _colorToNameMap = value;
 
             //Also be sure to set the reverse mapping
             ColorNameToColorMap = value.ToFrozenDictionary (static kvp => kvp.Value, static kvp => kvp.Key);
