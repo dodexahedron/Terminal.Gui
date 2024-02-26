@@ -1,4 +1,4 @@
-#nullable enable
+﻿#nullable enable
 using System.Numerics;
 
 namespace Terminal.Gui;
@@ -11,6 +11,7 @@ namespace Terminal.Gui;
 /// <param name="Orientation">The orientation (horizontal or vertical) of the line</param>
 /// <param name="Style">The <see cref="LineStyle"/> of the line</param>
 /// <param name="Attribute">The color of the line</param>
+[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public record StraightLine (
     Point Start,
     int Length,
