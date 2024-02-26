@@ -383,7 +383,7 @@ public readonly partial record struct Color
                                     out ReadOnlySpan<char> bSpan
                                    );
 
-                    return new Color (int.Parse (rSpan), int.Parse (gSpan), int.Parse (bSpan));
+                    return new (int.Parse (rSpan), int.Parse (gSpan), int.Parse (bSpan));
                 }
                 case 4:
                 {
@@ -408,7 +408,7 @@ public readonly partial record struct Color
                                                       );
                     }
 
-                    return new Color (int.Parse (rSpan), int.Parse (gSpan), int.Parse (bSpan), int.Parse (aSpan));
+                    return new (int.Parse (rSpan), int.Parse (gSpan), int.Parse (bSpan), int.Parse (aSpan));
                 }
                 default:
                     throw new ColorParseException (
