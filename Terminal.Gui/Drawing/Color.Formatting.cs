@@ -581,7 +581,6 @@ public readonly partial record struct Color
     ///     <para><see cref="A"/> (Alpha channel) is ignored and the returned string will not include it for this overload.</para>
     /// </remarks>
     /// <returns>The string representation of this value in #RRGGBB format.</returns>
-    [Pure]
     [SkipLocalsInit]
     public override string ToString ()
     {
