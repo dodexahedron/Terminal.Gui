@@ -1,6 +1,5 @@
 #nullable enable
 using System.Collections.Frozen;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Numerics;
 using System.Runtime.CompilerServices;
