@@ -776,7 +776,7 @@ public class DynamicStatusBar : Scenario
         {
             byte [] data = Encoding.ASCII.GetBytes (value.ToString () ?? string.Empty);
 
-            return StringExtensions.ToString (data);
+            return StringExtensions.ToString (new ReadOnlySpan<byte> (data));
         }
     }
 }

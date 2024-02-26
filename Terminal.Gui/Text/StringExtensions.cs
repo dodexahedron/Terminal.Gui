@@ -141,6 +141,17 @@ public static class StringExtensions
     {
         encoding ??= Encoding.UTF8;
 
-        return encoding.GetString (bytes.ToArray ());
+        return encoding.GetString (new ReadOnlySpan<byte> (bytes.ToArray ()));
+    }
+
+    /// <summary>Converts a byte generic collection into a string in the provided encoding (default is UTF8)</summary>
+    /// <param name="bytes">The enumerable byte to convert.</param>
+    /// <param name="encoding">The encoding to be used.</param>
+    /// <returns></returns>
+    public static string ToString (this ReadOnlySpan<byte> bytes, Encoding? encoding = null)
+    {
+        encoding ??= Encoding.UTF8;
+
+        return encoding.GetString (bytes);
     }
 }
