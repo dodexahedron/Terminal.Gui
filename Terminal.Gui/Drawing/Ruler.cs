@@ -35,6 +35,8 @@ public class Ruler
 
         if (Orientation == Orientation.Horizontal)
         {
+            // PERF: Looks like we can probably avoid some work and garbage here.
+            // See detailed comment below.
             string hrule =
                 _hTemplate.Repeat ((int)Math.Ceiling (Length + 2 / (double)_hTemplate.Length)) [start..(Length + start)];
 
@@ -44,6 +46,14 @@ public class Ruler
         }
         else
         {
+            // PERF: Looks like we can probably avoid some work and garbage here.
+            // An idea for both of these, though, is that we can just define a static or constant template string at startup that
+            // is larger than the console can be (in worst case, it's limited to short.MaxValue),
+            // and then just slice it when we need it, rather than doing this computation on every call to Draw.
+            // Alternatively, we could still compute it fewer times by only computing the string at construction or modification
+            // of the Ruler.
+            // We could even force a string.Intern on it at that point so it's not considered garbage after use.
+            // This applies to HTemplate, as well.
             string vrule =
                 _vTemplate.Repeat ((int)Math.Ceiling ((Length + 2) / (double)_vTemplate.Length)) [start..(Length + start)];
 
