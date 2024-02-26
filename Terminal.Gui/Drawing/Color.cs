@@ -143,7 +143,7 @@ public readonly partial record struct Color : ISpanParsable<Color>, IUtf8SpanPar
 
             return;
 
-            static Color GetColorToNameMapKey (KeyValuePair<ColorName, string> kvp) { return new Color (kvp.Value); }
+            static Color GetColorToNameMapKey (KeyValuePair<ColorName, string> kvp) { return new (kvp.Value); }
 
             static ColorName GetColorToNameMapValue (KeyValuePair<ColorName, string> kvp)
             {
