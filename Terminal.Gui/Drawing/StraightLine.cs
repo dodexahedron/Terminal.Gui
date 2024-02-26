@@ -8,29 +8,29 @@ namespace Terminal.Gui;
 /// <param name="orientation"></param>
 /// <param name="style"></param>
 /// <param name="attribute"></param>
-public class StraightLine (
-    Point start,
-    int length,
-    Orientation orientation,
-    LineStyle style,
-    Attribute? attribute = default
+public record StraightLine (
+    Point Start,
+    int Length,
+    Orientation Orientation,
+    LineStyle Style,
+    Attribute? Attribute = default
     )
 {
 
     /// <summary>Gets or sets the color of the line.</summary>
-    public Attribute? Attribute { get; set; } = attribute;
+    public Attribute? Attribute { get; set; } = Attribute;
 
     /// <summary>Gets or sets the length of the line.</summary>
-    public int Length { get; set; } = length;
+    public int Length { get; set; } = Length;
 
     /// <summary>Gets or sets the orientation (horizontal or vertical) of the line.</summary>
-    public Orientation Orientation { get; set; } = orientation;
+    public Orientation Orientation { get; set; } = Orientation;
 
     /// <summary>Gets or sets where the line begins.</summary>
-    public Point Start { get; set; } = start;
+    public Point Start { get; set; } = Start;
 
     /// <summary>Gets or sets the line style of the line (e.g. dotted, double).</summary>
-    public LineStyle Style { get; set; } = style;
+    public LineStyle Style { get; set; } = Style;
 
     /// <summary>
     ///     Gets the rectangle that describes the bounds of the canvas. Location is the coordinates of the line that is
