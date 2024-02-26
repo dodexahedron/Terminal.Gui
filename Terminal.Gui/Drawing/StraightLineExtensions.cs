@@ -126,8 +126,8 @@ public static class StraightLineExtensions
                     {
                         // Perpendicular intersection occurs here
                         Point intersection = l.Orientation == Orientation.Horizontal
-                                                 ? new Point (econstPoint, lconstPoint)
-                                                 : new Point (lconstPoint, econstPoint);
+                                                 ? new (econstPoint, lconstPoint)
+                                                 : new (lconstPoint, econstPoint);
 
                         // To snip out this single point we will use a recursive call
                         // snipping 1 length along the orientation of l (i.e. parallel)
@@ -166,7 +166,7 @@ public static class StraightLineExtensions
                                l.Orientation == Orientation.Horizontal ? l.Start.Y : from
                               );
 
-        return new StraightLine (start, length, l.Orientation, l.Style, l.Attribute);
+        return new (start, length, l.Orientation, l.Style, l.Attribute);
     }
 
     /// <summary>
