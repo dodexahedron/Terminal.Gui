@@ -1,5 +1,4 @@
 #nullable enable
-using System.Diagnostics.Contracts;
 using System.Numerics;
 
 namespace Terminal.Gui;
@@ -22,7 +21,6 @@ public readonly partial record struct Color
     public static Color MinValue => new (uint.MinValue);
 
     /// <inheritdoc/>
-    [Pure]
     public override int GetHashCode () { return Rgba.GetHashCode (); }
 
     /// <summary>
