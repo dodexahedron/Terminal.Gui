@@ -1,4 +1,4 @@
-﻿using System.Numerics;
+using System.Numerics;
 using System.Text.Json.Serialization;
 
 namespace Terminal.Gui;
@@ -128,14 +128,16 @@ public class Thickness : IEquatable<Thickness>, IEqualityOperators<Thickness, Th
         if ((ConsoleDriver.Diagnostics & ConsoleDriver.DiagnosticFlags.FramePadding)
             == ConsoleDriver.DiagnosticFlags.FramePadding)
         {
-            leftChar = (Rune)'L';
-            rightChar = (Rune)'R';
-            topChar = (Rune)'T';
-            bottomChar = (Rune)'B';
-
             if (!string.IsNullOrEmpty (label))
             {
                 leftChar = rightChar = bottomChar = topChar = (Rune)label [0];
+            }
+            else
+            {
+                leftChar = (Rune)'L';
+                rightChar = (Rune)'R';
+                topChar = (Rune)'T';
+                bottomChar = (Rune)'B';
             }
         }
 
