@@ -1,4 +1,5 @@
-﻿namespace Terminal.Gui;
+#nullable enable
+namespace Terminal.Gui;
 
 /// <summary>Draws a ruler on the screen.</summary>
 /// <remarks>
