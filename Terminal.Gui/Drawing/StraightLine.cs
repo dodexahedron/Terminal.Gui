@@ -1,9 +1,10 @@
-﻿#nullable enable
+#nullable enable
 using System.Numerics;
 
 namespace Terminal.Gui;
 
 // TODO: Add events that notify when StraightLine changes to enable dynamic layout
+// QUESTION: Should the properties be public-settable, as they currently are?
 /// <summary>A line between two points on a horizontal or vertical <see cref="Orientation"/> and a given style/color.</summary>
 /// <param name="Start">The <see cref="Point" /> at which the <see cref="StraightLine" /> starts</param>
 /// <param name="Length">The length of the line</param>
