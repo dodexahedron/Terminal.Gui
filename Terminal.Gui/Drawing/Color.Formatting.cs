@@ -167,6 +167,7 @@ public readonly partial record struct Color
     /// </remarks>
     [Pure]
     [SkipLocalsInit]
+    [SuppressMessage ("ReSharper", "CatchAllClause", Justification = "Try methods are not supposed to throw.")]
     public bool TryFormat (
         Span<char> destination,
         out int charsWritten,
