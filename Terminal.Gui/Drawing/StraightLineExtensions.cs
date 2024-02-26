@@ -1,4 +1,4 @@
-﻿namespace Terminal.Gui;
+namespace Terminal.Gui;
 
 /// <summary>Extension methods for <see cref="StraightLine"/> (including collections).</summary>
 public static class StraightLineExtensions
@@ -184,10 +184,7 @@ public static class StraightLineExtensions
     /// <returns>The maximum x or y (whichever is differing) point on the line, controlling for negative lengths. </returns>
     private static int GetLineEndOnDiffAxis (Point start, int length, Orientation orientation)
     {
-        if (length == 0)
-        {
-            throw new ArgumentException ("0 length lines are not supported", nameof (length));
-        }
+        ArgumentOutOfRangeException.ThrowIfEqual (length, 0);
 
         int sub = length > 0 ? 1 : -1;
 
