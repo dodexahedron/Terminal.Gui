@@ -1,4 +1,4 @@
-﻿using System.Buffers;
+using System.Buffers;
 using System.Globalization;
 using System.Text;
 
@@ -607,6 +607,7 @@ public class RuneTests
     [InlineData ("Hello, 世界", true)]
     [InlineData (new byte [] { 0xff, 0xfe, 0xfd }, false)]
     [InlineData (new byte [] { 0xf0, 0x9f, 0x8d, 0x95 }, true)]
+    [Trait ("Category", "Unicode")]
     public void Test_CanBeEncodedAsRune_Extension (object text, bool canBeEncodedAsRune)
     {
         if (text is string str)
