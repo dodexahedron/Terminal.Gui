@@ -69,7 +69,7 @@ namespace Terminal.Gui;
 ///         </list>
 ///     </para>
 /// </remarks>
-public class Key : EventArgs, IEquatable<Key>
+public class Key : IEquatable<Key>
 {
     /// <summary>Constructs a new <see cref="Key"/></summary>
     public Key () : this (KeyCode.Null) { }
