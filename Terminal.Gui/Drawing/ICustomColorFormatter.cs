@@ -1,4 +1,6 @@
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
+
 namespace Terminal.Gui;
 
 /// <summary>An interface to support custom formatting and parsing of <see cref="Color"/> values.</summary>
@@ -15,7 +17,8 @@ public interface ICustomColorFormatter : IFormatProvider, ICustomFormatter
     /// <param name="b"></param>
     /// <param name="a"></param>
     /// <returns></returns>
-    string Format (string? formatString, byte r, byte g, byte b, byte a);
+    [StringFormatMethod(nameof(formatString))]
+    string Format ([StringSyntax(StringSyntaxAttribute.CompositeFormat)]string? formatString, byte r, byte g, byte b, byte a);
 
     /// <summary>A method that returns a <see cref="Color"/> value based on the <paramref name="text"/> specified.</summary>
     /// <param name="text">
