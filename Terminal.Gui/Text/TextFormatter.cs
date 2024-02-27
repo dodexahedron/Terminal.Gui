@@ -664,6 +664,10 @@ public class TextFormatter : INotifyPropertyChanged
             return _lines;
         }
 
+        // INTENT: Which one is supposed to be used?
+        // So, this reference is grabbed, but then the code below accesses it by all three of its current names.
+        // But they're the same reference.
+        // What is the intention here?
         string? text = _text;
 
         if (FindHotKey (_text, HotKeySpecifier, out _hotKeyPos, out Key newHotKey))
