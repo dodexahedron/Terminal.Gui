@@ -195,12 +195,12 @@ public partial class View
     {
         if (isWidth)
         {
-            return TextFormatter.IsHorizontalDirection (TextDirection) && TextFormatter.Text?.Contains ((char)TextFormatter.HotKeySpecifier.Value) == true
+            return TextDirection.IsHorizontal () && TextFormatter.Text?.Contains ((char)TextFormatter.HotKeySpecifier.Value) == true
                        ? Math.Max (TextFormatter.HotKeySpecifier.GetColumns (), 0)
                        : 0;
         }
 
-        return TextFormatter.IsVerticalDirection (TextDirection) && TextFormatter.Text?.Contains ((char)TextFormatter.HotKeySpecifier.Value) == true
+        return TextDirection.IsVertical () && TextFormatter.Text?.Contains ((char)TextFormatter.HotKeySpecifier.Value) == true
                    ? Math.Max (TextFormatter.HotKeySpecifier.GetColumns (), 0)
                    : 0;
     }
@@ -331,10 +331,10 @@ public partial class View
                 return false;
             }
 
-            switch (TextFormatter.IsVerticalDirection (TextDirection))
+            switch (TextDirection.IsVertical ())
             {
                 case true:
-                    int colWidth = TextFormatter.GetWidestLineLength (new List<string> { TextFormatter.Text }, 0, 1);
+                    int colWidth = TextFormatter.GetWidestLineLength ([TextFormatter.Text], 0, 1);
 
                     // TODO: v2 - This uses frame.Width; it should only use Bounds
                     if (_frame.Width < colWidth
@@ -375,10 +375,10 @@ public partial class View
     }
 
     // only called from EndInit
+    // QUESTION: Why does this only check horizontal changes and not vertical as well?
     private void UpdateTextDirection (TextDirection newDirection)
     {
-        bool directionChanged = TextFormatter.IsHorizontalDirection (TextFormatter.Direction)
-                                != TextFormatter.IsHorizontalDirection (newDirection);
+        bool directionChanged = TextFormatter.Direction.IsHorizontal () ^ newDirection.IsHorizontal ();
         TextFormatter.Direction = newDirection;
 
         bool isValidOldAutoSize = AutoSize && IsValidAutoSize (out Size _);

@@ -480,7 +480,7 @@ public class TextAlignmentsAndDirections : Scenario
                                        {
                                            foreach (Label t in mtxts)
                                            {
-                                               if (TextFormatter.IsVerticalDirection (t.TextDirection))
+                                               if (t.TextDirection.IsVertical ())
                                                {
                                                    t.VerticalTextAlignment = VerticalTextAlignment.Justified;
                                                    t.TextAlignment = ((dynamic)t.Data).h;

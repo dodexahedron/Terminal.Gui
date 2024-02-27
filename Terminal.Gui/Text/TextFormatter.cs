@@ -245,7 +245,7 @@ public class TextFormatter
                 break;
         }
 
-        bool isVertical = IsVerticalDirection (Direction);
+        bool isVertical = Direction.IsVertical ();
         Rectangle maxBounds = bounds;
 
         if (driver is { })
@@ -301,12 +301,12 @@ public class TextFormatter
                         _ => runes
                     };
 
-            // When text is justified, we lost left or right, so we use the direction to align. 
+            // When text is justified, we lost left or right, so we use the direction to align.
 
             int x, y;
 
             // Horizontal Alignment
-            if (Alignment == TextAlignment.Right || (Alignment == TextAlignment.Justified && !IsLeftToRight (Direction)))
+            if (Alignment == TextAlignment.Right || (Alignment == TextAlignment.Justified && !Direction.IsLeftToRight ()))
             {
                 if (isVertical)
                 {
@@ -360,7 +360,7 @@ public class TextFormatter
             }
 
             // Vertical Alignment
-            if (VerticalAlignment == VerticalTextAlignment.Bottom || (VerticalAlignment == VerticalTextAlignment.Justified && !IsTopToBottom (Direction)))
+            if (VerticalAlignment == VerticalTextAlignment.Bottom || (VerticalAlignment == VerticalTextAlignment.Justified && !Direction.IsTopToBottom()))
             {
                 if (isVertical)
                 {
@@ -647,7 +647,7 @@ public class TextFormatter
                 text = ReplaceHotKeyWithTag (text, _hotKeyPos);
             }
 
-            if (IsVerticalDirection (Direction))
+            if (Direction.IsVertical())
             {
                 int colsWidth = GetSumMaxCharWidth (text, 0, 1, TabWidth);
 
@@ -712,54 +712,6 @@ public class TextFormatter
     }
 
     #region Static Members
-
-    /// <summary>Check if it is a horizontal direction</summary>
-    public static bool IsHorizontalDirection (TextDirection textDirection)
-    {
-        return textDirection switch
-               {
-                   TextDirection.LeftRight_TopBottom => true,
-                   TextDirection.LeftRight_BottomTop => true,
-                   TextDirection.RightLeft_TopBottom => true,
-                   TextDirection.RightLeft_BottomTop => true,
-                   _ => false
-               };
-    }
-
-    /// <summary>Check if it is a vertical direction</summary>
-    public static bool IsVerticalDirection (TextDirection textDirection)
-    {
-        return textDirection switch
-               {
-                   TextDirection.TopBottom_LeftRight => true,
-                   TextDirection.TopBottom_RightLeft => true,
-                   TextDirection.BottomTop_LeftRight => true,
-                   TextDirection.BottomTop_RightLeft => true,
-                   _ => false
-               };
-    }
-
-    /// <summary>Check if it is Left to Right direction</summary>
-    public static bool IsLeftToRight (TextDirection textDirection)
-    {
-        return textDirection switch
-               {
-                   TextDirection.LeftRight_TopBottom => true,
-                   TextDirection.LeftRight_BottomTop => true,
-                   _ => false
-               };
-    }
-
-    /// <summary>Check if it is Top to Bottom direction</summary>
-    public static bool IsTopToBottom (TextDirection textDirection)
-    {
-        return textDirection switch
-               {
-                   TextDirection.TopBottom_LeftRight => true,
-                   TextDirection.TopBottom_RightLeft => true,
-                   _ => false
-               };
-    }
 
     // TODO: Move to StringExtensions?
     private static string StripCRLF (string str, bool keepNewLine = false)
@@ -1008,7 +960,7 @@ public class TextFormatter
         }
         else
         {
-            if (IsHorizontalDirection (textDirection))
+            if (textDirection.IsHorizontal ())
             {
                 while ((end = start
                               + GetLengthThatFits (
@@ -1111,7 +1063,7 @@ public class TextFormatter
             {
                 Rune rune = runes [to];
 
-                if (IsHorizontalDirection (textDirection))
+                if (textDirection.IsHorizontal ())
                 {
                     length += rune.GetColumns ();
                 }
@@ -1176,7 +1128,7 @@ public class TextFormatter
                                                tabWidth
                                               );
 
-            if (IsVerticalDirection (textDirection) || preserveTrailingSpaces || str.GetColumns () <= width)
+            if (textDirection.IsVertical () || preserveTrailingSpaces || str.GetColumns () <= width)
             {
                 lines.Add (str);
             }
@@ -1239,7 +1191,7 @@ public class TextFormatter
 
         if (runes.Count > width)
         {
-            if (IsHorizontalDirection (textDirection))
+            if (textDirection.IsHorizontal ())
             {
                 return StringExtensions.ToString (
                                                   runes.GetRange (
@@ -1259,7 +1211,7 @@ public class TextFormatter
             return Justify (text, width, ' ', textDirection, tabWidth);
         }
 
-        if (IsHorizontalDirection (textDirection) && GetRuneWidth (text, tabWidth) > width)
+        if (textDirection.IsHorizontal() && GetRuneWidth (text, tabWidth) > width)
         {
             return StringExtensions.ToString (
                                               runes.GetRange (
@@ -1304,7 +1256,7 @@ public class TextFormatter
         string [] words = text.Split (' ');
         int textCount;
 
-        if (IsHorizontalDirection (textDirection))
+        if (textDirection.IsHorizontal ())
         {
             textCount = words.Sum (arg => GetRuneWidth (arg, tabWidth));
         }
@@ -1785,7 +1737,7 @@ public class TextFormatter
 
         int w, h;
 
-        if (IsHorizontalDirection (direction))
+        if (direction.IsHorizontal())
         {
             var mw = 0;
             var ml = 1;
