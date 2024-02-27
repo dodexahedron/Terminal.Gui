@@ -20,7 +20,7 @@ public class TextFormatter
     private bool _preserveTrailingSpaces;
     private Size _size;
     private int _tabWidth = 4;
-    private string _text;
+    private string? _text;
     private TextAlignment _textAlignment;
     private TextDirection _textDirection;
     private VerticalTextAlignment _textVerticalAlignment;
