@@ -232,6 +232,16 @@ public class KeyTests
         Assert.Equal (key, eventArgs.KeyCode);
     }
 
+    #nullable enable
+    [Fact]
+    [Trait("Category", "Exceptions")]
+    public void Constructor_With_Null_Key_Instance_Throws_ArgumentNullException ()
+    {
+        Key? nullKeyInstance = null;
+        Assert.Throws<ArgumentNullException> (() => new Key (nullKeyInstance!));
+    }
+    #nullable restore
+
     [Fact]
     public void HandledProperty_ShouldBeFalseByDefault ()
     {
