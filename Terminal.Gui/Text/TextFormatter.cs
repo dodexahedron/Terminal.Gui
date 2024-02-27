@@ -1920,18 +1920,19 @@ public class TextFormatter : INotifyPropertyChanged
 
         foreach (Rune c in stringSpan.EnumerateRunes ())
         {
-            if (c != Rune.ReplacementChar)
+            if (c == Rune.ReplacementChar)
             {
-                if (c == hotKeySpecifier)
-                {
-                    curHotPos = i;
-                }
-                else if (curHotPos > -1)
-                {
-                    curHotKey = c;
+                curHotPos = -1;
+            }
+            else if (c == hotKeySpecifier)
+            {
+                curHotPos = i;
+            }
+            else if (curHotPos > -1)
+            {
+                curHotKey = c;
 
-                    break;
-                }
+                break;
             }
 
             i++;
