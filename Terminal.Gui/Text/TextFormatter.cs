@@ -142,6 +142,13 @@ public class TextFormatter : INotifyPropertyChanged
     ///     <para>Set to <see langword="true"/> when any of the properties of <see cref="TextFormatter"/> are set.</para>
     ///     <para>Set to <see langword="false"/> when the text is formatted (if <see cref="GetLines"/> is accessed).</para>
     /// </remarks>
+    // CONCURRENCY: Dangerous!
+    // Reads and writes to this are unsynchronized.
+    // If a property is set that would have set this true or if it is set by consuming code while GetLines or anything
+    // else dependent on it is already running, whoever finishes last will be the winner for setting it, and may affect
+    // other code dependent on it, as well. The best case when that occurs is that a property change doesn't result in a
+    // re-draw until something else triggers it.
+    // Worst case is unbounded and thus undefined, meaning hang, program crash, memory corruption, or system crash.
     public bool NeedsFormat { get; set; }
 
     /// <summary>
