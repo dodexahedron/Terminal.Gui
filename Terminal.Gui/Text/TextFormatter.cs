@@ -1957,7 +1957,7 @@ public class TextFormatter : INotifyPropertyChanged
             }
         }
 
-        if (curHotKey != (Rune)0 && curHotPos != -1)
+        if (curHotKey.Value != 0 && curHotPos != -1)
         {
             hotPos = curHotPos;
 
