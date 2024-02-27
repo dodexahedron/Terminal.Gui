@@ -1893,7 +1893,7 @@ public class TextFormatter : INotifyPropertyChanged
     /// </param>
     /// <returns><c>true</c> if a HotKey was found; <c>false</c> otherwise.</returns>
     public static bool FindHotKey (
-        string text,
+        string? text,
         Rune hotKeySpecifier,
         out int hotPos,
         out Key hotKey,
