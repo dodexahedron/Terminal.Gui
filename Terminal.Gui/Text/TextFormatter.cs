@@ -1918,7 +1918,7 @@ public class TextFormatter : INotifyPropertyChanged
 
         foreach (Rune c in text.EnumerateRunes ())
         {
-            if ((char)c.Value != 0xFFFD)
+            if (c != Rune.ReplacementChar)
             {
                 if (c == hotKeySpecifier)
                 {
@@ -1942,7 +1942,7 @@ public class TextFormatter : INotifyPropertyChanged
 
             foreach (Rune c in text.EnumerateRunes ())
             {
-                if ((char)c.Value != 0xFFFD)
+                if (c != Rune.ReplacementChar)
                 {
                     if (Rune.IsUpper (c))
                     {
