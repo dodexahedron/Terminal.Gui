@@ -1918,7 +1918,7 @@ public class TextFormatter : INotifyPropertyChanged
         // TODO: Do not support non-alphanumeric chars that can't be typed
         var i = 0;
 
-        foreach (Rune c in text.EnumerateRunes ())
+        foreach (Rune c in stringSpan.EnumerateRunes ())
         {
             if (c != Rune.ReplacementChar)
             {
@@ -1942,7 +1942,7 @@ public class TextFormatter : INotifyPropertyChanged
         {
             i = 0;
 
-            foreach (Rune c in text.EnumerateRunes ())
+            foreach (Rune c in stringSpan.EnumerateRunes ())
             {
                 if (c != Rune.ReplacementChar)
                 {
