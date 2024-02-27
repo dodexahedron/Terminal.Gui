@@ -94,11 +94,10 @@ public class TextFormatter : INotifyPropertyChanged
         get => _hotKey;
         internal set
         {
-            if (_hotKey != value)
+            Key oldKey = _hotKey;
+            if (SetField (ref _hotKey, value))
             {
-                Key oldKey = _hotKey;
-                _hotKey = value;
-                HotKeyChanged?.Invoke (this, new KeyChangedEventArgs (oldKey, value));
+                HotKeyChanged?.Invoke (this, new (oldKey, value));
             }
         }
     }
@@ -107,21 +106,33 @@ public class TextFormatter : INotifyPropertyChanged
     public int HotKeyPos
     {
         get => _hotKeyPos;
-        internal set => _hotKeyPos = value;
+        internal set => SetField (ref _hotKeyPos, value);
     }
+
+    private Rune _hotKeySpecifier = (Rune)0xFFFF;
 
     /// <summary>
     ///     The specifier character for the hot key (e.g. '_'). Set to '\xffff' to disable hot key support for this View
     ///     instance. The default is '\xffff'.
     /// </summary>
-    public Rune HotKeySpecifier { get; set; } = (Rune)0xFFFF;
+    public Rune HotKeySpecifier
+    {
+        get => _hotKeySpecifier;
+        set => SetField (ref _hotKeySpecifier, value);
+    }
 
     /// <summary>Gets or sets a value indicating whether multi line is allowed.</summary>
     /// <remarks>Multi line is ignored if <see cref="WordWrap"/> is <see langword="true"/>.</remarks>
     public bool MultiLine
     {
         get => _multiLine;
-        set => _multiLine = EnableNeedsFormat (value);
+        set
+        {
+            if (SetField (ref _multiLine, value))
+            {
+                EnableNeedsFormat (value);
+            }
+        }
     }
 
     /// <summary>Gets or sets whether the <see cref="TextFormatter"/> needs to format the text.</summary>
