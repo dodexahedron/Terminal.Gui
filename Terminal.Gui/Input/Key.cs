@@ -78,11 +78,17 @@ public class Key : IEquatable<Key>, IEqualityOperators<Key, Key, bool>
     public Key (KeyCode k = KeyCode.Null) { KeyCode = k; }
 
     /// <summary>
-    /// Copy constructor.
+    ///     Copy constructor.
     /// </summary>
     /// <param name="key">The Key to copy</param>
+    /// <exception cref="ArgumentNullException">
+    ///     If the provided <paramref name="key"/> parameter is <see langword="null"/>
+    /// </exception>
     public Key (Key key)
     {
+        // NOTE: Alternative here is to fall back to a null key.
+        // This doesn't break any tests, though...
+        ArgumentNullException.ThrowIfNull (key);
         KeyCode = key.KeyCode;
         Handled = key.Handled;
     }
