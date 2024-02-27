@@ -1,4 +1,7 @@
 #nullable enable
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 namespace Terminal.Gui;
 
 /// <summary>
@@ -10,7 +13,7 @@ namespace Terminal.Gui;
 // this specific implementation.
 // SUGGESTION: Consider implementing ICustomFormatter as well, or a new interface that declares ICustomFormatter.
 // Then use that interface in the code and use this reference implementation unless the user provides their own.
-public class TextFormatter
+public class TextFormatter : INotifyPropertyChanged
 {
     private bool _autoSize;
     private Key _hotKey = new ();
@@ -2009,4 +2012,24 @@ public class TextFormatter
     }
 
     #endregion // Static Members
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged ([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke (this, new (propertyName));
+    }
+
+    protected bool SetField<T> (ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals (field, value))
+        {
+            return false;
+        }
+
+        field = value;
+        OnPropertyChanged (propertyName);
+
+        return true;
+    }
 }
