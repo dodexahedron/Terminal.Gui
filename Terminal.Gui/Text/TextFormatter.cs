@@ -1201,7 +1201,7 @@ public class TextFormatter
                                                  );
             }
 
-            int zeroLength = runes.Sum (r => r.GetColumns () == 0 ? 1 : 0);
+            int zeroLength = runes.Sum (static r => r.GetColumns () == 0 ? 1 : 0);
 
             return StringExtensions.ToString (runes.GetRange (0, width + zeroLength));
         }
@@ -1262,7 +1262,7 @@ public class TextFormatter
         }
         else
         {
-            textCount = words.Sum (arg => arg.GetRuneCount ());
+            textCount = words.Sum (static arg => arg.GetRuneCount ());
         }
 
         int spaces = words.Length > 1 ? (width - textCount) / (words.Length - 1) : 0;
