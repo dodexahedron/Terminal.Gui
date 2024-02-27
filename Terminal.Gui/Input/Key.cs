@@ -73,12 +73,9 @@ namespace Terminal.Gui;
 /// </remarks>
 public class Key : IEquatable<Key>, IEqualityOperators<Key, Key, bool>
 {
-    /// <summary>Constructs a new <see cref="Key"/></summary>
-    public Key () : this (KeyCode.Null) { }
-
     /// <summary>Constructs a new <see cref="Key"/> from the provided Key value</summary>
     /// <param name="k">The key</param>
-    public Key (KeyCode k) { KeyCode = k; }
+    public Key (KeyCode k = KeyCode.Null) { KeyCode = k; }
 
     /// <summary>
     /// Copy constructor.
