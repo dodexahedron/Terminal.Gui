@@ -18,7 +18,7 @@ public class TextFormatter : INotifyPropertyChanged
     private bool _autoSize;
     private Key _hotKey = new ();
     private int _hotKeyPos = -1;
-    private List<string> _lines = new ();
+    private List<string> _lines = [];
     private bool _multiLine;
     private bool _preserveTrailingSpaces;
     private Size _size;
@@ -651,7 +651,7 @@ public class TextFormatter : INotifyPropertyChanged
         //   My vote is to seal the class at this time, because of how coupled this is.
         if (string.IsNullOrEmpty (Text) || Size.Height == 0 || Size.Width == 0)
         {
-            _lines = new List<string> { string.Empty };
+            _lines = [string.Empty];
             NeedsFormat = false;
 
             return _lines;
