@@ -100,7 +100,7 @@ public readonly partial record struct Color
                    // Null or empty string and null formatProvider - Revert to 'g' case behavior
                    (null or { Length: 0 }, null) => ToString (),
 
-                   // Null or empty string and formatProvider is an ICustomColorFormatter - Output according to the given ICustomColorFormatted, with R, G, B, and A as typed arguments
+                   // Null or empty string and formatProvider is an ICustomColorFormatter - Output according to the given ICustomColorFormatter, with R, G, B, and A as typed arguments
                    (null or { Length: 0 }, ICustomColorFormatter ccf) => ccf.Format (null, R, G, B, A),
 
                    // Null or empty string and formatProvider is otherwise non-null but not the invariant culture - Output according to string.Format with the given IFormatProvider and R, G, B, and A as boxed arguments, with string.Empty as the format string
