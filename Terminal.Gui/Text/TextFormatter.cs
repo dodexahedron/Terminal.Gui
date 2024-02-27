@@ -616,6 +616,17 @@ public class TextFormatter
     public List<string> GetLines ()
     {
         // With this check, we protect against subclasses with overrides of Text
+        // INTENT: How does this check do what that comment says?
+        //   This is just a null or empty string check on Text.
+        //   That in no way protects against overriding that property.
+        //   And, if the consumer wants to go that far anyway, they can also hide this method as well.
+        //   Either make Text not virtual or seal this class (which will require nothing being virtual as well).
+        //   There is no trim-friendly way to check types not defined in our code at run-time.
+        //   If overriding Text isn't cool, then don't make Text virtual.
+        //   Then, only hiding it (members declared with the `new` modifier)
+        //   will be possible, which you can't really protect against anyway
+        //   without reflection, which would be an awful idea here.
+        //   My vote is to seal the class at this time, because of how coupled this is.
         if (string.IsNullOrEmpty (Text) || Size.Height == 0 || Size.Width == 0)
         {
             _lines = new List<string> { string.Empty };
