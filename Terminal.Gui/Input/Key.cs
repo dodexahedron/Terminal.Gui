@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Numerics;
 
 namespace Terminal.Gui;
 
@@ -69,7 +70,7 @@ namespace Terminal.Gui;
 ///         </list>
 ///     </para>
 /// </remarks>
-public class Key : IEquatable<Key>
+public class Key : IEquatable<Key>, IEqualityOperators<Key, Key, bool>
 {
     /// <summary>Constructs a new <see cref="Key"/></summary>
     public Key () : this (KeyCode.Null) { }
