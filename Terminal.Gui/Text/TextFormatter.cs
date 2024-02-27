@@ -1908,6 +1908,8 @@ public class TextFormatter : INotifyPropertyChanged
             return false;
         }
 
+        ReadOnlySpan<char> stringSpan = text.AsSpan ();
+
         var curHotKey = (Rune)0;
         int curHotPos = -1;
 
