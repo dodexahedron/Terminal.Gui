@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Xunit.Abstractions;
 
 // Alias Console to MockConsole so we don't accidentally use Console
@@ -576,6 +576,9 @@ ssb
     [InlineData ("no hotkey")]
     [InlineData ("No hotkey, Upper Case")]
     [InlineData ("Non-english: Сохранить")]
+    [InlineData ("With specifier followed by fffd: _\xfffd")]
+    [InlineData ("With specifier followed by fffdH : _\xfffdH")]
+    [Trait("Category","Unicode")]
     public void FindHotKey_Invalid_ReturnsFalse (string text)
     {
         var hotKeySpecifier = (Rune)'_';
