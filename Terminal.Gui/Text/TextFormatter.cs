@@ -657,6 +657,8 @@ public class TextFormatter : INotifyPropertyChanged
             return _lines;
         }
 
+        // CONCURRENCY: Lots of concurrency issues in this.
+        // Especially around the collection fields and that text reference.
         if (NeedsFormat)
         {
             string text = _text;
