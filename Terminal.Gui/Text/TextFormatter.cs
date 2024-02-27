@@ -63,7 +63,7 @@ public class TextFormatter : INotifyPropertyChanged
     ///     Gets the cursor position of the <see cref="HotKey"/>. If the <see cref="HotKey"/> is defined, the cursor will
     ///     be positioned over it.
     /// </summary>
-    public int CursorPosition { get; internal set; }
+    public int CursorPosition { get; private set; }
 
     /// <summary>Controls the text-direction property.</summary>
     /// <value>The text vertical alignment.</value>
