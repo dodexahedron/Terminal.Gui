@@ -34,7 +34,10 @@ public class TextFormatter : INotifyPropertyChanged
     public TextAlignment Alignment
     {
         get => _textAlignment;
-        set => _textAlignment = EnableNeedsFormat (in value);
+        set
+        {
+            _textAlignment = EnableNeedsFormat (in value);
+        }
     }
 
     /// <summary>Gets or sets whether the <see cref="Size"/> should be automatically changed to fit the <see cref="Text"/>.</summary>
@@ -107,7 +110,10 @@ public class TextFormatter : INotifyPropertyChanged
     public int HotKeyPos
     {
         get => _hotKeyPos;
-        internal set => _hotKeyPos = value;
+        internal set
+        {
+            _hotKeyPos = value;
+        }
     }
 
     /// <summary>
@@ -121,7 +127,10 @@ public class TextFormatter : INotifyPropertyChanged
     public bool MultiLine
     {
         get => _multiLine;
-        set => _multiLine = EnableNeedsFormat (in value);
+        set
+        {
+            _multiLine = EnableNeedsFormat (in value);
+        }
     }
 
     /// <summary>Gets or sets whether the <see cref="TextFormatter"/> needs to format the text.</summary>
@@ -141,7 +150,10 @@ public class TextFormatter : INotifyPropertyChanged
     public bool PreserveTrailingSpaces
     {
         get => _preserveTrailingSpaces;
-        set => _preserveTrailingSpaces = EnableNeedsFormat (in value);
+        set
+        {
+            _preserveTrailingSpaces = EnableNeedsFormat (in value);
+        }
     }
 
     /// <summary>Gets or sets the size <see cref="Text"/> will be constrained to when formatted.</summary>
@@ -202,14 +214,20 @@ public class TextFormatter : INotifyPropertyChanged
     public VerticalTextAlignment VerticalAlignment
     {
         get => _textVerticalAlignment;
-        set => _textVerticalAlignment = EnableNeedsFormat (in value);
+        set
+        {
+            _textVerticalAlignment = EnableNeedsFormat (in value);
+        }
     }
 
     /// <summary>Gets or sets whether word wrap will be used to fit <see cref="Text"/> to <see cref="Size"/>.</summary>
     public bool WordWrap
     {
         get => _wordWrap;
-        set => _wordWrap = EnableNeedsFormat (in value);
+        set
+        {
+            _wordWrap = EnableNeedsFormat (in value);
+        }
     }
 
     /// <summary>Draws the text held by <see cref="TextFormatter"/> to <see cref="ConsoleDriver"/> using the colors specified.</summary>
