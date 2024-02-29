@@ -1776,7 +1776,7 @@ public class TextFormatter : INotifyPropertyChanged
     public static Rectangle CalcRect (
         int x,
         int y,
-        string text,
+        string? text,
         TextDirection direction = TextDirection.LeftRight_TopBottom,
         int tabWidth = 0
     )
