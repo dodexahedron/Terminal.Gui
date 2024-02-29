@@ -697,7 +697,7 @@ public class TextFormatter
         return _lines;
     }
 
-    /// <summary>Event invoked when the <see cref="HotKey"/> is changed.</summary>
+    /// <summary>Event raised when the <see cref="HotKey" /> is changed.</summary>
     public event EventHandler<KeyChangedEventArgs> HotKeyChanged;
 
     /// <summary>Sets <see cref="NeedsFormat"/> to <see langword="true"/> and returns the value.</summary>
