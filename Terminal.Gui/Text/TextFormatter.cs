@@ -1714,19 +1714,14 @@ public class TextFormatter : INotifyPropertyChanged
 
     private static int GetRuneWidth (Rune rune, int tabWidth)
     {
-        int runeWidth = rune.GetColumns ();
-
         if (rune.Value == '\t')
         {
             return tabWidth;
         }
 
-        if (runeWidth < 0 || runeWidth > 0)
-        {
-            return Math.Max (runeWidth, 1);
-        }
+        int runeWidth = rune.GetColumns ();
 
-        return runeWidth;
+        return runeWidth == 0 ? runeWidth : Math.Max (runeWidth, 1);
     }
 
     /// <summary>Gets the index position from the list based on the <paramref name="width"/>.</summary>
