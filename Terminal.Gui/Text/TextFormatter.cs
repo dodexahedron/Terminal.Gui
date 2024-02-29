@@ -706,12 +706,12 @@ public class TextFormatter : INotifyPropertyChanged
     /// <summary>Sets <see cref="NeedsFormat"/> to <see langword="true"/> and returns the value.</summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="value"></param>
-    /// <returns>The value this method was called on.</returns>
-    private T EnableNeedsFormat<T> (T value)
+    /// <returns>The same reference to <paramref name="value"/> that this method was called on.</returns>
+    private ref readonly T EnableNeedsFormat<T> (ref readonly T value)
     {
         NeedsFormat = true;
 
-        return value;
+        return ref value;
     }
 
     #region Static Members
