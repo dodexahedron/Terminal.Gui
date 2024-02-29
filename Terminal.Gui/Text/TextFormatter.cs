@@ -23,7 +23,7 @@ public class TextFormatter : INotifyPropertyChanged
     private bool _preserveTrailingSpaces;
     private Size _size;
     private int _tabWidth = 4;
-    private string _text;
+    private string? _text;
     private TextAlignment _textAlignment;
     private TextDirection _textDirection;
     private VerticalTextAlignment _textVerticalAlignment;
@@ -176,7 +176,7 @@ public class TextFormatter : INotifyPropertyChanged
     }
 
     /// <summary>The text to be formatted. This string is never modified.</summary>
-    public virtual string Text
+    public string? Text
     {
         get => _text;
         set
