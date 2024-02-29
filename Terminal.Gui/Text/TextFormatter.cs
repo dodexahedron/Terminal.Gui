@@ -1,3 +1,4 @@
+#nullable enable
 namespace Terminal.Gui;
 
 /// <summary>
