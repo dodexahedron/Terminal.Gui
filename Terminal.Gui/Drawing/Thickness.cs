@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Terminal.Gui;
 
@@ -14,7 +14,8 @@ namespace Terminal.Gui;
 ///     </para>
 ///     <para>Use the helper API (<see cref="Draw(Rectangle, string)"/> to draw the frame with the specified thickness.</para>
 /// </remarks>
-public class Thickness : IEquatable<Thickness>
+public class Thickness : IEquatable<Thickness>, IEqualityOperators<Thickness, Thickness, bool>
+// NOTE: This almost certainly should be a value type.
 {
     /// <summary>Gets or sets the width of the lower side of the rectangle.</summary>
     [JsonInclude]
