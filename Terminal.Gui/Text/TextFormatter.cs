@@ -181,8 +181,8 @@ public class TextFormatter : INotifyPropertyChanged
         get => _text;
         set
         {
-            bool textWasNull = _text is null && value != null;
-            _text = EnableNeedsFormat (value);
+            bool textWasNull = _text is null && value is { };
+            _text = EnableNeedsFormat (in value);
 
             if ((AutoSize && Alignment != TextAlignment.Justified && VerticalAlignment != VerticalTextAlignment.Justified) || (textWasNull && Size.IsEmpty))
             {
@@ -2076,7 +2076,7 @@ public class TextFormatter : INotifyPropertyChanged
     ///   compiler with the name of the caller.
     /// </param>
     /// <returns><see langword="true"/>, if the value was changed. Otherwise, <see langword="false"/>.</returns>
-    protected bool SetField<T> (ref T field, T value, [CallerMemberName] string? propertyName = null) where T : IEquatable<T>
+    protected bool SetField<T> (ref T field, in T value, [CallerMemberName] string? propertyName = null) where T : IEquatable<T>
     {
         if (field.Equals (value))
         {
