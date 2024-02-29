@@ -1,5 +1,6 @@
 #nullable enable
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 
 namespace Terminal.Gui;
@@ -18,7 +19,7 @@ public class TextFormatter : INotifyPropertyChanged
     private bool _autoSize;
     private Key _hotKey = new ();
     private int _hotKeyPos = -1;
-    private List<string> _lines = new ();
+    private List<string> _lines = [];
     private bool _multiLine;
     private bool _preserveTrailingSpaces;
     private Size _size;
@@ -68,8 +69,8 @@ public class TextFormatter : INotifyPropertyChanged
     /// </summary>
     public int CursorPosition { get; internal set; }
 
-    /// <summary>Controls the text-direction property.</summary>
-    /// <value>The text vertical alignment.</value>
+    /// <summary>Gets or sets the direction of text display.</summary>
+    /// <value>A <see cref="TextDirection" /> value that controls rendered text output direction.</value>
     public TextDirection Direction
     {
         get => _textDirection;
@@ -1783,7 +1784,7 @@ public class TextFormatter : INotifyPropertyChanged
 
     /// <summary>Calculates the rectangle required to hold text, assuming no word wrapping or justification.</summary>
     /// <remarks>
-    ///     This API will return incorrect results if the text includes glyphs who's width is dependent on surrounding
+    ///     This API will return incorrect results if the text includes glyphs whose width is dependent on surrounding
     ///     glyphs (e.g. Arabic).
     /// </remarks>
     /// <param name="x">The x location of the rectangle</param>
