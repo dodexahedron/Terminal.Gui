@@ -1,4 +1,7 @@
 #nullable enable
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 namespace Terminal.Gui;
 
 /// <summary>
@@ -10,7 +13,7 @@ namespace Terminal.Gui;
 // this specific implementation.
 // SUGGESTION: Consider implementing ICustomFormatter as well, or a new interface that declares ICustomFormatter.
 // Then use that interface in the code and use this reference implementation unless the user provides their own.
-public class TextFormatter
+public class TextFormatter : INotifyPropertyChanged
 {
     private bool _autoSize;
     private Key _hotKey = new ();
@@ -2057,4 +2060,37 @@ public class TextFormatter
     }
 
     #endregion // Static Members
+
+    /// <inheritdoc />
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    /// <summary>Protected method which raises the PropertyChanged event.</summary>
+    /// <param name="propertyName">
+    ///   The name of the property that changed. Omit this parameter when calling this method. Supplied value will be ignored and replaced by the
+    ///   compiler with the name of the caller.
+    /// </param>
+    /// <remarks>Should only be called from the setter of a property.</remarks>
+    protected virtual void OnPropertyChanged ([CallerMemberName] string? propertyName = null) { PropertyChanged?.Invoke (this, new (propertyName)); }
+
+    /// <summary>Standard method for setting a field and raising the <see cref="PropertyChanged"/> event, if the value changed.</summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="field">A reference to the field to be set</param>
+    /// <param name="value">The value to set on <paramref name="field"/></param>
+    /// <param name="propertyName">
+    ///   The name of the property that changed. Omit this parameter when calling this method. Supplied value will be ignored and replaced by the
+    ///   compiler with the name of the caller.
+    /// </param>
+    /// <returns><see langword="true"/>, if the value was changed. Otherwise, <see langword="false"/>.</returns>
+    protected bool SetField<T> (ref T field, T value, [CallerMemberName] string? propertyName = null) where T : IEquatable<T>
+    {
+        if (field.Equals (value))
+        {
+            return false;
+        }
+
+        field = value;
+        OnPropertyChanged (propertyName);
+
+        return true;
+    }
 }
