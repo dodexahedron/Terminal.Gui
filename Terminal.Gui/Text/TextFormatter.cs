@@ -1,6 +1,8 @@
 #nullable enable
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Text.Unicode;
 
 namespace Terminal.Gui;
 
@@ -670,7 +672,7 @@ public class TextFormatter : INotifyPropertyChanged
         // What is the intention here?
         string? text = _text;
 
-        if (FindHotKey (_text, HotKeySpecifier, out _hotKeyPos, out Key newHotKey))
+        if (TryFindHotKey (_text, HotKeySpecifier, out _hotKeyPos, out Key newHotKey))
         {
             HotKey = newHotKey;
             text = RemoveHotKeySpecifier (Text, _hotKeyPos, HotKeySpecifier);
@@ -1892,15 +1894,18 @@ public class TextFormatter : INotifyPropertyChanged
     ///     Defaults to <see langword="false"/>.
     /// </param>
     /// <returns><c>true</c> if a HotKey was found; <c>false</c> otherwise.</returns>
-    public static bool FindHotKey (
+    public static bool TryFindHotKey (
         string? text,
-        Rune hotKeySpecifier,
+        in char hotKeySpecifier,
         out int hotPos,
         out Key hotKey,
         bool firstUpperCase = false
     )
     {
-        if (string.IsNullOrEmpty (text) || hotKeySpecifier == (Rune)0xFFFF)
+        if (string.IsNullOrWhiteSpace (text)
+            || !(char.IsLetterOrDigit (hotKeySpecifier)
+                 || char.IsSymbol (hotKeySpecifier)
+                 || char.IsPunctuation (hotKeySpecifier)))
         {
             hotPos = -1;
             hotKey = Key.Empty;

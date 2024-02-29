@@ -236,7 +236,7 @@ public partial class View
             return; // throw new InvalidOperationException ("Can't set HotKey unless a TextFormatter has been created");
         }
 
-        if (TextFormatter.FindHotKey (_title, HotKeySpecifier, out _, out Key hk))
+        if (TextFormatter.TryFindHotKey (_title, HotKeySpecifier, out _, out Key hk))
         {
             if (_hotKey != hk)
             {
