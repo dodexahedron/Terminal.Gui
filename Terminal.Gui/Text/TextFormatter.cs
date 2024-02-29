@@ -184,7 +184,13 @@ public class TextFormatter : INotifyPropertyChanged
             bool textWasNull = _text is null && value is { };
             _text = EnableNeedsFormat (in value);
 
-            if ((AutoSize && Alignment != TextAlignment.Justified && VerticalAlignment != VerticalTextAlignment.Justified) || (textWasNull && Size.IsEmpty))
+            if (this is
+                {
+                    AutoSize: true,
+                    Alignment: not TextAlignment.Justified,
+                    VerticalAlignment: not VerticalTextAlignment.Justified
+                }
+                || (textWasNull && Size.IsEmpty))
             {
                 Size = CalcRect (0, 0, _text, Direction, TabWidth).Size;
             }
