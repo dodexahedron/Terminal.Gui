@@ -706,7 +706,7 @@ public class TextFormatter : INotifyPropertyChanged
     /// <summary>Sets <see cref="NeedsFormat"/> to <see langword="true"/> and returns the value.</summary>
     /// <typeparam name="T"></typeparam>
     /// <param name="value"></param>
-    /// <returns></returns>
+    /// <returns>The value this method was called on.</returns>
     private T EnableNeedsFormat<T> (T value)
     {
         NeedsFormat = true;
