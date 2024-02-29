@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Xunit.Abstractions;
 
 // Alias Console to MockConsole so we don't accidentally use Console
@@ -715,8 +715,8 @@ ssb
                     true,
                     (KeyCode)'='
                 )] // BUGBUG: Not sure why this fails. Ignore the first and consider the second
-    [InlineData ("_ ~  s  gui.cs   master ↑10", true, (KeyCode)'')] // ~IsLetterOrDigit + Unicode
-    [InlineData (" ~  s  gui.cs  _ master ↑10", true, (KeyCode)'')] // ~IsLetterOrDigit + Unicode
+    [InlineData ("_ ~  s  gui.cs   master ↑10", false, KeyCode.Null)] // ~IsLetterOrDigit + Unicode
+    [InlineData (" ~  s  gui.cs  _ master ↑10", false, KeyCode.Null)] // ~IsLetterOrDigit + Unicode
     [InlineData ("non-english: _кдать", true, (KeyCode)'к')] // Lower case Cryllic K (к)
     public void FindHotKey_Symbols_Returns_Symbol (string text, bool found, KeyCode expected)
     {
