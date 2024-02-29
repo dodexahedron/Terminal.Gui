@@ -1913,40 +1913,76 @@ public class TextFormatter : INotifyPropertyChanged
             return false;
         }
 
-        ReadOnlySpan<char> stringSpan = text.AsSpan ();
-
         var curHotKey = (Rune)0;
         int curHotPos = -1;
 
         // Use first hot_key char passed into 'hotKey'.
-        // TODO: Ignore hot_key of two are provided
+        // TODO: Ignore hot_key if two are provided
         // TODO: Do not support non-alphanumeric chars that can't be typed
-        var i = 0;
 
-        foreach (Rune c in stringSpan.EnumerateRunes ())
+        ReadOnlySpan<char> stringSpan = text.AsSpan ();
+        if (hotKeySpecifier.IsBmp)
         {
-            if (c == Rune.ReplacementChar)
+            for(int index = 0;index < stringSpan.Length; index++)
             {
-                curHotPos = -1;
-            }
-            else if (c == hotKeySpecifier)
-            {
-                curHotPos = i;
-            }
-            else if (curHotPos > -1)
-            {
-                curHotKey = c;
+                index = text.IndexOf ((char)hotKeySpecifier.Value, index);
+
+                if (index < 0 || index + 1 >= text.Length)
+                {
+                    curHotPos = index;
+
+                    break;
+                }
+
+                if (!Rune.TryGetRuneAt (text, index + 1, out Rune potentialHotKeyRune))
+                {
+                    continue;
+                }
+
+                if (potentialHotKeyRune == Rune.ReplacementChar
+                    || potentialHotKeyRune == hotKeySpecifier
+                    || !potentialHotKeyRune.IsBmp
+                    || (!Rune.IsLetterOrDigit (potentialHotKeyRune)
+                        && !Rune.IsPunctuation (potentialHotKeyRune)
+                        && !Rune.IsSymbol (potentialHotKeyRune)))
+                {
+                    continue;
+                }
+
+                curHotKey = Rune.GetRuneAt (text, index + 1);
+                curHotPos = index;
 
                 break;
             }
+        }
+        if (!hotKeySpecifier.IsBmp || (curHotPos >= 0 && !Rune.GetRuneAt (text,curHotPos).IsBmp))
+        {
+            int index = 0;
+            foreach (Rune c in stringSpan.EnumerateRunes ())
+            {
+                if (c == Rune.ReplacementChar)
+                {
+                    curHotPos = -1;
+                }
+                else if (c == hotKeySpecifier)
+                {
+                    curHotPos = index;
+                }
+                else if (curHotPos > -1)
+                {
+                    curHotKey = c;
 
-            i++;
+                    break;
+                }
+
+                index++;
+            }
         }
 
         // Legacy support - use first upper case char if the specifier was not found
         if (curHotPos == -1 && firstUpperCase)
         {
-            i = 0;
+            int i = 0;
 
             foreach (Rune c in stringSpan.EnumerateRunes ())
             {
