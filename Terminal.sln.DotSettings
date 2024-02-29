@@ -400,6 +400,7 @@
 	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=1BE867097E5CBD4A911FDC0FC0E0BAAC/Name/@EntryValue">Suggestion</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=1BE867097E5CBD4A911FDC0FC0E0BAAC/Pattern/@EntryValue">(?&lt;=\W|^)(?&lt;TAG&gt;SUGGESTION:)(\W|$)(.*)</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=1BE867097E5CBD4A911FDC0FC0E0BAAC/TodoIconStyle/@EntryValue">Question</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=4386F01B791C56499C7EA059B55FFB54/Pattern/@EntryValue">(?&lt;=\W|^)(?&lt;TAG&gt;BUG:)(\W|$)(.*)</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=49F9F595ACF81E45B2F33CA1F1532FCD/@KeyIndexDefined">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=49F9F595ACF81E45B2F33CA1F1532FCD/Color/@EntryValue">#FFCF9D32</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=49F9F595ACF81E45B2F33CA1F1532FCD/MatchComments/@EntryValue">True</s:Boolean>
@@ -435,7 +436,7 @@
 	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=B0C2F2A1AF61DA42BBF270980E3DCEF7/Color/@EntryValue">#FFCF9D32</s:String>
 	<s:Boolean x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=B0C2F2A1AF61DA42BBF270980E3DCEF7/MatchComments/@EntryValue">True</s:Boolean>
 	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=B0C2F2A1AF61DA42BBF270980E3DCEF7/Name/@EntryValue">Concurrency Issue</s:String>
-	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=B0C2F2A1AF61DA42BBF270980E3DCEF7/Pattern/@EntryValue">(?&lt;=\W|^)(?&lt;TAG&gt;CONCURRENCY)(\W|$)(.*)</s:String>
+	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=B0C2F2A1AF61DA42BBF270980E3DCEF7/Pattern/@EntryValue">(?&lt;=\W|^)(?&lt;TAG&gt;CONCURRENCY:)(\W|$)(.*)</s:String>
 	<s:String x:Key="/Default/PatternsAndTemplates/Todo/TodoPatterns/=B0C2F2A1AF61DA42BBF270980E3DCEF7/TodoIconStyle/@EntryValue">Warning</s:String>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=unsynchronized/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/UserDictionary/Words/=AARRGGBB/@EntryIndexedValue">True</s:Boolean>

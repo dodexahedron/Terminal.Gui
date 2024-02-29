@@ -327,6 +327,15 @@ public abstract class ConsoleDriver
         lock (Contents)
         {
             // Can raise an exception while is still resizing.
+            // CONCURRENCY: Well, that's multiple bugs all at once and we shouldn't be eating that exception.
+            // This is not synchronized at all and is vulnerable to pretty much every possible
+            // concurrency-related bug, threaded or otherwise.
+            // The most basic reason being that the above lock isn't anywhere else in the code.
+            // It is not a good lock, anyway, and would be very susceptible to deadlocks if used elsewhere,
+            // (especially in the accessors of the property itself).
+            // All that code is doing, right now, is using up CPU cycles and a little memory while exposing
+            // all ConsoleDriver-derived types to non-obvious deadlock (without inspecting the Terminal.Gui code)
+            // if the consumer were to ever lock on that property or the type.
             try
             {
                 for (var row = 0; row < Rows; row++)

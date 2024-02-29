@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Xunit.Abstractions;
 
 // Alias Console to MockConsole so we don't accidentally use Console
@@ -493,6 +493,7 @@ ssb
     [InlineData ("After k_", false, -1, KeyCode.Null, true)]
     [InlineData ("Multiple _k and _r", true, 9, (KeyCode)'K', true)]
     [InlineData ("Non-english: _кдать", true, 13, (KeyCode)'к', true)] // Cryllic K (К)
+    [Trait("Category","Unicode")]
     public void FindHotKey_AlphaLowerCase_Succeeds (
         string text,
         bool expectedResult,
@@ -538,6 +539,9 @@ ssb
     [InlineData ("After K_", false, -1, KeyCode.Null, true)]
     [InlineData ("Multiple _K and _R", true, 9, (KeyCode)'K', true)]
     [InlineData ("Non-english: _Кдать", true, 13, (KeyCode)'К', true)] // Cryllic K (К)
+    [InlineData ("With _\xfffd_H\xfffd", true, 7, (KeyCode)'H', true)]
+    [InlineData ("With _\xfffd_H_\xfffd", true, 7, (KeyCode)'H', true)]
+    [Trait("Category","Unicode")]
     public void FindHotKey_AlphaUpperCase_Succeeds (
         string text,
         bool expectedResult,
@@ -576,8 +580,12 @@ ssb
     [InlineData ("no hotkey")]
     [InlineData ("No hotkey, Upper Case")]
     [InlineData ("Non-english: Сохранить")]
-    [InlineData ("With specifier followed by fffd: _\xfffd")]
-    [InlineData ("With specifier followed by fffdH : _\xfffdH")]
+    [InlineData ("With _\xfffd")]
+    [InlineData ("With _\xfffdH")]
+    [InlineData ("With _\xfffdH\xfffd")]
+    [InlineData ("With _\xfffd_\xfffdH\xfffd")]
+    [InlineData ("With _\xfffd_\xfffdH\xfffdH")]
+    [InlineData ("With _\xfffd\xfffd\xfffd")]
     [Trait("Category","Unicode")]
     public void FindHotKey_Invalid_ReturnsFalse (string text)
     {
@@ -718,8 +726,8 @@ ssb
                     true,
                     (KeyCode)'='
                 )] // BUGBUG: Not sure why this fails. Ignore the first and consider the second
-    [InlineData ("_ ~  s  gui.cs   master ↑10", true, (KeyCode)'')] // ~IsLetterOrDigit + Unicode
-    [InlineData (" ~  s  gui.cs  _ master ↑10", true, (KeyCode)'')] // ~IsLetterOrDigit + Unicode
+    [InlineData ("_ ~  s  gui.cs   master ↑10", false, KeyCode.Null)] // ~IsLetterOrDigit + Unicode
+    [InlineData (" ~  s  gui.cs  _ master ↑10", false, KeyCode.Null)] // ~IsLetterOrDigit + Unicode
     [InlineData ("non-english: _кдать", true, (KeyCode)'к')] // Lower case Cryllic K (к)
     public void FindHotKey_Symbols_Returns_Symbol (string text, bool found, KeyCode expected)
     {
