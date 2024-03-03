@@ -71,8 +71,6 @@ public partial record Key
         return new ((uint)baseKey);
     }
 
-    #region Operators
-
     /// <summary>
     ///     Explicitly cast a <see cref="Key"/> to a <see cref="Rune"/>. The conversion is lossy because properties such
     ///     as <see cref="Handled"/> are not encoded in <see cref="KeyCode"/>.
@@ -140,6 +138,4 @@ public partial record Key
     /// <param name="b"></param>
     /// <returns></returns>
     public static bool operator >= (Key a, Key b) { return a?.KeyCode >= b?.KeyCode; }
-
-    #endregion Operators
 }
