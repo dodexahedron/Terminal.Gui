@@ -56,11 +56,11 @@ public partial record Key
         switch (baseKey)
         {
             case >= KeyCode.A and <= KeyCode.Z when !key.HasFlag (KeyCode.ShiftMask):
-                return new Rune ((uint)(baseKey + 32));
+                return new ((uint)(baseKey + 32));
             case >= KeyCode.A and <= KeyCode.Z when key.HasFlag (KeyCode.ShiftMask):
-                return new Rune ((uint)baseKey);
+                return new ((uint)baseKey);
             case > KeyCode.Null and < KeyCode.A:
-                return new Rune ((uint)baseKey);
+                return new ((uint)baseKey);
         }
 
         if (Enum.IsDefined (typeof (KeyCode), baseKey))
@@ -68,7 +68,7 @@ public partial record Key
             return default (Rune);
         }
 
-        return new Rune ((uint)baseKey);
+        return new ((uint)baseKey);
     }
 
     #region Operators
@@ -97,17 +97,17 @@ public partial record Key
 
     /// <summary>Cast <see cref="KeyCode"/> to a <see cref="Key"/>.</summary>
     /// <param name="keyCode"></param>
-    public static implicit operator Key (KeyCode keyCode) { return new Key (keyCode); }
+    public static implicit operator Key (KeyCode keyCode) { return new (keyCode); }
 
     /// <summary>Cast <see langword="char"/> to a <see cref="Key"/>.</summary>
     /// <remarks>See <see cref="Key(char)"/> for more information.</remarks>
     /// <param name="ch"></param>
-    public static implicit operator Key (char ch) { return new Key (ch); }
+    public static implicit operator Key (char ch) { return new (ch); }
 
     /// <summary>Cast <see langword="string"/> to a <see cref="Key"/>.</summary>
     /// <remarks>See <see cref="Key(string)"/> for more information.</remarks>
     /// <param name="str"></param>
-    public static implicit operator Key (string str) { return new Key (str); }
+    public static implicit operator Key (string str) { return new (str); }
 
     /// <summary>Cast a <see cref="Key"/> to a <see langword="string"/>.</summary>
     /// <remarks>See <see cref="Key(string)"/> for more information.</remarks>
