@@ -410,10 +410,9 @@ internal class CursesDriver : ConsoleDriver
     {
         EscapeSequenceData input = new ();
         input.code = Curses.get_wch (out input.wch);
-        ref int code = ref input.code;
 
         //System.Diagnostics.Debug.WriteLine ($"code: {code}; input.wch: {input.wch}");
-        if (code == Curses.ERR)
+        if (input.code == Curses.ERR)
         {
             return;
         }
@@ -421,12 +420,12 @@ internal class CursesDriver : ConsoleDriver
         ref KeyCode k = ref input.k;
         k = KeyCode.Null;
 
-        if (code == Curses.KEY_CODE_YES)
+        if (input.code == Curses.KEY_CODE_YES)
         {
-            while (code == Curses.KEY_CODE_YES && input.wch == Curses.KeyResize)
+            while (input.code == Curses.KEY_CODE_YES && input.wch == Curses.KeyResize)
             {
                 ProcessWinChange ();
-                code = Curses.get_wch (out input.wch);
+                input.code = Curses.get_wch (out input.wch);
             }
 
             if (input.wch == 0)
@@ -449,7 +448,7 @@ internal class CursesDriver : ConsoleDriver
                         new ('<', 0, false, false, false)
                     ];
                     ref ConsoleKeyInfo [] cki = ref input.cki;
-                    code = 0;
+                    input.code = 0;
                     input = HandleEscapeSeqResponse (ref input);
                 }
 
@@ -500,16 +499,16 @@ internal class CursesDriver : ConsoleDriver
         {
             Curses.timeout (10);
 
-            code = Curses.get_wch (out int wch2);
+            input.code = Curses.get_wch (out int wch2);
 
-            if (code == Curses.KEY_CODE_YES)
+            if (input.code == Curses.KEY_CODE_YES)
             {
                 k = KeyCode.AltMask | MapCursesKey (input.wch);
             }
 
             Key key = null;
 
-            if (code == 0)
+            if (input.code == 0)
             {
                 // The ESC-number handling, debatable.
                 // Simulates the AltMask itself by pressing Alt + Space.
