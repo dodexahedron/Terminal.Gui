@@ -1512,7 +1512,8 @@ public class TextField : View
             _preTextChangedCursorPos = _cursorPosition;
         }
 
-        StringRuneEnumerator kbstr = a.AsRune.ToString ().EnumerateRunes ();
+        // TODO: Make this not do what it does.
+        StringRuneEnumerator kbstr = a.AsRune ().ToString ().EnumerateRunes ();
 
         if (Used)
         {

@@ -300,11 +300,12 @@ public class KeyboardTests
         var keyUps = 0;
         var output = string.Empty;
 
+        // TODO: Double-check that the AsRune() here is appropriate
         Application.Top.KeyUp += (sender, args) =>
                                  {
                                      if (args.KeyCode != (KeyCode.CtrlMask | KeyCode.Q))
                                      {
-                                         output += args.AsRune;
+                                         output += args.AsRune ();
                                      }
 
                                      keyUps++;
