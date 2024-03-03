@@ -70,24 +70,14 @@ namespace Terminal.Gui;
 ///         </list>
 ///     </para>
 /// </remarks>
-public class Key : EventArgs, IEquatable<Key>
+public record Key : IEqualityOperators<Key,Key,bool>
 {
     /// <summary>Constructs a new <see cref="Key"/></summary>
     public Key () : this (KeyCode.Null) { }
 
-    /// <summary>Constructs a new <see cref="Key"/> from the provided Key value</summary>
+    /// <summary>Constructs a new <see cref="Key"/>, initialized from <paramref name="k"/> or <see cref="Gui.KeyCode.Null"/>, if not provided.</summary>
     /// <param name="k">The key</param>
-    public Key (KeyCode k) { KeyCode = k; }
-
-    /// <summary>
-    /// Copy constructor.
-    /// </summary>
-    /// <param name="key">The Key to copy</param>
-    public Key (Key key)
-    {
-        KeyCode = key.KeyCode;
-        Handled = key.Handled;
-    }
+    public Key ([ConstantExpected(Max = uint.MaxValue, Min = uint.MinValue)]KeyCode k = KeyCode.Null) { KeyCode = k; }
 
     /// <summary>Constructs a new <see cref="Key"/> from a char.</summary>
     /// <remarks>
@@ -399,27 +389,7 @@ public class Key : EventArgs, IEquatable<Key>
     public static implicit operator string (Key key) { return key.ToString (); }
 
     /// <inheritdoc/>
-    public override bool Equals (object obj)
-    {
-        return obj is Key k && k.KeyCode == KeyCode && k.Handled == Handled;
-    }
-
-    bool IEquatable<Key>.Equals (Key other) { return Equals (other); }
-
-    /// <inheritdoc/>
     public override int GetHashCode () { return (int)KeyCode; }
-
-    /// <summary>Compares two <see cref="Key"/>s for equality.</summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <returns></returns>
-    public static bool operator == (Key a, Key b) { return a?.KeyCode == b?.KeyCode; }
-
-    /// <summary>Compares two <see cref="Key"/>s for not equality.</summary>
-    /// <param name="a"></param>
-    /// <param name="b"></param>
-    /// <returns></returns>
-    public static bool operator != (Key a, Key b) { return a?.KeyCode != b?.KeyCode; }
 
     /// <summary>Compares two <see cref="Key"/>s for less-than.</summary>
     /// <param name="a"></param>
