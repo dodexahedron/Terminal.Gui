@@ -463,25 +463,25 @@ internal class CursesDriver : ConsoleDriver
                     k = KeyCode.ShiftMask | MapCursesKey (input.wch);
 
                     break;
-                case >= 289 and <= 300:
+                case <= 300:
                     // Ctrl+(F1 - F12)
                     input.wch -= 24;
                     k = KeyCode.CtrlMask | MapCursesKey (input.wch);
 
                     break;
-                case >= 301 and <= 312:
+                case <= 312:
                     // Ctrl+Shift+(F1 - F12)
                     input.wch -= 36;
                     k = KeyCode.CtrlMask | KeyCode.ShiftMask | MapCursesKey (input.wch);
 
                     break;
-                case >= 313 and <= 324:
+                case <= 324:
                     // Alt+(F1 - F12)
                     input.wch -= 48;
                     k = KeyCode.AltMask | MapCursesKey (input.wch);
 
                     break;
-                case >= 325 and <= 327:
+                case <= 327:
                     // Shift+Alt+(F1 - F3)
                     input.wch -= 60;
                     k = KeyCode.ShiftMask | KeyCode.AltMask | MapCursesKey (input.wch);
