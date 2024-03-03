@@ -50,6 +50,8 @@ public class TreeView<T> : View, ITreeView where T : class
     ///     Error message to display when the control is not properly initialized at draw time (nodes added but no tree
     ///     builder set).
     /// </summary>
+    // BUG: This is not type-safe for generics.
+    // This exists for every concrete type of TreeView<T> at run-time.
     public static string NoBuilderError = "ERROR: TreeBuilder Not Set";
 
     /// <summary>

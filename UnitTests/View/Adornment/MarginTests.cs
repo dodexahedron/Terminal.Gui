@@ -30,9 +30,9 @@ public class MarginTests
 
         superView.BeginInit ();
         superView.EndInit ();
-        ConsoleDriver.Diagnostics = ConsoleDriver.DiagnosticFlags.FramePadding;
+        ConsoleDriver.Diagnostics = DiagnosticFlags.FramePadding;
         view.Draw ();
-        ConsoleDriver.Diagnostics = ConsoleDriver.DiagnosticFlags.Off;
+        ConsoleDriver.Diagnostics = DiagnosticFlags.Off;
 
         TestHelpers.AssertDriverContentsAre (
                                              @"

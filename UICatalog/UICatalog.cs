@@ -11,7 +11,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json.Serialization;
-using Terminal.Gui;
 using static Terminal.Gui.ConfigurationManager;
 using Command = Terminal.Gui.Command;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
@@ -56,7 +55,7 @@ internal class UICatalogApp
     private static string? _cachedTheme = string.Empty;
     private static List<string>? _categories;
     private static readonly FileSystemWatcher _currentDirWatcher = new ();
-    private static ConsoleDriver.DiagnosticFlags _diagnosticFlags;
+    private static DiagnosticFlags _diagnosticFlags;
     private static string _forceDriver = string.Empty;
     private static readonly FileSystemWatcher _homeDirWatcher = new ();
     private static bool _isFirstRunning = true;
@@ -751,11 +750,11 @@ internal class UICatalogApp
                 index++;
                 item.CheckType |= MenuItemCheckStyle.Checked;
 
-                if (GetDiagnosticsTitle (ConsoleDriver.DiagnosticFlags.Off) == item.Title)
+                if (GetDiagnosticsTitle (DiagnosticFlags.Off) == item.Title)
                 {
                     item.Checked = (_diagnosticFlags
-                                    & (ConsoleDriver.DiagnosticFlags.FramePadding
-                                       | ConsoleDriver.DiagnosticFlags
+                                    & (DiagnosticFlags.FramePadding
+                                       | DiagnosticFlags
                                                       .FrameRuler))
                                    == 0;
                 }
@@ -766,16 +765,16 @@ internal class UICatalogApp
 
                 item.Action += () =>
                                {
-                                   string t = GetDiagnosticsTitle (ConsoleDriver.DiagnosticFlags.Off);
+                                   string t = GetDiagnosticsTitle (DiagnosticFlags.Off);
 
                                    if (item.Title == t && item.Checked == false)
                                    {
-                                       _diagnosticFlags &= ~(ConsoleDriver.DiagnosticFlags.FramePadding | ConsoleDriver.DiagnosticFlags.FrameRuler);
+                                       _diagnosticFlags &= ~(DiagnosticFlags.FramePadding | DiagnosticFlags.FrameRuler);
                                        item.Checked = true;
                                    }
                                    else if (item.Title == t && item.Checked == true)
                                    {
-                                       _diagnosticFlags |= ConsoleDriver.DiagnosticFlags.FramePadding | ConsoleDriver.DiagnosticFlags.FrameRuler;
+                                       _diagnosticFlags |= DiagnosticFlags.FramePadding | DiagnosticFlags.FrameRuler;
                                        item.Checked = false;
                                    }
                                    else
@@ -798,10 +797,10 @@ internal class UICatalogApp
                                        {
                                            menuItem.Checked =
                                                !_diagnosticFlags.HasFlag (
-                                                                          ConsoleDriver.DiagnosticFlags
+                                                                          DiagnosticFlags
                                                                                        .FrameRuler
                                                                          )
-                                               && !_diagnosticFlags.HasFlag (ConsoleDriver.DiagnosticFlags.FramePadding);
+                                               && !_diagnosticFlags.HasFlag (DiagnosticFlags.FramePadding);
                                        }
                                        else if (menuItem.Title != t)
                                        {
@@ -835,8 +834,8 @@ internal class UICatalogApp
             {
                 return title switch
                        {
-                           FRAME_RULER => ConsoleDriver.DiagnosticFlags.FrameRuler,
-                           FRAME_PADDING => ConsoleDriver.DiagnosticFlags.FramePadding,
+                           FRAME_RULER => DiagnosticFlags.FrameRuler,
+                           FRAME_PADDING => DiagnosticFlags.FramePadding,
                            _ => null!
                        };
             }
@@ -845,30 +844,30 @@ internal class UICatalogApp
             {
                 switch (diag)
                 {
-                    case ConsoleDriver.DiagnosticFlags.FrameRuler:
+                    case DiagnosticFlags.FrameRuler:
                         if (add)
                         {
-                            _diagnosticFlags |= ConsoleDriver.DiagnosticFlags.FrameRuler;
+                            _diagnosticFlags |= DiagnosticFlags.FrameRuler;
                         }
                         else
                         {
-                            _diagnosticFlags &= ~ConsoleDriver.DiagnosticFlags.FrameRuler;
+                            _diagnosticFlags &= ~DiagnosticFlags.FrameRuler;
                         }
 
                         break;
-                    case ConsoleDriver.DiagnosticFlags.FramePadding:
+                    case DiagnosticFlags.FramePadding:
                         if (add)
                         {
-                            _diagnosticFlags |= ConsoleDriver.DiagnosticFlags.FramePadding;
+                            _diagnosticFlags |= DiagnosticFlags.FramePadding;
                         }
                         else
                         {
-                            _diagnosticFlags &= ~ConsoleDriver.DiagnosticFlags.FramePadding;
+                            _diagnosticFlags &= ~DiagnosticFlags.FramePadding;
                         }
 
                         break;
                     default:
-                        _diagnosticFlags = default (ConsoleDriver.DiagnosticFlags);
+                        _diagnosticFlags = default (DiagnosticFlags);
 
                         break;
                 }

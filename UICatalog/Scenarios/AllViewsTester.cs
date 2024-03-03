@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Terminal.Gui;
 
 namespace UICatalog.Scenarios;
 
@@ -65,7 +64,7 @@ public class AllViewsTester : Scenario
                                                 () =>
                                                 {
                                                     ConsoleDriver.Diagnostics ^=
-                                                        ConsoleDriver.DiagnosticFlags.FrameRuler;
+                                                        DiagnosticFlags.FrameRuler;
                                                     Application.Top.SetNeedsDisplay ();
                                                 }
                                                ),
@@ -75,7 +74,7 @@ public class AllViewsTester : Scenario
                                                 () =>
                                                 {
                                                     ConsoleDriver.Diagnostics ^=
-                                                        ConsoleDriver.DiagnosticFlags.FramePadding;
+                                                        DiagnosticFlags.FramePadding;
                                                     Application.Top.SetNeedsDisplay ();
                                                 }
                                                )

@@ -48,14 +48,15 @@
     <ProjectReference Include="..\UICatalog\UICatalog.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Using Include="System.Drawing" />
+    <Using Include="Terminal.Gui" />
+    <Using Include="Terminal.Gui.ConsoleDrivers" />
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
     <None Update="xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Using Include="System.Drawing" />
-    <Using Include="Terminal.Gui" />
-    <Using Include="Xunit" />
   </ItemGroup>
   <PropertyGroup Label="FineCodeCoverage">
     <Enabled>
