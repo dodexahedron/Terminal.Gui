@@ -624,29 +624,23 @@ internal class CursesDriver : ConsoleDriver
         }
     }
 
-    private void HandleEscSeqResponse (
-        ref int code,
-        ref KeyCode k,
-        ref int wch2,
-        ref Key keyEventArgs,
-        ref ConsoleKeyInfo [] cki
-    )
+    private ref EscapeSequenceData HandleEscapeSeqResponse (ref EscapeSequenceData data)
     {
         ConsoleKey ck = 0;
         ConsoleModifiers mod = 0;
 
-        while (code == 0)
+        while (data.code == 0)
         {
-            code = Curses.get_wch (out wch2);
-            var consoleKeyInfo = new ConsoleKeyInfo ((char)wch2, 0, false, false, false);
+            data.code = Curses.get_wch (out data.wch);
+            var consoleKeyInfo = new ConsoleKeyInfo ((char)data.wch, 0, false, false, false);
 
-            if (wch2 == 0 || wch2 == 27 || wch2 == Curses.KeyMouse)
+            if (data.wch == 0 || data.wch == 27 || data.wch == Curses.KeyMouse)
             {
                 EscSeqUtils.DecodeEscSeq (
                                           null,
                                           ref consoleKeyInfo,
                                           ref ck,
-                                          cki,
+                                          data.cki,
                                           ref mod,
                                           out _,
                                           out _,
@@ -666,11 +660,11 @@ internal class CursesDriver : ConsoleDriver
                         ProcessMouseEvent (mf, pos);
                     }
 
-                    cki = null;
+                    data.cki = null;
 
-                    if (wch2 == 27)
+                    if (data.wch == 27)
                     {
-                        cki = EscSeqUtils.ResizeArray (
+                        data.cki = EscSeqUtils.ResizeArray (
                                                        new ConsoleKeyInfo (
                                                                            (char)KeyCode.Esc,
                                                                            0,
@@ -678,22 +672,23 @@ internal class CursesDriver : ConsoleDriver
                                                                            false,
                                                                            false
                                                                           ),
-                                                       cki
+                                                       data.cki
                                                       );
                     }
                 }
                 else
                 {
-                    k = ConsoleKeyMapping.MapConsoleKeyInfoToKeyCode (consoleKeyInfo);
-                    keyEventArgs = new Key (k);
-                    OnKeyDown (keyEventArgs);
+                    data.k = ConsoleKeyMapping.MapConsoleKeyInfoToKeyCode (consoleKeyInfo);
+                    data.keyEventArgs = new Key (data.k);
+                    OnKeyDown (data.keyEventArgs);
                 }
             }
             else
             {
-                cki = EscSeqUtils.ResizeArray (consoleKeyInfo, cki);
+                data.cki = EscSeqUtils.ResizeArray (consoleKeyInfo, data.cki);
             }
         }
+        return ref data;
     }
 
     private static KeyCode MapCursesKey (int cursesKey)
