@@ -103,10 +103,10 @@ public class Thickness : IEquatable<Thickness>, IEqualityOperators<Thickness, Th
 
     /// <summary>Draws the <see cref="Thickness"/> rectangle with an optional diagnostics label.</summary>
     /// <remarks>
-    ///     If <see cref="ConsoleDriver.DiagnosticFlags"/> is set to
-    ///     <see cref="ConsoleDriver.DiagnosticFlags.FramePadding"/> then 'T', 'L', 'R', and 'B' glyphs will be used instead of
-    ///     space. If <see cref="ConsoleDriver.DiagnosticFlags"/> is set to
-    ///     <see cref="ConsoleDriver.DiagnosticFlags.FrameRuler"/> then a ruler will be drawn on the outer edge of the
+    ///     If <see cref="DiagnosticFlags"/> is set to
+    ///  DiagnosticFlagsiagnosticFlags.FramePadding"/> then 'T', 'L', 'R', and 'B' glyphs will be used instead of
+    ///     space. If <see cref="DiagnosticFlags"/> is set to
+    ///     <see cref="DiagnosticFlags.FrameRuler"/> then a ruler will be drawn on the outer edge of the
     ///     Thickness.
     /// </remarks>
     /// <param name="rect">The location and size of the rectangle that bounds the thickness rectangle, in screen coordinates.</param>
@@ -125,8 +125,8 @@ public class Thickness : IEquatable<Thickness>, IEqualityOperators<Thickness, Th
         Rune topChar = clearChar;
         Rune bottomChar = clearChar;
 
-        if ((ConsoleDriver.Diagnostics & ConsoleDriver.DiagnosticFlags.FramePadding)
-            == ConsoleDriver.DiagnosticFlags.FramePadding)
+        if ((ConsoleDriver.Diagnostics & DiagnosticFlags.FramePadding)
+            == DiagnosticFlags.FramePadding)
         {
             leftChar = (Rune)'L';
             rightChar = (Rune)'R';
@@ -178,8 +178,8 @@ public class Thickness : IEquatable<Thickness>, IEqualityOperators<Thickness, Th
         }
 
         // TODO: This should be moved to LineCanvas as a new LineStyle.Ruler
-        if ((ConsoleDriver.Diagnostics & ConsoleDriver.DiagnosticFlags.FrameRuler)
-            == ConsoleDriver.DiagnosticFlags.FrameRuler)
+        if ((ConsoleDriver.Diagnostics & DiagnosticFlags.FrameRuler)
+            == DiagnosticFlags.FrameRuler)
         {
             // PERF: This can almost certainly be simplified down to a single point offset and fewer calls to Draw
             // Top
@@ -211,8 +211,8 @@ public class Thickness : IEquatable<Thickness>, IEqualityOperators<Thickness, Th
             }
         }
 
-        if ((ConsoleDriver.Diagnostics & ConsoleDriver.DiagnosticFlags.FramePadding)
-            == ConsoleDriver.DiagnosticFlags.FramePadding)
+        if ((ConsoleDriver.Diagnostics & DiagnosticFlags.FramePadding)
+            == DiagnosticFlags.FramePadding)
         {
             // Draw the diagnostics label on the bottom
             var tf = new TextFormatter

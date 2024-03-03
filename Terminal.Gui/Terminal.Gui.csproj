@@ -60,6 +60,7 @@
     <Using Include="System.Drawing" />
     <Using Include="System.Numerics" />
     <Using Include="System.Text" />
+    <Using Include="Terminal.Gui.ConsoleDrivers" />
   </ItemGroup>
   <!-- =================================================================== -->
   <!-- Namespaces for which internal items are visible -->

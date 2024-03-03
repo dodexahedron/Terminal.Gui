@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Terminal.Gui;
 
 namespace UICatalog.Scenarios;
 
@@ -123,9 +122,9 @@ public class GraphViewExample : Scenario
                                                              )
                                      {
                                          Checked = ConsoleDriver.Diagnostics
-                                                   == (ConsoleDriver.DiagnosticFlags
+                                                   == (DiagnosticFlags
                                                                     .FramePadding
-                                                       | ConsoleDriver.DiagnosticFlags
+                                                       | DiagnosticFlags
                                                                       .FrameRuler),
                                          CheckType = MenuItemCheckStyle.Checked
                                      }
@@ -187,9 +186,9 @@ public class GraphViewExample : Scenario
         _miDiags.Checked = !_miDiags.Checked;
 
         ConsoleDriver.Diagnostics = _miDiags.Checked == true
-                                        ? ConsoleDriver.DiagnosticFlags.FramePadding
-                                          | ConsoleDriver.DiagnosticFlags.FrameRuler
-                                        : ConsoleDriver.DiagnosticFlags.Off;
+                                        ? DiagnosticFlags.FramePadding
+                                          | DiagnosticFlags.FrameRuler
+                                        : DiagnosticFlags.Off;
         Application.Refresh ();
     }
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using Terminal.Gui;
 
 namespace UICatalog.Scenarios;
 
@@ -406,11 +405,11 @@ public class Adornments : Scenario
                                              if (e.NewValue == true)
                                              {
                                                  ConsoleDriver.Diagnostics =
-                                                     ConsoleDriver.DiagnosticFlags.FramePadding | ConsoleDriver.DiagnosticFlags.FrameRuler;
+                                                     DiagnosticFlags.FramePadding | DiagnosticFlags.FrameRuler;
                                              }
                                              else
                                              {
-                                                 ConsoleDriver.Diagnostics = ConsoleDriver.DiagnosticFlags.Off;
+                                                 ConsoleDriver.Diagnostics = DiagnosticFlags.Off;
                                              }
                                          };
 
