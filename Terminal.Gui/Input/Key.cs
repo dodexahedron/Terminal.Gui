@@ -70,7 +70,7 @@ namespace Terminal.Gui;
 ///         </list>
 ///     </para>
 /// </remarks>
-public record Key : IEqualityOperators<Key,Key,bool>
+public sealed record Key : IEqualityOperators<Key,Key,bool>
 {
     /// <summary>Constructs a new <see cref="Key"/></summary>
     public Key () : this (KeyCode.Null) { }
