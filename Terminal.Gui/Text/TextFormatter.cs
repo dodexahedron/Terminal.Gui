@@ -9,12 +9,9 @@ namespace Terminal.Gui;
 ///     Provides text formatting. Supports <see cref="View.HotKey"/>s, horizontal alignment, vertical alignment,
 ///     multiple lines, and word-based line wrap.
 /// </summary>
-// SUGGESTION: I think we should seal this class.
-// A user subclassing this is asking for trouble, in the current state of things, as we're fairly tightly coupled to
-// this specific implementation.
 // SUGGESTION: Consider implementing ICustomFormatter as well, or a new interface that declares ICustomFormatter.
 // Then use that interface in the code and use this reference implementation unless the user provides their own.
-public class TextFormatter : INotifyPropertyChanged
+public sealed class TextFormatter : INotifyPropertyChanged
 {
     private bool _autoSize;
     private Key _hotKey = new ();
@@ -2090,7 +2087,7 @@ public class TextFormatter : INotifyPropertyChanged
     ///   compiler with the name of the caller.
     /// </param>
     /// <remarks>Should only be called from the setter of a property.</remarks>
-    protected virtual void OnPropertyChanged ([CallerMemberName] string? propertyName = null) { PropertyChanged?.Invoke (this, new (propertyName)); }
+    private void OnPropertyChanged ([CallerMemberName] string? propertyName = null) { PropertyChanged?.Invoke (this, new (propertyName)); }
 
     /// <summary>Standard method for setting a field and raising the <see cref="PropertyChanged"/> event, if the value changed.</summary>
     /// <typeparam name="T"></typeparam>
