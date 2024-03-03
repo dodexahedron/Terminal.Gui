@@ -506,8 +506,6 @@ internal class CursesDriver : ConsoleDriver
                 input.k = KeyCode.AltMask | MapCursesKey (input.wch);
             }
 
-            Key key = null;
-
             if (input.code == 0)
             {
                 // The ESC-number handling, debatable.
@@ -566,15 +564,15 @@ internal class CursesDriver : ConsoleDriver
                     }
                 }
 
-                key = new (input.k);
+                input.keyEventArgs = new (input.k);
             }
             else
             {
-                key = Key.Esc;
+                input.keyEventArgs = Key.Esc;
             }
 
-            OnKeyDown (key);
-            OnKeyUp (key);
+            OnKeyDown (input.keyEventArgs);
+            OnKeyUp (input.keyEventArgs);
         }
         else if (input.wch == Curses.KeyTab)
         {
