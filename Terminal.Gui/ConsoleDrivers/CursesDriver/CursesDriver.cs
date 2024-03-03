@@ -439,8 +439,6 @@ internal class CursesDriver : ConsoleDriver
 
                 while (wch2 == Curses.KeyMouse)
                 {
-                    Key kea = null;
-
                     input.cki =
                     [
                         new ((char)KeyCode.Esc, 0, false, false, false),
