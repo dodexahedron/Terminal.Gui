@@ -1012,7 +1012,7 @@ public class TextFieldTests
 
         void HandleJKey (object s, Key arg)
         {
-            if (arg.AsRune == new Rune ('j'))
+            if (arg.AsRune () == new Rune ('j'))
             {
                 arg.Handled = true;
             }

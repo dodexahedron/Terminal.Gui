@@ -18,7 +18,40 @@ public partial record Key
     ///         <see langword="default"/>.
     ///     </para>
     /// </remarks>
-    public Rune AsRune => ToRune (KeyCode);
+    public Rune AsRune ()
+    {
+        if (KeyCode is KeyCode.Null or KeyCode.SpecialMask
+            || KeyCode.HasFlag (KeyCode.CtrlMask)
+            || KeyCode.HasFlag (KeyCode.AltMask))
+        {
+            return default (Rune);
+        }
+
+        // Extract the base key code
+        KeyCode baseKey = KeyCode;
+
+        if (baseKey.HasFlag (KeyCode.ShiftMask))
+        {
+            baseKey &= ~KeyCode.ShiftMask;
+        }
+
+        switch (baseKey)
+        {
+            case >= KeyCode.A and <= KeyCode.Z when !KeyCode.HasFlag (KeyCode.ShiftMask):
+                return new ((uint)(baseKey + 32));
+            case >= KeyCode.A and <= KeyCode.Z when KeyCode.HasFlag (KeyCode.ShiftMask):
+                return new ((uint)baseKey);
+            case > KeyCode.Null and < KeyCode.A:
+                return new ((uint)baseKey);
+        }
+
+        if (Enum.IsDefined (typeof (KeyCode), baseKey))
+        {
+            return default (Rune);
+        }
+
+        return new ((uint)baseKey);
+    }
 
     /// <summary>
     ///     Converts a <see cref="KeyCode"/> to a <see cref="Rune"/>. Useful for determining if a key represents is a
@@ -77,15 +110,15 @@ public partial record Key
     ///     as <see cref="Handled"/> are not encoded in <see cref="KeyCode"/>.
     /// </summary>
     /// <remarks>Uses <see cref="AsRune"/>.</remarks>
-    /// <param name="kea"></param>
-    public static explicit operator Rune (Key kea) { return kea.AsRune; }
+    /// <param name="key"></param>
+    public static explicit operator Rune (Key key) => key.AsRune ();
 
     /// <summary>
     ///     Explicitly cast <see cref="Key"/> to a <see langword="uint"/>. The conversion is lossy because properties such
     ///     as <see cref="Handled"/> are not encoded in <see cref="KeyCode"/>.
     /// </summary>
-    /// <param name="kea"></param>
-    public static explicit operator uint (Key kea) { return (uint)kea.KeyCode; }
+    /// <param name="key"></param>
+    public static explicit operator uint (Key key) => (uint)key.KeyCode;
 
     /// <summary>
     ///     Explicitly cast <see cref="Key"/> to a <see cref="KeyCode"/>. The conversion is lossy because properties such

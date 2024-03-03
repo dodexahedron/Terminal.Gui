@@ -4956,7 +4956,7 @@ public class TextView : View
         {
             if (Used)
             {
-                Insert (new RuneCell { Rune = a.AsRune, ColorScheme = colorScheme });
+                Insert (new RuneCell { Rune = a.AsRune (), ColorScheme = colorScheme });
                 CurrentColumn++;
 
                 if (CurrentColumn >= _leftColumn + Frame.Width)
@@ -4967,7 +4967,7 @@ public class TextView : View
             }
             else
             {
-                Insert (new RuneCell { Rune = a.AsRune, ColorScheme = colorScheme });
+                Insert (new RuneCell { Rune = a.AsRune (), ColorScheme = colorScheme });
                 CurrentColumn++;
             }
         }

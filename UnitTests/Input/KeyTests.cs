@@ -98,7 +98,7 @@ public class KeyTests
     public void AsRune_ShouldReturnCorrectIntValue (KeyCode key, uint expected)
     {
         var eventArgs = new Key (key);
-        Assert.Equal ((Rune)expected, eventArgs.AsRune);
+        Assert.Equal ((Rune)expected, eventArgs.AsRune ());
     }
 
     [Theory]

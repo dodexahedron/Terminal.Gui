@@ -622,12 +622,14 @@ namespace Terminal.Gui
                 return false;
             }
 
-            if (a.AsRune == default (Rune))
+            // TODO: Clean this up
+            // default (Rune) is just when its value is zero.
+            if (a.AsRune () == default (Rune))
             {
                 return false;
             }
 
-            Rune key = a.AsRune;
+            Rune key = a.AsRune ();
 
             bool inserted = _provider.InsertAt ((char)key.Value, _cursorPosition);
 

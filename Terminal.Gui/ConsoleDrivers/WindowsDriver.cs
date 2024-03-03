@@ -744,7 +744,7 @@ internal class WindowsConsole
             sb.Append ((ex.ConsoleKeyInfo.Modifiers & ConsoleModifiers.Shift) != 0 ? " | Shift" : string.Empty);
             sb.Append ((ex.ConsoleKeyInfo.Modifiers & ConsoleModifiers.Control) != 0 ? " | Control" : string.Empty);
             sb.Append ((ex.ConsoleKeyInfo.Modifiers & ConsoleModifiers.Alt) != 0 ? " | Alt" : string.Empty);
-            sb.Append ($", KeyChar: {ke.AsRune.MakePrintable ()} ({(uint)ex.ConsoleKeyInfo.KeyChar}) ");
+            sb.Append ($", KeyChar: {ke.AsRune ().MakePrintable ()} ({(uint)ex.ConsoleKeyInfo.KeyChar}) ");
             sb.Append (ex.CapsLock ? "caps," : string.Empty);
             sb.Append (ex.NumLock ? "num," : string.Empty);
             sb.Append (ex.ScrollLock ? "scroll," : string.Empty);

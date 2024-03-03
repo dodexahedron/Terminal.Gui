@@ -134,7 +134,7 @@ public abstract class CollectionNavigatorBase
     /// <returns></returns>
     public static bool IsCompatibleKey (Key a)
     {
-        Rune rune = a.AsRune;
+        Rune rune = a.AsRune ();
 
         return rune != default (Rune) && !Rune.IsControl (rune);
     }
