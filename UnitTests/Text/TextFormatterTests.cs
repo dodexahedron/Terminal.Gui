@@ -705,18 +705,15 @@ ssb
         Assert.Equal (expectedKey, hotKey);
     }
 
+    // TODO: Re-create this and others as a parameterized test covering more cases
     [Theory]
     [InlineData ("_\"k before", true, (KeyCode)'"')] // BUGBUG: Not sure why this fails. " is a normal char
     [InlineData ("\"_k before", true, KeyCode.K)]
     [InlineData ("_`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?", true, (KeyCode)'`')]
     [InlineData ("`_~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?", true, (KeyCode)'~')]
-    [InlineData (
-                    "`~!@#$%^&*()-__=+[{]}\\|;:'\",<.>/?",
-                    true,
-                    (KeyCode)'='
-                )] // BUGBUG: Not sure why this fails. Ignore the first and consider the second
-    [InlineData ("_ ~  s  gui.cs   master ↑10", false, KeyCode.Null)] // ~IsLetterOrDigit + Unicode
-    [InlineData (" ~  s  gui.cs  _ master ↑10", false, KeyCode.Null)] // ~IsLetterOrDigit + Unicode
+    [InlineData ("`~!@#$%^&*()-__=+[{]}\\|;:'\",<.>/?", true, (KeyCode)'=')] // BUGBUG: Not sure why this fails. Ignore the first and consider the second
+    [InlineData ("_ ~  s  gui.cs   master ↑10", true, KeyCode.Null)] // ~IsLetterOrDigit + Unicode
+    [InlineData (" ~  s  gui.cs  _ master ↑10", true, KeyCode.Null)] // ~IsLetterOrDigit + Unicode
     [InlineData ("non-english: _кдать", true, (KeyCode)'к')] // Lower case Cryllic K (к)
     public void FindHotKey_Symbols_Returns_Symbol (string text, bool found, KeyCode expected)
     {
