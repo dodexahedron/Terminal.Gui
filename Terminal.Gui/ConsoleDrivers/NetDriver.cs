@@ -769,7 +769,7 @@ internal class NetEvents : IDisposable
             sb.Append ((cki.Modifiers & ConsoleModifiers.Shift) != 0 ? " | Shift" : string.Empty);
             sb.Append ((cki.Modifiers & ConsoleModifiers.Control) != 0 ? " | Control" : string.Empty);
             sb.Append ((cki.Modifiers & ConsoleModifiers.Alt) != 0 ? " | Alt" : string.Empty);
-            sb.Append ($", KeyChar: {ke.AsRune.MakePrintable ()} ({(uint)cki.KeyChar}) ");
+            sb.Append ($", KeyChar: {ke.AsRune ().MakePrintable ()} ({(uint)cki.KeyChar}) ");
             string s = sb.ToString ().TrimEnd (',').TrimEnd (' ');
 
             return $"[ConsoleKeyInfo({s})]";
