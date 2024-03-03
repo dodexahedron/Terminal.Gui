@@ -70,6 +70,12 @@ public partial class Curses
         internal set =>
 
             // For unit tests
+            // Suggestion: This kind of thing is why we need interfaces.
+            // Interfaces can be mocked. Full implementations can't, really,
+            // so you end up having to do these annoying kludges.
+            // Fine for now I guess, because V2 is already going to be awesome over V1.
+            // But thoughts for VNext. In general, btw. Not just here.
+
             cols = value;
     }
 
