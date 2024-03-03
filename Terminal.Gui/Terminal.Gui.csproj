@@ -58,6 +58,7 @@
     <Using Include="JetBrains.Annotations" />
     <Using Include="System.Diagnostics.Contracts.PureAttribute" Alias="PureAttribute" />
     <Using Include="System.Drawing" />
+    <Using Include="System.Numerics" />
     <Using Include="System.Text" />
   </ItemGroup>
   <!-- =================================================================== -->
