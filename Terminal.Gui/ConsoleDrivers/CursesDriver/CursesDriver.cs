@@ -2,8 +2,8 @@
 // Driver.cs: Curses-based Driver
 //
 
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Terminal.Gui.ConsoleDrivers;
 using Unix.Terminal;
 
 namespace Terminal.Gui;
@@ -11,6 +11,11 @@ namespace Terminal.Gui;
 /// <summary>This is the Curses driver for the gui.cs/Terminal framework.</summary>
 internal class CursesDriver : ConsoleDriver
 {
+    // These might seem silly, but the compiled IL was actually doing type conversions.
+    // So I'm pulling out the constants here for now.
+    private const KeyCode AltMask = KeyCode.AltMask;
+    private const KeyCode AltSpace = KeyCode.AltMask | KeyCode.Space;
+    private const KeyCode CtrlAltSpace = KeyCode.CtrlMask | AltSpace;
     public Curses.Window _window;
     private CursorVisibility? _currentCursorVisibility;
     private CursorVisibility? _initialCursorVisibility;
@@ -421,7 +426,7 @@ internal class CursesDriver : ConsoleDriver
 
         if (input.code == Curses.KEY_CODE_YES)
         {
-            while (input.code == Curses.KEY_CODE_YES && input.wch == Curses.KeyResize)
+            while (input is { code: Curses.KEY_CODE_YES, wch: Curses.KeyResize })
             {
                 ProcessWinChange ();
                 input.code = Curses.get_wch (out input.wch);
@@ -434,9 +439,7 @@ internal class CursesDriver : ConsoleDriver
 
             if (input.wch == Curses.KeyMouse)
             {
-                int wch2 = input.wch;
-
-                while (wch2 == Curses.KeyMouse)
+                while (input.wch == Curses.KeyMouse)
                 {
                     input.cki =
                     [
@@ -477,13 +480,13 @@ internal class CursesDriver : ConsoleDriver
                 case <= 324:
                     // Alt+(F1 - F12)
                     input.wch -= 48;
-                    input.k = KeyCode.AltMask | MapCursesKey (input.wch);
+                    input.k = AltMask | MapCursesKey (input.wch);
 
                     break;
                 case <= 327:
                     // Shift+Alt+(F1 - F3)
                     input.wch -= 60;
-                    input.k = KeyCode.ShiftMask | KeyCode.AltMask | MapCursesKey (input.wch);
+                    input.k = KeyCode.ShiftMask | AltMask | MapCursesKey (input.wch);
 
                     break;
             }
@@ -495,44 +498,48 @@ internal class CursesDriver : ConsoleDriver
         }
 
         // Special handling for ESC, we want to try to catch ESC+letter to simulate alt-letter as well as Alt-Fkey
+        const uint keyCodeUInt32A = (uint)KeyCode.A;
+        const uint keyCodeUInt32Z = (uint)KeyCode.Z;
+
+        const uint keyCodeUInt32AMinus64 = keyCodeUInt32A - 64;
+
         if (input.wch == 27)
         {
             Curses.timeout (10);
 
             input.code = Curses.get_wch (out int wch2);
-
+            KeyCode kc = Unsafe.As<int,KeyCode>(ref wch2) ;
             if (input.code == Curses.KEY_CODE_YES)
             {
-                input.k = KeyCode.AltMask | MapCursesKey (input.wch);
+                input.k = AltMask | MapCursesKey (input.wch);
             }
 
             if (input.code == 0)
             {
                 // The ESC-number handling, debatable.
                 // Simulates the AltMask itself by pressing Alt + Space.
-                if (wch2 == (int)KeyCode.Space)
+                if (kc == KeyCode.Space)
                 {
-                    input.k = KeyCode.AltMask;
+                    input.k = AltMask;
                 }
-                else if (wch2 - (int)KeyCode.Space >= (uint)KeyCode.A
-                         && wch2 - (int)KeyCode.Space <= (uint)KeyCode.Z)
+                else if ((kc - KeyCode.Space) is >= keyCodeUInt32A and <= keyCodeUInt32Z)
                 {
-                    input.k = (KeyCode)((uint)KeyCode.AltMask + (wch2 - (int)KeyCode.Space));
+                    input.k = (KeyCode)((uint)AltMask + (wch2 - (int)KeyCode.Space));
                 }
-                else if (wch2 >= (uint)KeyCode.A - 64 && wch2 <= (uint)KeyCode.Z - 64)
+                else if (wch2 >= keyCodeUInt32AMinus64 && wch2 <= keyCodeUInt32Z - 64)
                 {
-                    input.k = (KeyCode)((uint)(KeyCode.AltMask | KeyCode.CtrlMask) + (wch2 + 64));
+                    input.k = (KeyCode)((uint)(AltMask | KeyCode.CtrlMask) + (wch2 + 64));
                 }
                 else if (wch2 >= (uint)KeyCode.D0 && wch2 <= (uint)KeyCode.D9)
                 {
-                    input.k = (KeyCode)((uint)KeyCode.AltMask + (uint)KeyCode.D0 + (wch2 - (uint)KeyCode.D0));
+                    input.k = (KeyCode)((uint)AltMask + (uint)KeyCode.D0 + (wch2 - (uint)KeyCode.D0));
                 }
                 else if (wch2 == Curses.KeyCSI)
                 {
-                    ConsoleKeyInfo [] cki =
-                    {
+                    input.cki =
+                    [
                         new ((char)KeyCode.Esc, 0, false, false, false), new ('[', 0, false, false, false)
-                    };
+                    ];
 
                     input = HandleEscapeSeqResponse (ref input);
 
@@ -548,19 +555,25 @@ internal class CursesDriver : ConsoleDriver
 
                     if (wch2 == 0)
                     {
-                        input.k = KeyCode.CtrlMask | KeyCode.AltMask | KeyCode.Space;
-                    }
-                    else if (input.wch >= (uint)KeyCode.A && input.wch <= (uint)KeyCode.Z)
-                    {
-                        input.k = KeyCode.ShiftMask | KeyCode.AltMask | KeyCode.Space;
-                    }
-                    else if (wch2 < 256)
-                    {
-                        input.k = (KeyCode)wch2; // | KeyCode.AltMask;
+                        input.k = CtrlAltSpace;
                     }
                     else
                     {
-                        input.k = (KeyCode)((uint)(KeyCode.AltMask | KeyCode.CtrlMask) + wch2);
+                        const int keyCodeAInt = (int)KeyCode.A; // 65
+                        const int keyCodeZInt = (int)KeyCode.Z; // 90
+
+                        if (input is {wch: >= keyCodeAInt and <= keyCodeZInt})
+                        {
+                            input.k = KeyCode.ShiftMask | AltSpace;
+                        }
+                        else if (wch2 < 256)
+                        {
+                            input.k = (KeyCode)wch2; // | KeyCode.AltMask;
+                        }
+                        else
+                        {
+                            input.k = (KeyCode)((uint)(AltMask | KeyCode.CtrlMask) + wch2);
+                        }
                     }
                 }
 
@@ -589,14 +602,14 @@ internal class CursesDriver : ConsoleDriver
             {
                 input.k = KeyCode.CtrlMask | KeyCode.Space;
             }
-            else if (input.wch >= (uint)KeyCode.A - 64 && input.wch <= (uint)KeyCode.Z - 64)
+            else if (input.wch >= keyCodeUInt32AMinus64 && input.wch <= keyCodeUInt32Z - 64)
             {
                 if ((KeyCode)(input.wch + 64) != KeyCode.J)
                 {
                     input.k = KeyCode.CtrlMask | (KeyCode)(input.wch + 64);
                 }
             }
-            else if (input.wch >= (uint)KeyCode.A && input.wch <= (uint)KeyCode.Z)
+            else if (input.wch >= keyCodeUInt32A && input.wch <= keyCodeUInt32Z)
             {
                 input.k = (KeyCode)input.wch | KeyCode.ShiftMask;
             }
