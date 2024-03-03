@@ -45,6 +45,7 @@ public partial record Key
                 return new ((uint)(baseKey + 32));
         }
 
+        // INTENT: Why do this when it IS defined? Shouldn't this be when it isn't defined?
         if (Enum.IsDefined (typeof (KeyCode), baseKey))
         {
             return default (Rune);
