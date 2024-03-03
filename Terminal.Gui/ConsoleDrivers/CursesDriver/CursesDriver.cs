@@ -417,8 +417,7 @@ internal class CursesDriver : ConsoleDriver
             return;
         }
 
-        ref KeyCode k = ref input.k;
-        k = KeyCode.Null;
+        input.k = KeyCode.Null;
 
         if (input.code == Curses.KEY_CODE_YES)
         {
@@ -453,44 +452,44 @@ internal class CursesDriver : ConsoleDriver
                 return;
             }
 
-            k = MapCursesKey (input.wch);
+            input.k = MapCursesKey (input.wch);
 
             switch (input.wch)
             {
                 case >= 277 and <= 288:
                     // Shift+(F1 - F12)
                     input.wch -= 12;
-                    k = KeyCode.ShiftMask | MapCursesKey (input.wch);
+                    input.k = KeyCode.ShiftMask | MapCursesKey (input.wch);
 
                     break;
                 case <= 300:
                     // Ctrl+(F1 - F12)
                     input.wch -= 24;
-                    k = KeyCode.CtrlMask | MapCursesKey (input.wch);
+                    input.k = KeyCode.CtrlMask | MapCursesKey (input.wch);
 
                     break;
                 case <= 312:
                     // Ctrl+Shift+(F1 - F12)
                     input.wch -= 36;
-                    k = KeyCode.CtrlMask | KeyCode.ShiftMask | MapCursesKey (input.wch);
+                    input.k = KeyCode.CtrlMask | KeyCode.ShiftMask | MapCursesKey (input.wch);
 
                     break;
                 case <= 324:
                     // Alt+(F1 - F12)
                     input.wch -= 48;
-                    k = KeyCode.AltMask | MapCursesKey (input.wch);
+                    input.k = KeyCode.AltMask | MapCursesKey (input.wch);
 
                     break;
                 case <= 327:
                     // Shift+Alt+(F1 - F3)
                     input.wch -= 60;
-                    k = KeyCode.ShiftMask | KeyCode.AltMask | MapCursesKey (input.wch);
+                    input.k = KeyCode.ShiftMask | KeyCode.AltMask | MapCursesKey (input.wch);
 
                     break;
             }
 
-            OnKeyDown (new Key (k));
-            OnKeyUp (new Key (k));
+            OnKeyDown (new (input.k));
+            OnKeyUp (new (input.k));
 
             return;
         }
@@ -504,7 +503,7 @@ internal class CursesDriver : ConsoleDriver
 
             if (input.code == Curses.KEY_CODE_YES)
             {
-                k = KeyCode.AltMask | MapCursesKey (input.wch);
+                input.k = KeyCode.AltMask | MapCursesKey (input.wch);
             }
 
             Key key = null;
@@ -515,20 +514,20 @@ internal class CursesDriver : ConsoleDriver
                 // Simulates the AltMask itself by pressing Alt + Space.
                 if (wch2 == (int)KeyCode.Space)
                 {
-                    k = KeyCode.AltMask;
+                    input.k = KeyCode.AltMask;
                 }
                 else if (wch2 - (int)KeyCode.Space >= (uint)KeyCode.A
                          && wch2 - (int)KeyCode.Space <= (uint)KeyCode.Z)
                 {
-                    k = (KeyCode)((uint)KeyCode.AltMask + (wch2 - (int)KeyCode.Space));
+                    input.k = (KeyCode)((uint)KeyCode.AltMask + (wch2 - (int)KeyCode.Space));
                 }
                 else if (wch2 >= (uint)KeyCode.A - 64 && wch2 <= (uint)KeyCode.Z - 64)
                 {
-                    k = (KeyCode)((uint)(KeyCode.AltMask | KeyCode.CtrlMask) + (wch2 + 64));
+                    input.k = (KeyCode)((uint)(KeyCode.AltMask | KeyCode.CtrlMask) + (wch2 + 64));
                 }
                 else if (wch2 >= (uint)KeyCode.D0 && wch2 <= (uint)KeyCode.D9)
                 {
-                    k = (KeyCode)((uint)KeyCode.AltMask + (uint)KeyCode.D0 + (wch2 - (uint)KeyCode.D0));
+                    input.k = (KeyCode)((uint)KeyCode.AltMask + (uint)KeyCode.D0 + (wch2 - (uint)KeyCode.D0));
                 }
                 else if (wch2 == Curses.KeyCSI)
                 {
@@ -546,28 +545,28 @@ internal class CursesDriver : ConsoleDriver
                     // Unfortunately there are no way to differentiate Ctrl+Alt+alfa and Ctrl+Shift+Alt+alfa.
                     if (((KeyCode)wch2 & KeyCode.CtrlMask) != 0)
                     {
-                        k = (KeyCode)((uint)KeyCode.CtrlMask + (wch2 & ~(int)KeyCode.CtrlMask));
+                        input.k = (KeyCode)((uint)KeyCode.CtrlMask + (wch2 & ~(int)KeyCode.CtrlMask));
                     }
 
                     if (wch2 == 0)
                     {
-                        k = KeyCode.CtrlMask | KeyCode.AltMask | KeyCode.Space;
+                        input.k = KeyCode.CtrlMask | KeyCode.AltMask | KeyCode.Space;
                     }
                     else if (input.wch >= (uint)KeyCode.A && input.wch <= (uint)KeyCode.Z)
                     {
-                        k = KeyCode.ShiftMask | KeyCode.AltMask | KeyCode.Space;
+                        input.k = KeyCode.ShiftMask | KeyCode.AltMask | KeyCode.Space;
                     }
                     else if (wch2 < 256)
                     {
-                        k = (KeyCode)wch2; // | KeyCode.AltMask;
+                        input.k = (KeyCode)wch2; // | KeyCode.AltMask;
                     }
                     else
                     {
-                        k = (KeyCode)((uint)(KeyCode.AltMask | KeyCode.CtrlMask) + wch2);
+                        input.k = (KeyCode)((uint)(KeyCode.AltMask | KeyCode.CtrlMask) + wch2);
                     }
                 }
 
-                key = new Key (k);
+                key = new (input.k);
             }
             else
             {
@@ -579,38 +578,38 @@ internal class CursesDriver : ConsoleDriver
         }
         else if (input.wch == Curses.KeyTab)
         {
-            k = MapCursesKey (input.wch);
-            OnKeyDown (new Key (k));
-            OnKeyUp (new Key (k));
+            input.k = MapCursesKey (input.wch);
+            OnKeyDown (new (input.k));
+            OnKeyUp (new (input.k));
         }
         else
         {
             // Unfortunately there are no way to differentiate Ctrl+alfa and Ctrl+Shift+alfa.
-            k = (KeyCode)input.wch;
+            input.k = (KeyCode)input.wch;
 
             if (input.wch == 0)
             {
-                k = KeyCode.CtrlMask | KeyCode.Space;
+                input.k = KeyCode.CtrlMask | KeyCode.Space;
             }
             else if (input.wch >= (uint)KeyCode.A - 64 && input.wch <= (uint)KeyCode.Z - 64)
             {
                 if ((KeyCode)(input.wch + 64) != KeyCode.J)
                 {
-                    k = KeyCode.CtrlMask | (KeyCode)(input.wch + 64);
+                    input.k = KeyCode.CtrlMask | (KeyCode)(input.wch + 64);
                 }
             }
             else if (input.wch >= (uint)KeyCode.A && input.wch <= (uint)KeyCode.Z)
             {
-                k = (KeyCode)input.wch | KeyCode.ShiftMask;
+                input.k = (KeyCode)input.wch | KeyCode.ShiftMask;
             }
 
             if (input.wch == '\n' || input.wch == '\r')
             {
-                k = KeyCode.Enter;
+                input.k = KeyCode.Enter;
             }
 
-            OnKeyDown (new Key (k));
-            OnKeyUp (new Key (k));
+            OnKeyDown (new (input.k));
+            OnKeyUp (new (input.k));
         }
     }
 
