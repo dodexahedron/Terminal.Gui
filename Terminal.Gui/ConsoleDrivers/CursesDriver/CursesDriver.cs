@@ -1,4 +1,4 @@
-﻿//
+//
 // Driver.cs: Curses-based Driver
 //
 
@@ -408,8 +408,10 @@ internal class CursesDriver : ConsoleDriver
 
     internal void ProcessInput ()
     {
-        int wch;
-        int code = Curses.get_wch (out wch);
+        EscapeSequenceData input = new ();
+        input.code = Curses.get_wch (out input.wch);
+        ref int wch = ref input.wch;
+        ref int code = ref input.code;
 
         //System.Diagnostics.Debug.WriteLine ($"code: {code}; wch: {wch}");
         if (code == Curses.ERR)
@@ -417,7 +419,8 @@ internal class CursesDriver : ConsoleDriver
             return;
         }
 
-        var k = KeyCode.Null;
+        ref KeyCode k = ref input.k;
+        k = KeyCode.Null;
 
         if (code == Curses.KEY_CODE_YES)
         {
@@ -440,14 +443,15 @@ internal class CursesDriver : ConsoleDriver
                 {
                     Key kea = null;
 
-                    ConsoleKeyInfo [] cki =
-                    {
+                    input.cki =
+                    [
                         new ((char)KeyCode.Esc, 0, false, false, false),
                         new ('[', 0, false, false, false),
                         new ('<', 0, false, false, false)
-                    };
+                    ];
+                    ref ConsoleKeyInfo [] cki = ref input.cki;
                     code = 0;
-                    HandleEscSeqResponse (ref code, ref k, ref wch2, ref kea, ref cki);
+                    input = HandleEscapeSeqResponse (ref input);
                 }
 
                 return;
@@ -533,7 +537,8 @@ internal class CursesDriver : ConsoleDriver
                     {
                         new ((char)KeyCode.Esc, 0, false, false, false), new ('[', 0, false, false, false)
                     };
-                    HandleEscSeqResponse (ref code, ref k, ref wch2, ref key, ref cki);
+
+                    input = HandleEscapeSeqResponse (ref input);
 
                     return;
                 }
@@ -935,6 +940,21 @@ internal class CursesDriver : ConsoleDriver
     }
 
     #endregion
+
+    /// <summary>
+    /// A private byRefLike struct to simplify calls and keep everything really on the stack.
+    /// </summary>
+    /// <remarks>
+    /// This is a ref struct. It cannot escape the stack and the compiler will enforce that if you try.
+    /// </remarks>
+    private ref struct EscapeSequenceData
+    {
+        public ref int code;
+        public ref KeyCode k;
+        public ref int wch;
+        public Key keyEventArgs;
+        public ConsoleKeyInfo [] cki;
+    }
 }
 
 internal static class Platform
