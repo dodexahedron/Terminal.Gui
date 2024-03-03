@@ -18,6 +18,7 @@ public partial record Key
     ///         <see langword="default"/>.
     ///     </para>
     /// </remarks>
+    /// <returns>The key converted to a Rune. <see langword="default"/>(<see cref="Rune"/>) if conversion is not possible.</returns>
     public Rune AsRune ()
     {
         if (KeyCode is KeyCode.Null or KeyCode.SpecialMask
@@ -40,58 +41,6 @@ public partial record Key
             case >= KeyCode.A and <= KeyCode.Z when !KeyCode.HasFlag (KeyCode.ShiftMask):
                 return new ((uint)(baseKey + 32));
             case >= KeyCode.A and <= KeyCode.Z when KeyCode.HasFlag (KeyCode.ShiftMask):
-                return new ((uint)baseKey);
-            case > KeyCode.Null and < KeyCode.A:
-                return new ((uint)baseKey);
-        }
-
-        if (Enum.IsDefined (typeof (KeyCode), baseKey))
-        {
-            return default (Rune);
-        }
-
-        return new ((uint)baseKey);
-    }
-
-    /// <summary>
-    ///     Converts a <see cref="KeyCode"/> to a <see cref="Rune"/>. Useful for determining if a key represents is a
-    ///     printable character.
-    /// </summary>
-    /// <remarks>
-    ///     <para>Keys with Ctrl or Alt modifiers will return <see langword="default"/>.</para>
-    ///     <para>
-    ///         If the key is a letter key (A-Z), the Rune will be the upper or lower case letter depending on whether
-    ///         <see cref="KeyCode.ShiftMask"/> is set.
-    ///     </para>
-    ///     <para>
-    ///         If the key is outside of the <see cref="KeyCode.CharMask"/> range, the returned Rune will be
-    ///         <see langword="default"/>.
-    ///     </para>
-    /// </remarks>
-    /// <param name="key"></param>
-    /// <returns>The key converted to a Rune. <see langword="default"/> if conversion is not possible.</returns>
-    public static Rune ToRune (KeyCode key)
-    {
-        if (key is KeyCode.Null or KeyCode.SpecialMask
-            || key.HasFlag (KeyCode.CtrlMask)
-            || key.HasFlag (KeyCode.AltMask))
-        {
-            return default (Rune);
-        }
-
-        // Extract the base key code
-        KeyCode baseKey = key;
-
-        if (baseKey.HasFlag (KeyCode.ShiftMask))
-        {
-            baseKey &= ~KeyCode.ShiftMask;
-        }
-
-        switch (baseKey)
-        {
-            case >= KeyCode.A and <= KeyCode.Z when !key.HasFlag (KeyCode.ShiftMask):
-                return new ((uint)(baseKey + 32));
-            case >= KeyCode.A and <= KeyCode.Z when key.HasFlag (KeyCode.ShiftMask):
                 return new ((uint)baseKey);
             case > KeyCode.Null and < KeyCode.A:
                 return new ((uint)baseKey);
