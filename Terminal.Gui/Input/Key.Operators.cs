@@ -38,12 +38,11 @@ public partial record Key
 
         switch (baseKey)
         {
-            case >= KeyCode.A and <= KeyCode.Z when !KeyCode.HasFlag (KeyCode.ShiftMask):
-                return new ((uint)(baseKey + 32));
+            case > KeyCode.Null and < KeyCode.A:
             case >= KeyCode.A and <= KeyCode.Z when KeyCode.HasFlag (KeyCode.ShiftMask):
                 return new ((uint)baseKey);
-            case > KeyCode.Null and < KeyCode.A:
-                return new ((uint)baseKey);
+            case >= KeyCode.A and <= KeyCode.Z when !KeyCode.HasFlag (KeyCode.ShiftMask):
+                return new ((uint)(baseKey + 32));
         }
 
         if (Enum.IsDefined (typeof (KeyCode), baseKey))
