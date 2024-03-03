@@ -410,10 +410,9 @@ internal class CursesDriver : ConsoleDriver
     {
         EscapeSequenceData input = new ();
         input.code = Curses.get_wch (out input.wch);
-        ref int wch = ref input.wch;
         ref int code = ref input.code;
 
-        //System.Diagnostics.Debug.WriteLine ($"code: {code}; wch: {wch}");
+        //System.Diagnostics.Debug.WriteLine ($"code: {code}; input.wch: {input.wch}");
         if (code == Curses.ERR)
         {
             return;
@@ -424,20 +423,20 @@ internal class CursesDriver : ConsoleDriver
 
         if (code == Curses.KEY_CODE_YES)
         {
-            while (code == Curses.KEY_CODE_YES && wch == Curses.KeyResize)
+            while (code == Curses.KEY_CODE_YES && input.wch == Curses.KeyResize)
             {
                 ProcessWinChange ();
-                code = Curses.get_wch (out wch);
+                code = Curses.get_wch (out input.wch);
             }
 
-            if (wch == 0)
+            if (input.wch == 0)
             {
                 return;
             }
 
-            if (wch == Curses.KeyMouse)
+            if (input.wch == Curses.KeyMouse)
             {
-                int wch2 = wch;
+                int wch2 = input.wch;
 
                 while (wch2 == Curses.KeyMouse)
                 {
@@ -457,37 +456,37 @@ internal class CursesDriver : ConsoleDriver
                 return;
             }
 
-            k = MapCursesKey (wch);
+            k = MapCursesKey (input.wch);
 
-            if (wch >= 277 && wch <= 288)
+            if (input.wch >= 277 && input.wch <= 288)
             {
                 // Shift+(F1 - F12)
-                wch -= 12;
-                k = KeyCode.ShiftMask | MapCursesKey (wch);
+                input.wch -= 12;
+                k = KeyCode.ShiftMask | MapCursesKey (input.wch);
             }
-            else if (wch >= 289 && wch <= 300)
+            else if (input.wch >= 289 && input.wch <= 300)
             {
                 // Ctrl+(F1 - F12)
-                wch -= 24;
-                k = KeyCode.CtrlMask | MapCursesKey (wch);
+                input.wch -= 24;
+                k = KeyCode.CtrlMask | MapCursesKey (input.wch);
             }
-            else if (wch >= 301 && wch <= 312)
+            else if (input.wch >= 301 && input.wch <= 312)
             {
                 // Ctrl+Shift+(F1 - F12)
-                wch -= 36;
-                k = KeyCode.CtrlMask | KeyCode.ShiftMask | MapCursesKey (wch);
+                input.wch -= 36;
+                k = KeyCode.CtrlMask | KeyCode.ShiftMask | MapCursesKey (input.wch);
             }
-            else if (wch >= 313 && wch <= 324)
+            else if (input.wch >= 313 && input.wch <= 324)
             {
                 // Alt+(F1 - F12)
-                wch -= 48;
-                k = KeyCode.AltMask | MapCursesKey (wch);
+                input.wch -= 48;
+                k = KeyCode.AltMask | MapCursesKey (input.wch);
             }
-            else if (wch >= 325 && wch <= 327)
+            else if (input.wch >= 325 && input.wch <= 327)
             {
                 // Shift+Alt+(F1 - F3)
-                wch -= 60;
-                k = KeyCode.ShiftMask | KeyCode.AltMask | MapCursesKey (wch);
+                input.wch -= 60;
+                k = KeyCode.ShiftMask | KeyCode.AltMask | MapCursesKey (input.wch);
             }
 
             OnKeyDown (new Key (k));
@@ -497,7 +496,7 @@ internal class CursesDriver : ConsoleDriver
         }
 
         // Special handling for ESC, we want to try to catch ESC+letter to simulate alt-letter as well as Alt-Fkey
-        if (wch == 27)
+        if (input.wch == 27)
         {
             Curses.timeout (10);
 
@@ -505,7 +504,7 @@ internal class CursesDriver : ConsoleDriver
 
             if (code == Curses.KEY_CODE_YES)
             {
-                k = KeyCode.AltMask | MapCursesKey (wch);
+                k = KeyCode.AltMask | MapCursesKey (input.wch);
             }
 
             Key key = null;
@@ -554,7 +553,7 @@ internal class CursesDriver : ConsoleDriver
                     {
                         k = KeyCode.CtrlMask | KeyCode.AltMask | KeyCode.Space;
                     }
-                    else if (wch >= (uint)KeyCode.A && wch <= (uint)KeyCode.Z)
+                    else if (input.wch >= (uint)KeyCode.A && input.wch <= (uint)KeyCode.Z)
                     {
                         k = KeyCode.ShiftMask | KeyCode.AltMask | KeyCode.Space;
                     }
@@ -578,34 +577,34 @@ internal class CursesDriver : ConsoleDriver
             OnKeyDown (key);
             OnKeyUp (key);
         }
-        else if (wch == Curses.KeyTab)
+        else if (input.wch == Curses.KeyTab)
         {
-            k = MapCursesKey (wch);
+            k = MapCursesKey (input.wch);
             OnKeyDown (new Key (k));
             OnKeyUp (new Key (k));
         }
         else
         {
             // Unfortunately there are no way to differentiate Ctrl+alfa and Ctrl+Shift+alfa.
-            k = (KeyCode)wch;
+            k = (KeyCode)input.wch;
 
-            if (wch == 0)
+            if (input.wch == 0)
             {
                 k = KeyCode.CtrlMask | KeyCode.Space;
             }
-            else if (wch >= (uint)KeyCode.A - 64 && wch <= (uint)KeyCode.Z - 64)
+            else if (input.wch >= (uint)KeyCode.A - 64 && input.wch <= (uint)KeyCode.Z - 64)
             {
-                if ((KeyCode)(wch + 64) != KeyCode.J)
+                if ((KeyCode)(input.wch + 64) != KeyCode.J)
                 {
-                    k = KeyCode.CtrlMask | (KeyCode)(wch + 64);
+                    k = KeyCode.CtrlMask | (KeyCode)(input.wch + 64);
                 }
             }
-            else if (wch >= (uint)KeyCode.A && wch <= (uint)KeyCode.Z)
+            else if (input.wch >= (uint)KeyCode.A && input.wch <= (uint)KeyCode.Z)
             {
-                k = (KeyCode)wch | KeyCode.ShiftMask;
+                k = (KeyCode)input.wch | KeyCode.ShiftMask;
             }
 
-            if (wch == '\n' || wch == '\r')
+            if (input.wch == '\n' || input.wch == '\r')
             {
                 k = KeyCode.Enter;
             }
