@@ -455,31 +455,31 @@ internal class CursesDriver : ConsoleDriver
 
             k = MapCursesKey (input.wch);
 
-            if (input.wch >= 277 && input.wch <= 288)
+            if (input.wch is >= 277 and <= 288)
             {
                 // Shift+(F1 - F12)
                 input.wch -= 12;
                 k = KeyCode.ShiftMask | MapCursesKey (input.wch);
             }
-            else if (input.wch >= 289 && input.wch <= 300)
+            else if (input.wch is >= 289 and <= 300)
             {
                 // Ctrl+(F1 - F12)
                 input.wch -= 24;
                 k = KeyCode.CtrlMask | MapCursesKey (input.wch);
             }
-            else if (input.wch >= 301 && input.wch <= 312)
+            else if (input.wch is >= 301 and <= 312)
             {
                 // Ctrl+Shift+(F1 - F12)
                 input.wch -= 36;
                 k = KeyCode.CtrlMask | KeyCode.ShiftMask | MapCursesKey (input.wch);
             }
-            else if (input.wch >= 313 && input.wch <= 324)
+            else if (input.wch is >= 313 and <= 324)
             {
                 // Alt+(F1 - F12)
                 input.wch -= 48;
                 k = KeyCode.AltMask | MapCursesKey (input.wch);
             }
-            else if (input.wch >= 325 && input.wch <= 327)
+            else if (input.wch is >= 325 and <= 327)
             {
                 // Shift+Alt+(F1 - F3)
                 input.wch -= 60;
