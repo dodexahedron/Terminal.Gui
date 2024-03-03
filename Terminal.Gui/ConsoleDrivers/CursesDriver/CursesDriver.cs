@@ -447,7 +447,7 @@ internal class CursesDriver : ConsoleDriver
                         new ('[', 0, false, false, false),
                         new ('<', 0, false, false, false)
                     ];
-                    ref ConsoleKeyInfo [] cki = ref input.cki;
+
                     input.code = 0;
                     input = HandleEscapeSeqResponse (ref input);
                 }
