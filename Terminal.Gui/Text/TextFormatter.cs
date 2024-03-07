@@ -1,5 +1,6 @@
 #nullable enable
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
@@ -1927,7 +1928,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
     /// <param name="hotKey">Outputs the hotKey. <see cref="Key.Empty"/> if not found.</param>
     /// <returns><see langword="true" /> if a valid HotKey was found; <see langword="false" /> otherwise.</returns>
     public static bool FindHotKey (
-        string text,
+        [NotNullWhen(true)]string? text,
         Rune hotKeySpecifier,
         out int hotPos,
         out Key hotKey
