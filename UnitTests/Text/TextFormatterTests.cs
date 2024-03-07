@@ -568,30 +568,28 @@ ssb
         Assert.Equal (expectedKey, hotKey);
     }
 
+    #nullable enable
     [Theory]
     [InlineData (null)]
     [InlineData ("")]
     [InlineData ("no hotkey")]
     [InlineData ("No hotkey, Upper Case")]
     [InlineData ("Non-english: Сохранить")]
-    public void FindHotKey_Invalid_ReturnsFalse (string text)
+    public void FindHotKey_Invalid_ReturnsFalse (string? text)
     {
         var hotKeySpecifier = (Rune)'_';
-        var supportFirstUpperCase = false;
-        var hotPos = 0;
-        Key hotKey = KeyCode.Null;
-        var result = false;
 
-        result = TextFormatter.FindHotKey (
-                                           text,
-                                           hotKeySpecifier,
-                                           out hotPos,
-                                           out hotKey
-                                          );
+        bool result = TextFormatter.FindHotKey (
+                                                text,
+                                                hotKeySpecifier,
+                                                out int hotPos,
+                                                out Key hotKey
+                                               );
         Assert.False (result);
         Assert.Equal (-1, hotPos);
         Assert.Equal (KeyCode.Null, hotKey);
     }
+    #nullable restore
 
     [Theory]
     [InlineData ("_1 Before", true, 0, (KeyCode)'1')] // Digits 
