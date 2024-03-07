@@ -1929,7 +1929,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
     /// <returns><see langword="true" /> if a valid HotKey was found; <see langword="false" /> otherwise.</returns>
     public static bool FindHotKey (
         [NotNullWhen(true)]string? text,
-        Rune hotKeySpecifier,
+        in Rune hotKeySpecifier,
         out int hotPos,
         out Key hotKey
     )
