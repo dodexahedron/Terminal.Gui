@@ -1925,18 +1925,12 @@ public sealed class TextFormatter : INotifyPropertyChanged
     /// <param name="hotKeySpecifier">The HotKey specifier (e.g. '_') to look for.</param>
     /// <param name="hotPos">Outputs the Rune index into <c>text</c>.</param>
     /// <param name="hotKey">Outputs the hotKey. <see cref="Key.Empty"/> if not found.</param>
-    /// <param name="firstUpperCase">
-    ///     If <see langword="true" />, the legacy behavior of identifying the first upper case character as the
-    ///     HotKey will be enabled. Regardless of the value of this parameter, <c>hotKeySpecifier</c> takes precedence.
-    ///     Defaults to <see langword="false"/>.
-    /// </param>
     /// <returns><see langword="true" /> if a valid HotKey was found; <see langword="false" /> otherwise.</returns>
     public static bool FindHotKey (
         string text,
         Rune hotKeySpecifier,
         out int hotPos,
-        out Key hotKey,
-        bool firstUpperCase = false
+        out Key hotKey
     )
     {
         if (string.IsNullOrEmpty (text) || hotKeySpecifier == (Rune)0xFFFF)
@@ -1972,28 +1966,6 @@ public sealed class TextFormatter : INotifyPropertyChanged
             }
 
             i++;
-        }
-
-        // Legacy support - use first upper case char if the specifier was not found
-        if (curHotPos == -1 && firstUpperCase)
-        {
-            i = 0;
-
-            foreach (Rune c in text.EnumerateRunes ())
-            {
-                if ((char)c.Value != 0xFFFD)
-                {
-                    if (Rune.IsUpper (c))
-                    {
-                        curHotKey = c;
-                        curHotPos = i;
-
-                        break;
-                    }
-                }
-
-                i++;
-            }
         }
 
         if (curHotKey != (Rune)0 && curHotPos != -1)
