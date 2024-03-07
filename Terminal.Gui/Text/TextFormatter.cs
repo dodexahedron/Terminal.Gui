@@ -1963,7 +1963,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
             return false;
         }
 
-        var curHotKey = (Rune)0;
+        Rune curHotKey = new (0);
         int curHotPos = -1;
 
         // Use first hot_key char passed into 'hotKey'.
