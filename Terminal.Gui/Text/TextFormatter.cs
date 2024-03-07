@@ -1926,11 +1926,11 @@ public sealed class TextFormatter : INotifyPropertyChanged
     /// <param name="hotPos">Outputs the Rune index into <c>text</c>.</param>
     /// <param name="hotKey">Outputs the hotKey. <see cref="Key.Empty"/> if not found.</param>
     /// <param name="firstUpperCase">
-    ///     If <c>true</c> the legacy behavior of identifying the first upper case character as the
+    ///     If <see langword="true" />, the legacy behavior of identifying the first upper case character as the
     ///     HotKey will be enabled. Regardless of the value of this parameter, <c>hotKeySpecifier</c> takes precedence.
     ///     Defaults to <see langword="false"/>.
     /// </param>
-    /// <returns><c>true</c> if a HotKey was found; <c>false</c> otherwise.</returns>
+    /// <returns><see langword="true" /> if a valid HotKey was found; <see langword="false" /> otherwise.</returns>
     public static bool FindHotKey (
         string text,
         Rune hotKeySpecifier,
