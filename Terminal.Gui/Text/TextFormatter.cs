@@ -1951,7 +1951,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
 
         foreach (Rune c in text.EnumerateRunes ())
         {
-            if ((char)c.Value != 0xFFFD)
+            if (c != Rune.ReplacementChar)
             {
                 if (c == hotKeySpecifier)
                 {
@@ -1968,7 +1968,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
             i++;
         }
 
-        if (curHotKey != (Rune)0 && curHotPos != -1)
+        if (curHotKey.Value != 0 && curHotPos != -1)
         {
             hotPos = curHotPos;
 
