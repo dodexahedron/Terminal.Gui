@@ -480,6 +480,7 @@ ssb
                                                attrs);
     }
 
+    #nullable enable
     [Theory]
     [InlineData ("_k Before", true, 0, (KeyCode)'K')] // lower case should return uppercase Hotkey
     [InlineData ("a_k Second", true, 1, (KeyCode)'K')]
@@ -487,18 +488,11 @@ ssb
     [InlineData ("After k_", false, -1, KeyCode.Null)]
     [InlineData ("Multiple _k and _R", true, 9, (KeyCode)'K')]
     [InlineData ("Non-english: _кдать", true, 13, (KeyCode)'к')] // Lower case Cryllic K (к)
-    [InlineData ("_k Before", true, 0, (KeyCode)'K', true)] // Turn on FirstUpperCase and verify same results
-    [InlineData ("a_k Second", true, 1, (KeyCode)'K', true)]
-    [InlineData ("Last _k", true, 5, (KeyCode)'K', true)]
-    [InlineData ("After k_", false, -1, KeyCode.Null, true)]
-    [InlineData ("Multiple _k and _r", true, 9, (KeyCode)'K', true)]
-    [InlineData ("Non-english: _кдать", true, 13, (KeyCode)'к', true)] // Cryllic K (К)
     public void FindHotKey_AlphaLowerCase_Succeeds (
-        string text,
+        string? text,
         bool expectedResult,
         int expectedHotPos,
-        KeyCode expectedKey,
-        bool supportFirstUpperCase = false
+        KeyCode expectedKey
     )
     {
         var hotKeySpecifier = (Rune)'_';
@@ -531,18 +525,11 @@ ssb
     [InlineData ("After K_", false, -1, KeyCode.Null)]
     [InlineData ("Multiple _K and _R", true, 9, (KeyCode)'K')]
     [InlineData ("Non-english: _Кдать", true, 13, (KeyCode)'К')] // Cryllic K (К)
-    [InlineData ("_K Before", true, 0, (KeyCode)'K', true)] // Turn on FirstUpperCase and verify same results
-    [InlineData ("a_K Second", true, 1, (KeyCode)'K', true)]
-    [InlineData ("Last _K", true, 5, (KeyCode)'K', true)]
-    [InlineData ("After K_", false, -1, KeyCode.Null, true)]
-    [InlineData ("Multiple _K and _R", true, 9, (KeyCode)'K', true)]
-    [InlineData ("Non-english: _Кдать", true, 13, (KeyCode)'К', true)] // Cryllic K (К)
     public void FindHotKey_AlphaUpperCase_Succeeds (
-        string text,
+        string? text,
         bool expectedResult,
         int expectedHotPos,
-        KeyCode expectedKey,
-        bool supportFirstUpperCase = false
+        KeyCode expectedKey
     )
     {
         var hotKeySpecifier = (Rune)'_';
@@ -568,7 +555,6 @@ ssb
         Assert.Equal (expectedKey, hotKey);
     }
 
-    #nullable enable
     [Theory]
     [InlineData (null)]
     [InlineData ("")]
@@ -597,17 +583,11 @@ ssb
     [InlineData ("Last _1", true, 5, (KeyCode)'1')]
     [InlineData ("After 1_", false, -1, KeyCode.Null)]
     [InlineData ("Multiple _1 and _2", true, 9, (KeyCode)'1')]
-    [InlineData ("_1 Before", true, 0, (KeyCode)'1', true)] // Turn on FirstUpperCase and verify same results
-    [InlineData ("a_1 Second", true, 1, (KeyCode)'1', true)]
-    [InlineData ("Last _1", true, 5, (KeyCode)'1', true)]
-    [InlineData ("After 1_", false, -1, KeyCode.Null, true)]
-    [InlineData ("Multiple _1 and _2", true, 9, (KeyCode)'1', true)]
     public void FindHotKey_Numeric_Succeeds (
         string text,
         bool expectedResult,
         int expectedHotPos,
-        KeyCode expectedKey,
-        bool supportFirstUpperCase = false
+        KeyCode expectedKey
     )
     {
         var hotKeySpecifier = (Rune)'_';
