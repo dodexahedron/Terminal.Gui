@@ -507,8 +507,7 @@ ssb
                                                 text,
                                                 hotKeySpecifier,
                                                 out int hotPos,
-                                                out Key hotKey,
-                                                supportFirstUpperCase
+                                                out Key hotKey
                                                );
 
         if (expectedResult)
@@ -552,8 +551,7 @@ ssb
                                                 text,
                                                 hotKeySpecifier,
                                                 out int hotPos,
-                                                out Key hotKey,
-                                                supportFirstUpperCase
+                                                out Key hotKey
                                                );
 
         if (expectedResult)
@@ -588,78 +586,11 @@ ssb
                                            text,
                                            hotKeySpecifier,
                                            out hotPos,
-                                           out hotKey,
-                                           supportFirstUpperCase
+                                           out hotKey
                                           );
         Assert.False (result);
         Assert.Equal (-1, hotPos);
         Assert.Equal (KeyCode.Null, hotKey);
-    }
-
-    [Theory]
-    [InlineData ("\"k before")]
-    [InlineData ("ak second")]
-    [InlineData ("last k")]
-    [InlineData ("multiple k and r")]
-    [InlineData ("12345")]
-    [InlineData ("`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?")] // punctuation
-    [InlineData (" ~  s  gui.cs   master ↑10")] // ~IsLetterOrDigit + Unicode
-    [InlineData ("non-english: кдать")] // Lower case Cryllic K (к)
-    public void FindHotKey_Legacy_FirstUpperCase_NotFound_Returns_False (string text)
-    {
-        var supportFirstUpperCase = true;
-
-        var hotKeySpecifier = (Rune)0;
-
-        bool result = TextFormatter.FindHotKey (
-                                                text,
-                                                hotKeySpecifier,
-                                                out int hotPos,
-                                                out Key hotKey,
-                                                supportFirstUpperCase
-                                               );
-        Assert.False (result);
-        Assert.Equal (-1, hotPos);
-        Assert.Equal (KeyCode.Null, hotKey);
-    }
-
-    [Theory]
-    [InlineData ("K Before", true, 0, (KeyCode)'K')]
-    [InlineData ("aK Second", true, 1, (KeyCode)'K')]
-    [InlineData ("last K", true, 5, (KeyCode)'K')]
-    [InlineData ("multiple K and R", true, 9, (KeyCode)'K')]
-    [InlineData ("non-english: Кдать", true, 13, (KeyCode)'К')] // Cryllic K (К)
-    public void FindHotKey_Legacy_FirstUpperCase_Succeeds (
-        string text,
-        bool expectedResult,
-        int expectedHotPos,
-        KeyCode expectedKey
-    )
-    {
-        var supportFirstUpperCase = true;
-
-        var hotKeySpecifier = (Rune)0;
-
-        bool result = TextFormatter.FindHotKey (
-                                                text,
-                                                hotKeySpecifier,
-                                                out int hotPos,
-                                                out Key hotKey,
-                                                supportFirstUpperCase
-                                               );
-
-        if (expectedResult)
-        {
-            Assert.True (result);
-        }
-        else
-        {
-            Assert.False (result);
-        }
-
-        Assert.Equal (expectedResult, result);
-        Assert.Equal (expectedHotPos, hotPos);
-        Assert.Equal (expectedKey, hotKey);
     }
 
     [Theory]
@@ -687,8 +618,7 @@ ssb
                                                 text,
                                                 hotKeySpecifier,
                                                 out int hotPos,
-                                                out Key hotKey,
-                                                supportFirstUpperCase
+                                                out Key hotKey
                                                );
 
         if (expectedResult)

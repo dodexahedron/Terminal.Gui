@@ -308,8 +308,7 @@ public class RadioGroup : View
                                               _radioLabels [i],
                                               HotKeySpecifier,
                                               out _,
-                                              out Key hotKey,
-                                              true
+                                              out Key hotKey
                                              )
                     && key.NoAlt.NoCtrl.NoShift == hotKey)
                 {
