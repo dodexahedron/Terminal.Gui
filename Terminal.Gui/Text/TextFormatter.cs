@@ -1921,12 +1921,33 @@ public sealed class TextFormatter : INotifyPropertyChanged
         return new (x, y, w, h);
     }
 
-    /// <summary>Finds the HotKey and its location in text.</summary>
-    /// <param name="text">The text to look in.</param>
-    /// <param name="hotKeySpecifier">The HotKey specifier (e.g. '_') to look for.</param>
-    /// <param name="hotPos">Outputs the Rune index into <c>text</c>.</param>
-    /// <param name="hotKey">Outputs the hotKey. <see cref="Key.Empty"/> if not found.</param>
-    /// <returns><see langword="true" /> if a valid HotKey was found; <see langword="false" /> otherwise.</returns>
+    /// <summary>
+    ///     Attempts to find the supplied <paramref name="hotKeySpecifier"/> immediately followed by a valid
+    ///     <paramref name="hotKey"/> value in <paramref name="text"/>, returning a boolean indicating if a valid hotkey was
+    ///     found and, if true, providing the value and position of the first such value.
+    /// </summary>
+    /// <param name="text">The text to look in. If null or empty, this method will immediately return <see langword="false"/>.</param>
+    /// <param name="hotKeySpecifier">
+    ///     The HotKey specifier (e.g. '_') to look for. Must be a valid non-private codepoint less
+    ///     than or equal to U+D7FF.
+    /// </param>
+    /// <param name="hotPos">
+    ///     If return value is <see langword="true"/>, the position of the found HotKey value, as its index in
+    ///     <paramref name="text"/>. -1 otherwise.
+    /// </param>
+    /// <param name="hotKey">
+    ///     If return value is <see langword="true"/>, the value of the found HotKey value. If return value is
+    ///     <see langword="false"/>, contains the value <see cref="Key.Empty"/>.
+    /// </param>
+    /// <returns>
+    ///     <see langword="true"/> if all supplied parameters are valid and a valid HotKey was found; <see langword="false"/>
+    ///     otherwise.
+    /// </returns>
+    /// <remarks>
+    ///     If a valid hotkey was found, the value in <paramref name="hotKey"/> is guaranteed to be in the Basic Multilingual
+    ///     Plane and can therefore be represented by a single <see langword="char"/> value. Surrogate pairs or any other
+    ///     values above U+D7FF are not supported by this method.
+    /// </remarks>
     public static bool FindHotKey (
         [NotNullWhen(true)]string? text,
         in Rune hotKeySpecifier,
