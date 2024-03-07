@@ -1934,7 +1934,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
         out Key hotKey
     )
     {
-        if (string.IsNullOrEmpty (text) || hotKeySpecifier == (Rune)0xFFFF)
+        if (string.IsNullOrEmpty (text) || hotKeySpecifier.Value > 0xD7FFu)
         {
             hotPos = -1;
             hotKey = Key.Empty;
