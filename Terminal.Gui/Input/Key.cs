@@ -479,12 +479,12 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
                 {
                     if (parsedKeyCode is >= KeyCode.A and <= KeyCode.Z && modifiers == 0)
                     {
-                        key = new Key (parsedKeyCode | KeyCode.ShiftMask);
+                        key = new (parsedKeyCode | KeyCode.ShiftMask);
 
                         return true;
                     }
 
-                    key = new Key (parsedKeyCode | modifiers);
+                    key = new (parsedKeyCode | modifiers);
 
                     return true;
                 }
@@ -494,7 +494,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
             {
                 keyCode = keyCode & ~KeyCode.Space;
             }
-            key = new Key (keyCode | modifiers);
+            key = new (keyCode | modifiers);
 
             return true;
         }
@@ -505,7 +505,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
             {
                 if (parsedKeyCode is >= KeyCode.A and <= KeyCode.Z && modifiers == 0)
                 {
-                    key = new Key (parsedKeyCode | KeyCode.ShiftMask);
+                    key = new (parsedKeyCode | KeyCode.ShiftMask);
 
                     return true;
                 }
@@ -514,7 +514,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
                 {
                     parsedKeyCode = parsedKeyCode & ~KeyCode.Space;
                 }
-                key = new Key (parsedKeyCode | modifiers);
+                key = new (parsedKeyCode | modifiers);
 
                 return true;
             }
@@ -535,12 +535,12 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
 
             if ((KeyCode)parsedInt is >= KeyCode.A and <= KeyCode.Z && modifiers == 0)
             {
-                key = new Key ((KeyCode)parsedInt | KeyCode.ShiftMask);
+                key = new ((KeyCode)parsedInt | KeyCode.ShiftMask);
 
                 return true;
             }
 
-            key = new Key ((KeyCode)parsedInt);
+            key = new ((KeyCode)parsedInt);
 
             return true;
         }
@@ -552,7 +552,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
 
         if (GetIsKeyCodeAtoZ (parsedKeyCode))
         {
-            key = new Key (parsedKeyCode | (modifiers & ~KeyCode.Space));
+            key = new (parsedKeyCode | (modifiers & ~KeyCode.Space));
 
             return true;
         }
