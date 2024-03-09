@@ -567,7 +567,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
 
     #region Standard Key Definitions
 
-    /// <summary>An uninitialized The <see cref="Key"/> object.</summary>
+    /// <summary>A default <see cref="Key"/> instance. Equivalent to a call to new Key();</summary>
     public static Key Empty => new ();
 
     /// <summary>The <see cref="Key"/> object for the Backspace key.</summary>
