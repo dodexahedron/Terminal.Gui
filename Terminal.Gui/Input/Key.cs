@@ -143,11 +143,11 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
 
     /// <summary>Gets a value indicating whether the Alt key was pressed (real or synthesized)</summary>
     /// <value><see langword="true"/> if is alternate; otherwise, <see langword="false"/>.</value>
-    public bool IsAlt => (KeyCode & KeyCode.AltMask) != 0;
+    public bool IsAlt => (_keyCode & KeyCode.AltMask) != 0;
 
     /// <summary>Gets a value indicating whether the Ctrl key was pressed.</summary>
     /// <value><see langword="true"/> if is ctrl; otherwise, <see langword="false"/>.</value>
-    public bool IsCtrl => (KeyCode & KeyCode.CtrlMask) != 0;
+    public bool IsCtrl => (_keyCode & KeyCode.CtrlMask) != 0;
 
     /// <summary>
     ///     Gets a value indicating whether the key represents a key in the range of <see cref="KeyCode.A"/> to
@@ -160,11 +160,11 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     ///     <see cref="Key.A"/>, <see cref="Key.B"/>, etc.). Even though the values are the same as the ASCII values for
     ///     uppercase characters, these enum values represent *lowercase*, un-shifted characters.
     /// </remarks>
-    public bool IsKeyCodeAtoZ => GetIsKeyCodeAtoZ (KeyCode);
+    public bool IsKeyCodeAtoZ => GetIsKeyCodeAtoZ (_keyCode);
 
     /// <summary>Gets a value indicating whether the Shift key was pressed.</summary>
     /// <value><see langword="true"/> if is shift; otherwise, <see langword="false"/>.</value>
-    public bool IsShift => (KeyCode & KeyCode.ShiftMask) != 0;
+    public bool IsShift => (_keyCode & KeyCode.ShiftMask) != 0;
 
     /// <summary>
     ///     Indicates whether the <see cref="Key"/> is valid or not. Invalid keys are <see cref="Key.Empty"/>, and keys
