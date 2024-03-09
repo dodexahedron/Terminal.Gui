@@ -682,7 +682,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
 
         if (NeedsFormat)
         {
-            string text = _text;
+            string? text = _text;
 
             if (FindHotKey (_text, HotKeySpecifier, out _hotKeyPos, out Key newHotKey))
             {
