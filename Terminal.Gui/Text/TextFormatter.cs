@@ -674,7 +674,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
         //   My vote is to seal the class at this time, because of how coupled this is.
         if (string.IsNullOrEmpty (Text) || Size.Height == 0 || Size.Width == 0)
         {
-            _lines = new List<string> { string.Empty };
+            _lines = [string.Empty];
             NeedsFormat = false;
 
             return _lines;
