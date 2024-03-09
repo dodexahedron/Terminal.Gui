@@ -257,7 +257,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
         Attribute normalColor,
         Attribute hotColor,
         Rectangle containerBounds = default,
-        ConsoleDriver driver = null
+        ConsoleDriver? driver = null
     )
     {
         // With this check, we protect against subclasses with overrides of Text (like Button)
