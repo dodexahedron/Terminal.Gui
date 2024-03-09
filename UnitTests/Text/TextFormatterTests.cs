@@ -515,7 +515,7 @@ ssb
 
         Assert.Equal (expectedResult, result);
         Assert.Equal (expectedHotPos, hotPos);
-        Assert.Equal (expectedKey, hotKey);
+        Assert.Equal (expectedKey, hotKey.KeyCode);
     }
 
     [Theory]
@@ -552,7 +552,7 @@ ssb
 
         Assert.Equal (expectedResult, result);
         Assert.Equal (expectedHotPos, hotPos);
-        Assert.Equal (expectedKey, hotKey);
+        Assert.Equal (expectedKey, hotKey.KeyCode);
     }
 
     [Theory]
