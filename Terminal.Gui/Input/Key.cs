@@ -122,9 +122,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     [SetsRequiredMembers]
     public Key (string str)
     {
-        bool result = TryParse (str, out Key? key);
-
-        if (!result)
+        if (!TryParse (str, out Key? key))
         {
             throw new ArgumentException (@$"Invalid key string: {str}", nameof (str));
         }
