@@ -123,13 +123,13 @@ public static class RuneExtensions
     /// <remarks>This is a Terminal.Gui extension method to <see cref="System.Text.Rune"/> to support TUI text manipulation.</remarks>
     /// <param name="rune"></param>
     /// <returns></returns>
-    public static bool IsCombiningMark (this Rune rune)
+    public static bool IsCombiningMark (in this Rune rune)
     {
         UnicodeCategory category = Rune.GetUnicodeCategory (rune);
 
-        return category == UnicodeCategory.NonSpacingMark
-               || category == UnicodeCategory.SpacingCombiningMark
-               || category == UnicodeCategory.EnclosingMark;
+        return category is UnicodeCategory.NonSpacingMark
+                           or UnicodeCategory.SpacingCombiningMark
+                           or UnicodeCategory.EnclosingMark;
     }
 
     /// <summary>Reports whether a rune is a surrogate code point.</summary>
