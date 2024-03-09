@@ -410,7 +410,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     {
         if (string.IsNullOrEmpty (text))
         {
-            key = Key.Empty;
+            key = Empty;
 
             return true;
         }
@@ -459,7 +459,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
         // we now have the modifiers
 
         string partNotFound = parts.FirstOrDefault (p => !string.IsNullOrEmpty (p), string.Empty);
-        var parsedKeyCode = KeyCode.Null;
+        KeyCode parsedKeyCode;
         var parsedInt = 0;
 
         if (partNotFound.Length == 1)
