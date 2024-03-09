@@ -2132,7 +2132,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
     ///   compiler with the name of the caller.
     /// </param>
     /// <returns><see langword="true"/>, if the value was changed. Otherwise, <see langword="false"/>.</returns>
-    protected bool SetField<T> (ref T field, in T value, [CallerMemberName] string? propertyName = null) where T : IEquatable<T>
+    private bool SetField<T> (ref T field, in T value, [CallerMemberName] string? propertyName = null) where T : IEquatable<T>
     {
         if (field.Equals (value))
         {
