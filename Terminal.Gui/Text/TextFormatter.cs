@@ -17,6 +17,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
     private bool _autoSize;
     private Key _hotKey = new ();
     private int _hotKeyPos = -1;
+    // PERF: Use of this is really heavy.
     private List<string> _lines = [];
     private bool _multiLine;
     private bool _preserveTrailingSpaces;
@@ -658,6 +659,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
     ///         be returned.
     ///     </para>
     /// </remarks>
+    // PERF: This is super heavy.
     public List<string> GetLines ()
     {
         // With this check, we protect against subclasses with overrides of Text
@@ -674,6 +676,10 @@ public sealed class TextFormatter : INotifyPropertyChanged
         //   My vote is to seal the class at this time, because of how coupled this is.
         if (string.IsNullOrEmpty (Text) || Size is {Height: 0} or {Width: 0})
         {
+            // TODO: Don't create a new list every single time.
+            // A few options.
+            // Likely that use of the INotifyPropertyChanged infrastructure can
+            // help cut down on this and other work in this method.
             _lines = [string.Empty];
             NeedsFormat = false;
 
