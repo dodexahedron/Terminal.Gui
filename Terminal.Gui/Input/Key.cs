@@ -73,10 +73,12 @@ namespace Terminal.Gui;
 public sealed partial record Key : IEqualityOperators<Key,Key,bool>
 {
     /// <summary>Constructs a new <see cref="Key"/></summary>
+    [SetsRequiredMembers]
     public Key () : this (KeyCode.Null) { }
 
     /// <summary>Constructs a new <see cref="Key"/>, initialized from <paramref name="k"/> or <see cref="Gui.KeyCode.Null"/>, if not provided.</summary>
     /// <param name="k">The key</param>
+    [SetsRequiredMembers]
     public Key ([ConstantExpected(Max = uint.MaxValue, Min = uint.MinValue)]KeyCode k = KeyCode.Null) { KeyCode = k; }
 
     /// <summary>Constructs a new <see cref="Key"/> from a char.</summary>
@@ -90,6 +92,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     ///     </para>
     /// </remarks>
     /// <param name="ch"></param>
+    [SetsRequiredMembers]
     public Key (char ch)
     {
         switch (ch)
@@ -116,6 +119,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     ///     <see cref="TryParse(string, out Terminal.Gui.Key)"/> for information on the format of the string.
     /// </summary>
     /// <param name="str">The string describing the key.</param>
+    [SetsRequiredMembers]
     public Key (string str)
     {
         bool result = TryParse (str, out Key? key);
