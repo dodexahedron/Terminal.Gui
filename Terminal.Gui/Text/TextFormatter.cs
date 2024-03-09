@@ -1949,13 +1949,14 @@ public sealed class TextFormatter : INotifyPropertyChanged
     ///     values above U+D7FF are not supported by this method.
     /// </remarks>
     public static bool FindHotKey (
-        [NotNullWhen(true)]string? text,
+        [NotNullWhen (true)] string? text,
         in Rune hotKeySpecifier,
         out int hotPos,
         out Key hotKey
     )
     {
-        if (string.IsNullOrEmpty (text) || hotKeySpecifier.Value > 0xD7FFu)
+        // Short-circuit to false if inputs are clearly out of range.
+        if (string.IsNullOrEmpty (text) || hotKeySpecifier.Value > 0xD7FFu || hotKeySpecifier.IsCombiningMark ())
         {
             hotPos = -1;
             hotKey = Key.Empty;
@@ -1963,56 +1964,69 @@ public sealed class TextFormatter : INotifyPropertyChanged
             return false;
         }
 
-        Rune curHotKey = new (0);
-        int curHotPos = -1;
+        // Get a span over the string so we can slide and dice without allocations.
+        ReadOnlySpan<char> textSpan = text.AsSpan ();
 
-        // Use first hot_key char passed into 'hotKey'.
-        // TODO: Ignore hot_key of two are provided
-        // TODO: Do not support non-alphanumeric chars that can't be typed
-        var i = 0;
+        int spanPosition = 0;
 
-        foreach (Rune c in text.EnumerateRunes ())
+        // Scan the span up to end minus one since we have to find a pair.
+        while (spanPosition < textSpan.Length - 1)
         {
-            if (c != Rune.ReplacementChar)
-            {
-                if (c == hotKeySpecifier)
-                {
-                    curHotPos = i;
-                }
-                else if (curHotPos > -1)
-                {
-                    curHotKey = c;
+            int currentClusterLength = StringInfo.GetNextTextElementLength (textSpan [spanPosition..]);
 
-                    break;
-                }
+            // If the text element is not representable as a single char, move on.
+            if (currentClusterLength != 1)
+            {
+                spanPosition += currentClusterLength;
+
+                continue;
             }
 
-            i++;
-        }
-
-        if (curHotKey.Value != 0 && curHotPos != -1)
-        {
-            hotPos = curHotPos;
-
-            var newHotKey = (KeyCode)curHotKey.Value;
-
-            if (newHotKey != KeyCode.Null && !(newHotKey == KeyCode.Space || Rune.IsControl (curHotKey)))
+            // Not the specifier. Move on.
+            if (textSpan [spanPosition] != hotKeySpecifier.Value)
             {
-                if ((newHotKey & ~KeyCode.Space) is >= KeyCode.A and <= KeyCode.Z)
+                spanPosition += currentClusterLength;
+
+                continue;
+            }
+
+            // Found a specifier.
+            // Validate the NEXT element is one char.
+            // If not, move on and skip that element too, since that means it will not pass the above tests either.
+            int nextClusterLength = StringInfo.GetNextTextElementLength (textSpan [(spanPosition + 1)..]);
+
+            if (nextClusterLength != 1)
+            {
+                spanPosition += currentClusterLength + nextClusterLength;
+
+                continue;
+            }
+
+            // The next character MIGHT be a legal hotkey.
+            // Perform final validation and return if true.
+            var keyCode = (KeyCode)textSpan [spanPosition + 1];
+
+            if (keyCode is not KeyCode.Null and not KeyCode.Space && !char.IsControl (textSpan [spanPosition + 1]))
+            {
+                if ((keyCode & ~KeyCode.Space) is >= KeyCode.A and <= KeyCode.Z)
                 {
-                    newHotKey &= ~KeyCode.Space;
+                    keyCode &= ~KeyCode.Space;
                 }
 
-                hotKey = newHotKey;
-
-                //hotKey.Scope = KeyBindingScope.HotKey;
+                hotPos = spanPosition;
+                hotKey = keyCode;
 
                 return true;
             }
+
+            // Move on after failing the above test.
+            // Also skip next element if it isn't the specifier.
+            spanPosition += currentClusterLength + (hotKeySpecifier.Value != textSpan [spanPosition + 1] ? nextClusterLength : 0);
         }
 
+        // If we finish the loop without returning or skip it entirely, there's no hotkey.
         hotPos = -1;
-        hotKey = KeyCode.Null;
+        hotKey = Key.Empty;
 
         return false;
     }
