@@ -23,19 +23,22 @@ public sealed class TextFormatter : INotifyPropertyChanged
     private Size _size;
     private int _tabWidth = 4;
     private string? _text;
-    private TextAlignment _textAlignment;
-    private TextDirection _textDirection;
-    private VerticalTextAlignment _textVerticalAlignment;
+    private int _textAlignment;
+    private int _textDirection;
+    private int _textVerticalAlignment;
     private bool _wordWrap = true;
 
     /// <summary>Controls the horizontal text-alignment property.</summary>
     /// <value>The text alignment.</value>
     public TextAlignment Alignment
     {
-        get => _textAlignment;
+        get => Unsafe.As<int, TextAlignment> (ref _textAlignment);
         set
         {
-            _textAlignment = EnableNeedsFormat (in value);
+            if (SetField (ref _textAlignment, Unsafe.As<TextAlignment, int> (ref value)))
+            {
+                EnableNeedsFormat (in value);
+            }
         }
     }
 
@@ -52,11 +55,14 @@ public sealed class TextFormatter : INotifyPropertyChanged
         get => _autoSize;
         set
         {
-            _autoSize = EnableNeedsFormat (in value);
-
-            if (_autoSize && Alignment != TextAlignment.Justified && VerticalAlignment != VerticalTextAlignment.Justified)
+            if (SetField (ref _autoSize, in value))
             {
-                Size = CalcRect (0, 0, _text, Direction, TabWidth).Size;
+                EnableNeedsFormat (in value);
+
+                if (_autoSize && Alignment != TextAlignment.Justified && VerticalAlignment != VerticalTextAlignment.Justified)
+                {
+                    Size = CalcRect (0, 0, _text, Direction, TabWidth).Size;
+                }
             }
         }
     }
@@ -71,10 +77,13 @@ public sealed class TextFormatter : INotifyPropertyChanged
     /// <value>A <see cref="TextDirection" /> value that controls rendered text output direction.</value>
     public TextDirection Direction
     {
-        get => _textDirection;
+        get => Unsafe.As<int, TextDirection> (ref _textDirection);
         set
         {
-            _textDirection = EnableNeedsFormat (in value);
+            if (SetField (ref _textDirection, Unsafe.As<TextDirection, int> (ref value)))
+            {
+                EnableNeedsFormat (in value);
+            }
 
             if (AutoSize && Alignment != TextAlignment.Justified && VerticalAlignment != VerticalTextAlignment.Justified)
             {
@@ -212,10 +221,13 @@ public sealed class TextFormatter : INotifyPropertyChanged
     /// <value>The text vertical alignment.</value>
     public VerticalTextAlignment VerticalAlignment
     {
-        get => _textVerticalAlignment;
+        get => Unsafe.As<int, VerticalTextAlignment> (ref _textVerticalAlignment);
         set
         {
-            _textVerticalAlignment = EnableNeedsFormat (in value);
+            if (SetField (ref _textVerticalAlignment, Unsafe.As<VerticalTextAlignment, int> (ref value)))
+            {
+                EnableNeedsFormat (in value);
+            }
         }
     }
 
