@@ -672,7 +672,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
         //   will be possible, which you can't really protect against anyway
         //   without reflection, which would be an awful idea here.
         //   My vote is to seal the class at this time, because of how coupled this is.
-        if (string.IsNullOrEmpty (Text) || Size.Height == 0 || Size.Width == 0)
+        if (string.IsNullOrEmpty (Text) || Size is {Height: 0} or {Width: 0})
         {
             _lines = [string.Empty];
             NeedsFormat = false;
