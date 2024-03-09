@@ -619,7 +619,7 @@ ssb
     [InlineData ("\"_k before", true, KeyCode.K)]
     [InlineData ("_`~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?", true, (KeyCode)'`')]
     [InlineData ("`_~!@#$%^&*()-_=+[{]}\\|;:'\",<.>/?", true, (KeyCode)'~')]
-    [InlineData ("`~!@#$%^&*()-__=+[{]}\\|;:'\",<.>/?", true, (KeyCode)'=')] // BUGBUG: Not sure why this fails. Ignore the first and consider the second
+    [InlineData ("`~!@#$%^&*()-__=+[{]}\\|;:'\",<.>/?", true, (KeyCode)'_')]
     //[InlineData ("_ ~  s  gui.cs   master ↑10", true, KeyCode.Null)] // ~IsLetterOrDigit + Unicode
     //[InlineData (" ~  s  gui.cs  _ master ↑10", true, KeyCode.Null)] // ~IsLetterOrDigit + Unicode
     [InlineData ("non-english: _кдать", true, (KeyCode)'к')] // Lower case Cryllic K (к)
