@@ -182,7 +182,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     ///     for uppercase characters, these enum values represent *lowercase*, un-shifted characters.
     /// </para>
     /// <remarks>This property is the backing data for the <see cref="Key"/>. It is a <see cref="KeyCode"/> enum value.</remarks>
-    public KeyCode KeyCode
+    public required KeyCode KeyCode
     {
         get => _keyCode;
         init
