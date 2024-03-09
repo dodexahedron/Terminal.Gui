@@ -261,6 +261,12 @@ public sealed class TextFormatter : INotifyPropertyChanged
     )
     {
         // With this check, we protect against subclasses with overrides of Text (like Button)
+        // INTENT: No we don't, in any way.
+        // Button doesn't inherit from TextFormatter, anyway,
+        // so override isn't/wasn't relevant, even before I sealed this class, which proves that definitively.
+        // Is that comment just obsolete?
+        // Are there any other cases in which we can short-circuit this method here?
+        // This case still seems valid, just not for the reason in the above comment.
         if (string.IsNullOrEmpty (Text))
         {
             return;
