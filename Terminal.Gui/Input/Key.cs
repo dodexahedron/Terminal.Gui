@@ -565,7 +565,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     #region Standard Key Definitions
 
     /// <summary>An uninitialized The <see cref="Key"/> object.</summary>
-    public new static Key Empty => new ();
+    public static Key Empty => new ();
 
     /// <summary>The <see cref="Key"/> object for the Backspace key.</summary>
     public static Key Backspace => new (KeyCode.Backspace);
