@@ -403,7 +403,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     /// <param name="key">The parsed value.</param>
     /// <returns>A boolean value indicating whether parsing was successful.</returns>
     /// <remarks></remarks>
-    public static bool TryParse (string text, [NotNullWhen (true)] out Key key)
+    public static bool TryParse (string? text, [NotNullWhen (true)] out Key? key)
     {
         if (string.IsNullOrEmpty (text))
         {
