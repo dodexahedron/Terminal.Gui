@@ -680,63 +680,65 @@ public sealed class TextFormatter : INotifyPropertyChanged
             return _lines;
         }
 
-        if (NeedsFormat)
+        if (!NeedsFormat)
         {
-            string? text = _text;
-
-            if (FindHotKey (_text, HotKeySpecifier, out _hotKeyPos, out Key newHotKey))
-            {
-                HotKey = newHotKey;
-                text = RemoveHotKeySpecifier (Text, _hotKeyPos, HotKeySpecifier);
-                text = ReplaceHotKeyWithTag (text, _hotKeyPos);
-            }
-
-            if (IsVerticalDirection (Direction))
-            {
-                int colsWidth = GetSumMaxCharWidth (text, 0, 1, TabWidth);
-
-                _lines = Format (
-                                 text,
-                                 Size.Height,
-                                 VerticalAlignment == VerticalTextAlignment.Justified,
-                                 Size.Width > colsWidth && WordWrap,
-                                 PreserveTrailingSpaces,
-                                 TabWidth,
-                                 Direction,
-                                 MultiLine
-                                );
-
-                if (!AutoSize)
-                {
-                    colsWidth = GetMaxColsForWidth (_lines, Size.Width, TabWidth);
-
-                    if (_lines.Count > colsWidth)
-                    {
-                        _lines.RemoveRange (colsWidth, _lines.Count - colsWidth);
-                    }
-                }
-            }
-            else
-            {
-                _lines = Format (
-                                 text,
-                                 Size.Width,
-                                 Alignment == TextAlignment.Justified,
-                                 Size.Height > 1 && WordWrap,
-                                 PreserveTrailingSpaces,
-                                 TabWidth,
-                                 Direction,
-                                 MultiLine
-                                );
-
-                if (!AutoSize && _lines.Count > Size.Height)
-                {
-                    _lines.RemoveRange (Size.Height, _lines.Count - Size.Height);
-                }
-            }
-
-            NeedsFormat = false;
+            return _lines;
         }
+
+        string? text = _text;
+
+        if (FindHotKey (_text, HotKeySpecifier, out _hotKeyPos, out Key newHotKey))
+        {
+            HotKey = newHotKey;
+            text = RemoveHotKeySpecifier (Text, _hotKeyPos, HotKeySpecifier);
+            text = ReplaceHotKeyWithTag (text, _hotKeyPos);
+        }
+
+        if (IsVerticalDirection (Direction))
+        {
+            int colsWidth = GetSumMaxCharWidth (text, 0, 1, TabWidth);
+
+            _lines = Format (
+                             text,
+                             Size.Height,
+                             VerticalAlignment == VerticalTextAlignment.Justified,
+                             Size.Width > colsWidth && WordWrap,
+                             PreserveTrailingSpaces,
+                             TabWidth,
+                             Direction,
+                             MultiLine
+                            );
+
+            if (!AutoSize)
+            {
+                colsWidth = GetMaxColsForWidth (_lines, Size.Width, TabWidth);
+
+                if (_lines.Count > colsWidth)
+                {
+                    _lines.RemoveRange (colsWidth, _lines.Count - colsWidth);
+                }
+            }
+        }
+        else
+        {
+            _lines = Format (
+                             text,
+                             Size.Width,
+                             Alignment == TextAlignment.Justified,
+                             Size.Height > 1 && WordWrap,
+                             PreserveTrailingSpaces,
+                             TabWidth,
+                             Direction,
+                             MultiLine
+                            );
+
+            if (!AutoSize && _lines.Count > Size.Height)
+            {
+                _lines.RemoveRange (Size.Height, _lines.Count - Size.Height);
+            }
+        }
+
+        NeedsFormat = false;
 
         return _lines;
     }
