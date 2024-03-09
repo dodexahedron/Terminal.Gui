@@ -750,7 +750,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
     }
 
     /// <summary>Event raised when the <see cref="HotKey" /> is changed.</summary>
-    public event EventHandler<KeyChangedEventArgs> HotKeyChanged;
+    public event EventHandler<KeyChangedEventArgs>? HotKeyChanged;
 
     /// <summary>Sets <see cref="NeedsFormat"/> to <see langword="true"/> and returns the value.</summary>
     /// <typeparam name="T"></typeparam>
