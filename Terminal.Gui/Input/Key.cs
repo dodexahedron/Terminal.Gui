@@ -120,7 +120,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     /// </summary>
     /// <param name="str">The string describing the key.</param>
     [SetsRequiredMembers]
-    public Key (string str)
+    public Key (string? str)
     {
         if (!TryParse (str, out Key? key))
         {
