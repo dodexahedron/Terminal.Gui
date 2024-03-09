@@ -118,7 +118,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     /// <param name="str">The string describing the key.</param>
     public Key (string str)
     {
-        bool result = TryParse (str, out Key key);
+        bool result = TryParse (str, out Key? key);
 
         if (!result)
         {
