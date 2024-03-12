@@ -121,11 +121,10 @@ public class Thickness : IEquatable<Thickness>, IEqualityOperators<Thickness, Th
 
     /// <summary>Draws the <see cref="Thickness"/> rectangle with an optional diagnostics label.</summary>
     /// <remarks>
-    ///     If <see cref="ViewDiagnosticFlags"/> is set to
-    ///     <see cref="ViewViewDiagnosticFlags.Paddingthen 'T', 'L', 'R', and 'B' glyphs will be used instead of
-    ///     space. If <see cref="ViewDiagnosticFlags"/> is set to
-    ///     <see cref="ViewViewDiagnosticFlags.Rulerthen a ruler will be drawn on the outer edge of the
-    ///     Thickness.
+    ///     If <see cref="View.Diagnostics"/> is set to
+    ///     <see cref="ViewDiagnosticFlags.Padding."/> then 'T', 'L', 'R', and 'B' glyphs will be used instead of
+    ///     space. If <see cref="View.Diagnostics"/> is set to
+    ///     <see cref="ViewDiagnosticFlags.Ruler"/> then a ruler will be drawn on the outer edge of the
     /// </remarks>
     /// <param name="rect">The location and size of the rectangle that bounds the thickness rectangle, in screen coordinates.</param>
     /// <param name="label">The diagnostics label to draw on the bottom of the <see cref="Bottom"/>.</param>
