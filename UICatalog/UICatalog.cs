@@ -11,7 +11,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json.Serialization;
-using Terminal.Gui;
 using static Terminal.Gui.ConfigurationManager;
 using Command = Terminal.Gui.Command;
 using RuntimeEnvironment = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment;
