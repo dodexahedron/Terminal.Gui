@@ -1325,14 +1325,14 @@ public class TableEditor : Scenario
 
     private string StripArrows (string columnName) { return columnName.Replace ($"{CM.Glyphs.DownArrow}", "").Replace ($"{CM.Glyphs.UpArrow}", ""); }
 
-    private void TableViewKeyPress (object sender, Key e)
+    private void TableViewKeyPress (object sender, KeyEventArgs e)
     {
         if (_currentTable == null)
         {
             return;
         }
 
-        if (e.KeyCode == KeyCode.Delete)
+        if (e.Key.KeyCode == KeyCode.Delete)
         {
             if (_tableView.FullRowSelect)
             {

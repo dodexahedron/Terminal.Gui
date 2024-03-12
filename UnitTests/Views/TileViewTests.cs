@@ -1689,7 +1689,7 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // Keyboard movement on splitter should have no effect if it is not focused
-        bool handled = tileView.NewKeyDownEvent (Key.CursorDown);
+        bool handled = tileView.NewKeyDownEvent (new (Key.CursorDown));
         Assert.False (handled);
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
@@ -1703,7 +1703,7 @@ public class TileViewTests
         TileView tileView = Get11By3TileView (out LineView line);
 
         tileView.Orientation = Orientation.Horizontal;
-        tileView.NewKeyDownEvent (new Key (tileView.ToggleResizable));
+        tileView.NewKeyDownEvent (new (new (tileView.ToggleResizable)));
 
         Assert.True (line.HasFocus);
 
@@ -1717,7 +1717,7 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // Now move splitter line down
-        tileView.NewKeyDownEvent (Key.CursorDown);
+        tileView.NewKeyDownEvent (new (Key.CursorDown));
 
         tileView.Draw ();
 
@@ -1729,8 +1729,8 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // And 2 up
-        line.NewKeyDownEvent (Key.CursorUp);
-        line.NewKeyDownEvent (Key.CursorUp);
+        line.NewKeyDownEvent (new (Key.CursorUp));
+        line.NewKeyDownEvent (new (Key.CursorUp));
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
 
@@ -1747,7 +1747,7 @@ public class TileViewTests
     public void TestTileView_Horizontal_View1MinSize_Absolute ()
     {
         TileView tileView = Get11By3TileView (out LineView line);
-        tileView.NewKeyDownEvent (new Key (tileView.ToggleResizable));
+        tileView.NewKeyDownEvent (new (new (tileView.ToggleResizable)));
 
         tileView.Orientation = Orientation.Horizontal;
         tileView.Tiles.ElementAt (0).MinSize = 1;
@@ -1768,7 +1768,7 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // Now move splitter line down (allowed
-        line.NewKeyDownEvent (Key.CursorDown);
+        line.NewKeyDownEvent (new (Key.CursorDown));
         tileView.Draw ();
 
         looksLike =
@@ -1779,8 +1779,8 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // And up 2 (only 1 is allowed because of minimum size of 1 on view1)
-        line.NewKeyDownEvent (Key.CursorUp);
-        line.NewKeyDownEvent (Key.CursorUp);
+        line.NewKeyDownEvent (new (Key.CursorUp));
+        line.NewKeyDownEvent (new (Key.CursorUp));
 
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
@@ -1905,7 +1905,7 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // Keyboard movement on splitter should have no effect if it is not focused
-        tileView.NewKeyDownEvent (Key.CursorRight);
+        tileView.NewKeyDownEvent (new (Key.CursorRight));
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
@@ -1916,7 +1916,7 @@ public class TileViewTests
     public void TestTileView_Vertical_Focused ()
     {
         TileView tileView = Get11By3TileView (out LineView line);
-        tileView.NewKeyDownEvent (new Key (tileView.ToggleResizable));
+        tileView.NewKeyDownEvent (new (new (tileView.ToggleResizable)));
 
         tileView.Draw ();
 
@@ -1928,7 +1928,7 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // Now while focused move the splitter 1 unit right
-        line.NewKeyDownEvent (Key.CursorRight);
+        line.NewKeyDownEvent (new (Key.CursorRight));
         tileView.Draw ();
 
         looksLike =
@@ -1939,8 +1939,8 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // and 2 to the left
-        line.NewKeyDownEvent (Key.CursorLeft);
-        line.NewKeyDownEvent (Key.CursorLeft);
+        line.NewKeyDownEvent (new (Key.CursorLeft));
+        line.NewKeyDownEvent (new (Key.CursorLeft));
         tileView.Draw ();
 
         looksLike =
@@ -1958,7 +1958,7 @@ public class TileViewTests
         TileView tileView = Get11By3TileView (out LineView line);
         tileView.SetSplitterPos (0, Pos.Percent (50));
         Assert.IsType<Pos.PosFactor> (tileView.SplitterDistances.ElementAt (0));
-        tileView.NewKeyDownEvent (new Key (tileView.ToggleResizable));
+        tileView.NewKeyDownEvent (new (new (tileView.ToggleResizable)));
 
         tileView.Draw ();
 
@@ -1970,7 +1970,7 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // Now while focused move the splitter 1 unit right
-        line.NewKeyDownEvent (Key.CursorRight);
+        line.NewKeyDownEvent (new (Key.CursorRight));
         tileView.Draw ();
 
         looksLike =
@@ -1984,8 +1984,8 @@ public class TileViewTests
         Assert.IsType<Pos.PosFactor> (tileView.SplitterDistances.ElementAt (0));
 
         // and 2 to the left
-        line.NewKeyDownEvent (Key.CursorLeft);
-        line.NewKeyDownEvent (Key.CursorLeft);
+        line.NewKeyDownEvent (new (Key.CursorLeft));
+        line.NewKeyDownEvent (new (Key.CursorLeft));
         tileView.Draw ();
 
         looksLike =
@@ -2004,7 +2004,7 @@ public class TileViewTests
     public void TestTileView_Vertical_Focused_WithBorder ()
     {
         TileView tileView = Get11By3TileView (out LineView line, true);
-        tileView.NewKeyDownEvent (new Key (tileView.ToggleResizable));
+        tileView.NewKeyDownEvent (new (new (tileView.ToggleResizable)));
 
         tileView.Draw ();
 
@@ -2016,7 +2016,7 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // Now while focused move the splitter 1 unit right
-        line.NewKeyDownEvent (Key.CursorRight);
+        line.NewKeyDownEvent (new (Key.CursorRight));
         tileView.Draw ();
 
         looksLike =
@@ -2027,8 +2027,8 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // and 2 to the left
-        line.NewKeyDownEvent (Key.CursorLeft);
-        line.NewKeyDownEvent (Key.CursorLeft);
+        line.NewKeyDownEvent (new (Key.CursorLeft));
+        line.NewKeyDownEvent (new (Key.CursorLeft));
         tileView.Draw ();
 
         looksLike =
@@ -2044,7 +2044,7 @@ public class TileViewTests
     public void TestTileView_Vertical_View1MinSize_Absolute ()
     {
         TileView tileView = Get11By3TileView (out LineView line);
-        tileView.NewKeyDownEvent (new Key (tileView.ToggleResizable));
+        tileView.NewKeyDownEvent (new (new (tileView.ToggleResizable)));
         tileView.Tiles.ElementAt (0).MinSize = 6;
 
         // distance is too small (below 6)
@@ -2065,13 +2065,13 @@ public class TileViewTests
 
         // Keyboard movement on splitter should have no effect because it
         // would take us below the minimum splitter size
-        line.NewKeyDownEvent (Key.CursorLeft);
+        line.NewKeyDownEvent (new (Key.CursorLeft));
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // but we can continue to move the splitter right if we want
-        line.NewKeyDownEvent (Key.CursorRight);
+        line.NewKeyDownEvent (new (Key.CursorRight));
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
 
@@ -2089,7 +2089,7 @@ public class TileViewTests
     public void TestTileView_Vertical_View1MinSize_Absolute_WithBorder ()
     {
         TileView tileView = Get11By3TileView (out LineView line, true);
-        tileView.NewKeyDownEvent (new Key (tileView.ToggleResizable));
+        tileView.NewKeyDownEvent (new (new (tileView.ToggleResizable)));
         tileView.Tiles.ElementAt (0).MinSize = 5;
 
         // distance is too small (below 5)
@@ -2110,13 +2110,13 @@ public class TileViewTests
 
         // Keyboard movement on splitter should have no effect because it
         // would take us below the minimum splitter size
-        line.NewKeyDownEvent (Key.CursorLeft);
+        line.NewKeyDownEvent (new (Key.CursorLeft));
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // but we can continue to move the splitter right if we want
-        line.NewKeyDownEvent (Key.CursorRight);
+        line.NewKeyDownEvent (new (Key.CursorRight));
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
 
@@ -2134,7 +2134,7 @@ public class TileViewTests
     public void TestTileView_Vertical_View2MinSize_Absolute ()
     {
         TileView tileView = Get11By3TileView (out LineView line);
-        tileView.NewKeyDownEvent (new Key (tileView.ToggleResizable));
+        tileView.NewKeyDownEvent (new (new (tileView.ToggleResizable)));
         tileView.Tiles.ElementAt (1).MinSize = 6;
 
         // distance leaves too little space for view2 (less than 6 would remain)
@@ -2155,13 +2155,13 @@ public class TileViewTests
 
         // Keyboard movement on splitter should have no effect because it
         // would take us below the minimum splitter size
-        line.NewKeyDownEvent (Key.CursorRight);
+        line.NewKeyDownEvent (new (Key.CursorRight));
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // but we can continue to move the splitter left if we want
-        line.NewKeyDownEvent (Key.CursorLeft);
+        line.NewKeyDownEvent (new (Key.CursorLeft));
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
 
@@ -2179,7 +2179,7 @@ public class TileViewTests
     public void TestTileView_Vertical_View2MinSize_Absolute_WithBorder ()
     {
         TileView tileView = Get11By3TileView (out LineView line, true);
-        tileView.NewKeyDownEvent (new Key (tileView.ToggleResizable));
+        tileView.NewKeyDownEvent (new (new (tileView.ToggleResizable)));
         tileView.Tiles.ElementAt (1).MinSize = 5;
 
         // distance leaves too little space for view2 (less than 5 would remain)
@@ -2200,13 +2200,13 @@ public class TileViewTests
 
         // Keyboard movement on splitter should have no effect because it
         // would take us below the minimum splitter size
-        line.NewKeyDownEvent (Key.CursorRight);
+        line.NewKeyDownEvent (new (Key.CursorRight));
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // but we can continue to move the splitter left if we want
-        line.NewKeyDownEvent (Key.CursorLeft);
+        line.NewKeyDownEvent (new (Key.CursorLeft));
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
 
@@ -2235,7 +2235,7 @@ public class TileViewTests
         TestHelpers.AssertDriverContentsAre (looksLike, _output);
 
         // Keyboard movement on splitter should have no effect if it is not focused
-        tileView.NewKeyDownEvent (Key.CursorRight);
+        tileView.NewKeyDownEvent (new (Key.CursorRight));
         tileView.SetNeedsDisplay ();
         tileView.Draw ();
         TestHelpers.AssertDriverContentsAre (looksLike, _output);

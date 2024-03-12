@@ -86,7 +86,7 @@ public class ContextMenuTests
         Assert.True (ContextMenu.IsShow);
         Assert.Equal (cm.MenuBar, Application.MouseGrabView);
         Assert.False (menu.IsMenuOpen);
-        Assert.True (menu.NewKeyDownEvent (menu.Key));
+        Assert.True (menu.NewKeyDownEvent (new (menu.Key)));
         Assert.False (ContextMenu.IsShow);
         Assert.Equal (menu, Application.MouseGrabView);
         Assert.True (menu.IsMenuOpen);
@@ -520,9 +520,9 @@ public class ContextMenuTests
         Application.Top.Add (tf);
         Application.Begin (Application.Top);
 
-        Assert.True (Application.OnKeyDown (ContextMenu.DefaultKey));
+        Assert.True (Application.OnKeyDown (new(ContextMenu.DefaultKey)));
         Assert.True (tf.ContextMenu.MenuBar.IsMenuOpen);
-        Assert.True (Application.OnKeyDown (ContextMenu.DefaultKey));
+        Assert.True (Application.OnKeyDown (new(ContextMenu.DefaultKey)));
         Assert.Null (tf.ContextMenu.MenuBar);
     }
 

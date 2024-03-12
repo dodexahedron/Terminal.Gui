@@ -618,14 +618,14 @@ public class TableViewTests
 
         Assert.Equal (0, tableView.RowOffset);
 
-        tableView.NewKeyDownEvent (Key.PageDown);
+        tableView.NewKeyDownEvent (new (Key.PageDown));
 
         // window height is 5 rows 2 are header so page down should give 3 new rows
         Assert.Equal (3, tableView.SelectedRow);
         Assert.Equal (1, tableView.RowOffset);
 
         // header is no longer visible so page down should give 5 new rows
-        tableView.NewKeyDownEvent (Key.PageDown);
+        tableView.NewKeyDownEvent (new (Key.PageDown));
 
         Assert.Equal (8, tableView.SelectedRow);
         Assert.Equal (4, tableView.RowOffset);
@@ -668,7 +668,7 @@ public class TableViewTests
         tableView.SelectedRow = 3; // row is 0 indexed so this is the 4th visible row
 
         // Scroll down
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorDown });
+        tableView.NewKeyDownEvent (new ( new (KeyCode.CursorDown)));
 
         // Scrolled off the page by 1 row so it should only have moved down 1 line of RowOffset
         Assert.Equal (4, tableView.SelectedRow);
@@ -720,7 +720,7 @@ public class TableViewTests
         TestHelpers.AssertDriverContentsAre (expected, output);
 
         // Scroll right
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorRight });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorRight )));
 
         // since A is now pushed off screen we get indicator showing
         // that user can scroll left to see first column
@@ -735,8 +735,8 @@ public class TableViewTests
         TestHelpers.AssertDriverContentsAre (expected, output);
 
         // Scroll right twice more (to end of columns)
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorRight });
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorRight });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorRight )));
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorRight )));
 
         tableView.Draw ();
 
@@ -795,7 +795,7 @@ public class TableViewTests
         TestHelpers.AssertDriverContentsAre (expected, output);
 
         // Scroll right
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorRight });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorRight )));
 
         tableView.Draw ();
 
@@ -858,7 +858,7 @@ public class TableViewTests
         TestHelpers.AssertDriverContentsAre (expected, output);
 
         // Scroll right
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorRight });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorRight )));
 
         tableView.Draw ();
 
@@ -1008,7 +1008,7 @@ public class TableViewTests
         Application.Begin (Application.Top);
 
         // pressing enter should activate the first cell (selected cell)
-        tv.NewKeyDownEvent (Key.Enter);
+        tv.NewKeyDownEvent (new (Key.Enter));
         Assert.Equal ("R0C0", activatedValue);
 
         // reset the test
@@ -1016,12 +1016,12 @@ public class TableViewTests
 
         // clear keybindings and ensure that Enter does not trigger the event anymore
         tv.KeyBindings.Clear ();
-        tv.NewKeyDownEvent (Key.Enter);
+        tv.NewKeyDownEvent (new (Key.Enter));
         Assert.Null (activatedValue);
 
         // New method for changing the activation key
         tv.KeyBindings.Add (Key.Z, Command.Accept);
-        tv.NewKeyDownEvent (Key.Z);
+        tv.NewKeyDownEvent (new (Key.Z));
         Assert.Equal ("R0C0", activatedValue);
 
         // reset the test
@@ -1030,7 +1030,7 @@ public class TableViewTests
 
         // Old method for changing the activation key
         tv.CellActivationKey = KeyCode.Z;
-        tv.NewKeyDownEvent (Key.Z);
+        tv.NewKeyDownEvent (new (Key.Z));
         Assert.Equal ("R0C0", activatedValue);
     }
 
@@ -1489,14 +1489,14 @@ public class TableViewTests
         tv.MultiSelect = true;
         tv.SelectedColumn = 0;
         tv.SelectedRow = 0;
-        tv.NewKeyDownEvent (Key.CursorRight.WithShift);
-        tv.NewKeyDownEvent (Key.CursorDown.WithShift);
+        tv.NewKeyDownEvent (new (Key.CursorRight.WithShift));
+        tv.NewKeyDownEvent (new (Key.CursorDown.WithShift));
 
         Assert.Equal (new Rectangle (0, 0, 2, 2), tv.MultiSelectedRegions.Single ().Rectangle);
 
         // this next moves should be ignored because we already selected the whole table
-        tv.NewKeyDownEvent (Key.CursorRight.WithShift);
-        tv.NewKeyDownEvent (Key.CursorDown.WithShift);
+        tv.NewKeyDownEvent (new (Key.CursorRight.WithShift));
+        tv.NewKeyDownEvent (new (Key.CursorDown.WithShift));
 
         Assert.Equal (new Rectangle (0, 0, 2, 2), tv.MultiSelectedRegions.Single ().Rectangle);
         Assert.Equal (1, tv.SelectedColumn);
@@ -1515,12 +1515,12 @@ public class TableViewTests
         tv.MultiSelect = true;
         tv.SelectedColumn = 1;
         tv.SelectedRow = 1;
-        tv.NewKeyDownEvent (Key.CursorLeft.WithShift);
+        tv.NewKeyDownEvent (new (Key.CursorLeft.WithShift));
 
         Assert.Equal (new Rectangle (0, 1, 2, 1), tv.MultiSelectedRegions.Single ().Rectangle);
 
         // this next shift left should be ignored because we are already at the bounds
-        tv.NewKeyDownEvent (Key.CursorLeft.WithShift);
+        tv.NewKeyDownEvent (new (Key.CursorLeft.WithShift));
 
         Assert.Equal (new Rectangle (0, 1, 2, 1), tv.MultiSelectedRegions.Single ().Rectangle);
 
@@ -1540,12 +1540,12 @@ public class TableViewTests
         tv.MultiSelect = true;
         tv.SelectedColumn = 0;
         tv.SelectedRow = 1;
-        tv.NewKeyDownEvent (Key.CursorRight.WithShift);
+        tv.NewKeyDownEvent (new (Key.CursorRight.WithShift));
 
         Assert.Equal (new Rectangle (0, 1, 2, 1), tv.MultiSelectedRegions.Single ().Rectangle);
 
         // this next shift right should be ignored because we are already at the right bounds
-        tv.NewKeyDownEvent (Key.CursorRight.WithShift);
+        tv.NewKeyDownEvent (new (Key.CursorRight.WithShift));
 
         Assert.Equal (new Rectangle (0, 1, 2, 1), tv.MultiSelectedRegions.Single ().Rectangle);
 
@@ -1566,14 +1566,14 @@ public class TableViewTests
         tv.MultiSelect = true;
         tv.SelectedColumn = 1;
         tv.SelectedRow = 1;
-        tv.NewKeyDownEvent (Key.CursorLeft.WithShift);
-        tv.NewKeyDownEvent (Key.CursorUp.WithShift);
+        tv.NewKeyDownEvent (new (Key.CursorLeft.WithShift));
+        tv.NewKeyDownEvent (new (Key.CursorUp.WithShift));
 
         Assert.Equal (new Rectangle (0, 0, 2, 2), tv.MultiSelectedRegions.Single ().Rectangle);
 
         // this next moves should be ignored because we already selected the whole table
-        tv.NewKeyDownEvent (Key.CursorLeft.WithShift);
-        tv.NewKeyDownEvent (Key.CursorUp.WithShift);
+        tv.NewKeyDownEvent (new (Key.CursorLeft.WithShift));
+        tv.NewKeyDownEvent (new (Key.CursorUp.WithShift));
 
         Assert.Equal (new Rectangle (0, 0, 2, 2), tv.MultiSelectedRegions.Single ().Rectangle);
         Assert.Equal (0, tv.SelectedColumn);
@@ -1617,11 +1617,11 @@ public class TableViewTests
         Assert.False (tv.HasFocus);
 
         // already on fish
-        tv.NewKeyDownEvent (new Key { KeyCode = KeyCode.F });
+        tv.NewKeyDownEvent (new (new (KeyCode.F)));
         Assert.Equal (0, tv.SelectedRow);
 
         // not focused
-        tv.NewKeyDownEvent (new Key { KeyCode = KeyCode.Z });
+        tv.NewKeyDownEvent (new (new (KeyCode.Z)));
         Assert.Equal (0, tv.SelectedRow);
 
         // ensure that TableView has the input focus
@@ -1632,38 +1632,38 @@ public class TableViewTests
         Assert.True (tv.HasFocus);
 
         // already on fish
-        tv.NewKeyDownEvent (new Key { KeyCode = KeyCode.F });
+        tv.NewKeyDownEvent (new (new (KeyCode.F)));
         Assert.Equal (0, tv.SelectedRow);
 
         // move to zoo
-        tv.NewKeyDownEvent (new Key { KeyCode = KeyCode.Z });
+        tv.NewKeyDownEvent (new (new (KeyCode.Z)));
         Assert.Equal (3, tv.SelectedRow);
 
         // move to troll
-        tv.NewKeyDownEvent (new Key { KeyCode = KeyCode.T });
+        tv.NewKeyDownEvent (new (new (KeyCode.T)));
         Assert.Equal (1, tv.SelectedRow);
 
         // move to trap
-        tv.NewKeyDownEvent (new Key { KeyCode = KeyCode.T });
+        tv.NewKeyDownEvent (new (new (KeyCode.T)));
         Assert.Equal (2, tv.SelectedRow);
 
         // change columns to navigate by column 2
         Assert.Equal (0, tv.SelectedColumn);
         Assert.Equal (2, tv.SelectedRow);
-        tv.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorRight });
+        tv.NewKeyDownEvent (new (new (KeyCode.CursorRight )));
         Assert.Equal (1, tv.SelectedColumn);
         Assert.Equal (2, tv.SelectedRow);
 
         // nothing ends with t so stay where you are
-        tv.NewKeyDownEvent (new Key { KeyCode = KeyCode.T });
+        tv.NewKeyDownEvent (new (new (KeyCode.T)));
         Assert.Equal (2, tv.SelectedRow);
 
         //jump to fish which ends in h
-        tv.NewKeyDownEvent (new Key { KeyCode = KeyCode.H });
+        tv.NewKeyDownEvent (new (new (KeyCode.H)));
         Assert.Equal (0, tv.SelectedRow);
 
         // jump to zoo which ends in o
-        tv.NewKeyDownEvent (new Key { KeyCode = KeyCode.O });
+        tv.NewKeyDownEvent (new (new (KeyCode.O)));
         Assert.Equal (3, tv.SelectedRow);
     }
 
@@ -1904,9 +1904,7 @@ public class TableViewTests
         tableView.EnsureValidSelection ();
         Assert.Equal (1, tableView.SelectedColumn);
 
-        tableView.NewKeyDownEvent (
-                                   new Key { KeyCode = useHome ? KeyCode.Home : KeyCode.CursorLeft }
-                                  );
+        tableView.NewKeyDownEvent (new (new (useHome ? KeyCode.Home : KeyCode.CursorLeft)));
 
         // Expect the cursor to stay at 1
         Assert.Equal (1, tableView.SelectedColumn);
@@ -1955,9 +1953,7 @@ public class TableViewTests
         tableView.EnsureValidSelection ();
         Assert.Equal (2, tableView.SelectedColumn);
 
-        tableView.NewKeyDownEvent (
-                                   new Key { KeyCode = useEnd ? KeyCode.End : KeyCode.CursorRight }
-                                  );
+        tableView.NewKeyDownEvent (new (new (useEnd ? KeyCode.End : KeyCode.CursorRight)));
 
         // Expect the cursor to stay at 2
         Assert.Equal (2, tableView.SelectedColumn);
@@ -2053,12 +2049,12 @@ public class TableViewTests
         tableView.Style.GetOrCreateColumnStyle (1).Visible = false;
         tableView.SelectedColumn = 0;
 
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorRight });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorRight )));
 
         // Expect the cursor navigation to skip over the invisible column(s)
         Assert.Equal (2, tableView.SelectedColumn);
 
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorLeft });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorLeft)));
 
         // Expect the cursor navigation backwards to skip over invisible column too
         Assert.Equal (0, tableView.SelectedColumn);
@@ -2167,7 +2163,7 @@ public class TableViewTests
         // if middle column is invisible
         tableView.Style.GetOrCreateColumnStyle (1).Visible = false;
 
-        tableView.NewKeyDownEvent (Key.CursorRight.WithShift);
+        tableView.NewKeyDownEvent (new (Key.CursorRight.WithShift));
 
         // Selection should extend from A to C but skip B
         Assert.Equal (2, tableView.GetAllSelectedCells ().Count ());
@@ -2508,7 +2504,7 @@ A B C
         tableView.SelectedRow = 1;
         tableView.SelectedColumn = 1;
 
-        tableView.NewKeyDownEvent (Key.Home.WithCtrl);
+        tableView.NewKeyDownEvent (new (Key.Home.WithCtrl));
 
         if (withFullRowSelect)
         {
@@ -2523,11 +2519,7 @@ A B C
             Assert.Equal (0, tableView.SelectedRow);
         }
 
-        tableView.NewKeyDownEvent (
-                                   new Key (
-                                            KeyCode.End | KeyCode.CtrlMask
-                                           )
-                                  );
+        tableView.NewKeyDownEvent (new (new (KeyCode.End | KeyCode.CtrlMask)));
 
         if (withFullRowSelect)
         {
@@ -2604,7 +2596,7 @@ A B C
 
         Assert.Empty (pets.Where (p => p.IsPicked));
 
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.Space));
 
         Assert.True (pets.First ().IsPicked);
 
@@ -2621,8 +2613,8 @@ A B C
 
         TestHelpers.AssertDriverContentsAre (expected, output);
 
-        tv.NewKeyDownEvent (Key.CursorDown);
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.CursorDown));
+        tv.NewKeyDownEvent (new (Key.Space));
 
         Assert.True (pets.ElementAt (0).IsPicked);
         Assert.True (pets.ElementAt (1).IsPicked);
@@ -2641,8 +2633,8 @@ A B C
 
         TestHelpers.AssertDriverContentsAre (expected, output);
 
-        tv.NewKeyDownEvent (Key.CursorUp);
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.CursorUp));
+        tv.NewKeyDownEvent (new (Key.Space));
 
         Assert.False (pets.ElementAt (0).IsPicked);
         Assert.True (pets.ElementAt (1).IsPicked);
@@ -2686,10 +2678,10 @@ A B C
 │☑│1│2│";
 
         //toggle top two at once
-        tv.NewKeyDownEvent (Key.CursorDown.WithShift);
+        tv.NewKeyDownEvent (new (Key.CursorDown.WithShift));
         Assert.True (tv.IsSelected (0, 0));
         Assert.True (tv.IsSelected (0, 1));
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.Space));
 
         // Because at least 1 of the rows is not yet ticked we toggle them all to ticked
         TestHelpers.AssertDriverContentsAre (expected, output);
@@ -2711,7 +2703,7 @@ A B C
         TestHelpers.AssertDriverContentsAre (expected, output);
 
         // Untoggle the top 2
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.Space));
 
         tv.Draw ();
 
@@ -2738,8 +2730,8 @@ A B C
         tv.Table = wrapper;
 
         //toggle all cells
-        tv.NewKeyDownEvent (Key.A.WithCtrl);
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.A.WithCtrl));
+        tv.NewKeyDownEvent (new (Key.Space));
 
         tv.Draw ();
 
@@ -2758,7 +2750,7 @@ A B C
         Assert.Equal (3, wrapper.CheckedRows.Count);
 
         // Untoggle all again
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.Space));
 
         tv.Draw ();
 
@@ -2795,8 +2787,8 @@ A B C
         Assert.DoesNotContain (pets, p => p.IsPicked);
 
         //toggle all cells
-        tv.NewKeyDownEvent (Key.A.WithCtrl);
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.A.WithCtrl));
+        tv.NewKeyDownEvent (new (Key.Space));
 
         Assert.True (pets.All (p => p.IsPicked));
 
@@ -2813,7 +2805,7 @@ A B C
 
         TestHelpers.AssertDriverContentsAre (expected, output);
 
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.Space));
 
         Assert.Empty (pets.Where (p => p.IsPicked));
 
@@ -2858,7 +2850,7 @@ A B C
         Assert.Empty (wrapper.CheckedRows);
 
         //toggle the top cell
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.Space));
 
         Assert.Single (wrapper.CheckedRows, 0);
 
@@ -2874,8 +2866,8 @@ A B C
 
         TestHelpers.AssertDriverContentsAre (expected, output);
 
-        tv.NewKeyDownEvent (Key.CursorDown);
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.CursorDown));
+        tv.NewKeyDownEvent (new (Key.Space));
 
         Assert.Contains (0, wrapper.CheckedRows);
         Assert.Contains (1, wrapper.CheckedRows);
@@ -2894,8 +2886,8 @@ A B C
         TestHelpers.AssertDriverContentsAre (expected, output);
 
         // untoggle top one
-        tv.NewKeyDownEvent (Key.CursorUp);
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.CursorUp));
+        tv.NewKeyDownEvent (new (Key.Space));
 
         Assert.Single (wrapper.CheckedRows, 1);
 
@@ -2946,7 +2938,7 @@ A B C
 
         Assert.Empty (pets.Where (p => p.IsPicked));
 
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.Space));
 
         Assert.True (pets.First ().IsPicked);
 
@@ -2963,8 +2955,8 @@ A B C
 
         TestHelpers.AssertDriverContentsAre (expected, output);
 
-        tv.NewKeyDownEvent (Key.CursorDown);
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.CursorDown));
+        tv.NewKeyDownEvent (new (Key.Space));
 
         Assert.False (pets.ElementAt (0).IsPicked);
         Assert.True (pets.ElementAt (1).IsPicked);
@@ -2983,8 +2975,8 @@ A B C
 
         TestHelpers.AssertDriverContentsAre (expected, output);
 
-        tv.NewKeyDownEvent (Key.CursorUp);
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.CursorUp));
+        tv.NewKeyDownEvent (new (Key.Space));
 
         Assert.True (pets.ElementAt (0).IsPicked);
         Assert.False (pets.ElementAt (1).IsPicked);
@@ -3021,14 +3013,14 @@ A B C
         Assert.Equal (0, selectedCell.Y);
 
         // Go Right
-        tableView.NewKeyDownEvent (Key.CursorRight );
+        tableView.NewKeyDownEvent (new (Key.CursorRight));
 
         selectedCell = tableView.GetAllSelectedCells ().Single ();
         Assert.Equal (1, selectedCell.X);
         Assert.Equal (0, selectedCell.Y);
 
         // Toggle Select
-        tableView.NewKeyDownEvent (Key.Space);
+        tableView.NewKeyDownEvent (new (Key.Space));
         TableSelection m = tableView.MultiSelectedRegions.Single ();
         Assert.True (m.IsToggled);
         Assert.Equal (1, m.Origin.X);
@@ -3038,7 +3030,7 @@ A B C
         Assert.Equal (0, selectedCell.Y);
 
         // Go Left
-        tableView.NewKeyDownEvent (Key.CursorLeft);
+        tableView.NewKeyDownEvent (new (Key.CursorLeft));
 
         // Both Toggled and Moved to should be selected
         Assert.Equal (2, tableView.GetAllSelectedCells ().Count ());
@@ -3050,7 +3042,7 @@ A B C
         Assert.Equal (0, s2.Y);
 
         // Go Down
-        tableView.NewKeyDownEvent (Key.CursorDown );
+        tableView.NewKeyDownEvent (new (Key.CursorDown));
 
         // Both Toggled and Moved to should be selected but not 0,0
         // which we moved down from
@@ -3063,14 +3055,14 @@ A B C
         Assert.Equal (1, s2.Y);
 
         // Go back to the toggled cell
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorRight });
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorUp });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorRight )));
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorUp)));
 
         // Toggle off 
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.Space });
+        tableView.NewKeyDownEvent (new (new (KeyCode.Space)));
 
         // Go Left
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorLeft });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorLeft)));
 
         selectedCell = tableView.GetAllSelectedCells ().Single ();
         Assert.Equal (0, selectedCell.X);
@@ -3090,10 +3082,10 @@ A B C
         tableView.KeyBindings.Add (Key.Space, Command.Select);
 
         // Toggle Select Cell 0,0
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.Space });
+        tableView.NewKeyDownEvent (new (new (KeyCode.Space)));
 
         // Go Down
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorDown });
+        tableView.NewKeyDownEvent (new ( new (KeyCode.CursorDown)));
 
         TableSelection m = tableView.MultiSelectedRegions.Single ();
         Assert.True (m.IsToggled);
@@ -3103,13 +3095,13 @@ A B C
         //First row toggled and Second row active = 12 selected cells
         Assert.Equal (12, tableView.GetAllSelectedCells ().Count ());
 
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorRight });
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorUp });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorRight )));
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorUp)));
 
         Assert.Single (tableView.MultiSelectedRegions.Where (r => r.IsToggled));
 
         // Can untoggle at 1,0 even though 0,0 was initial toggle because FullRowSelect is on
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.Space });
+        tableView.NewKeyDownEvent (new (new (KeyCode.Space)));
 
         Assert.Empty (tableView.MultiSelectedRegions.Where (r => r.IsToggled));
     }
@@ -3127,16 +3119,16 @@ A B C
         tableView.KeyBindings.Add (Key.Space, Command.Select);
 
         // Make a square selection
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.ShiftMask | KeyCode.CursorDown });
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.ShiftMask | KeyCode.CursorRight });
+        tableView.NewKeyDownEvent (new (new (KeyCode.ShiftMask | KeyCode.CursorDown)));
+        tableView.NewKeyDownEvent (new (new (KeyCode.ShiftMask | KeyCode.CursorRight)));
 
         Assert.Equal (4, tableView.GetAllSelectedCells ().Count ());
 
         // Toggle the square selected region on
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.Space });
+        tableView.NewKeyDownEvent (new (new (KeyCode.Space)));
 
         // Go Right
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorRight });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorRight )));
 
         //Toggled on square + the active cell (x=2,y=1)
         Assert.Equal (5, tableView.GetAllSelectedCells ().Count ());
@@ -3145,11 +3137,11 @@ A B C
 
         // Untoggle the rectangular region by hitting toggle in
         // any cell in that rect
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorUp });
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorLeft });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorUp)));
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorLeft)));
 
         Assert.Equal (4, tableView.GetAllSelectedCells ().Count ());
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.Space });
+        tableView.NewKeyDownEvent (new (new (KeyCode.Space)));
         Assert.Single (tableView.GetAllSelectedCells ());
     }
 
@@ -3169,17 +3161,17 @@ A B C
         tableView.KeyBindings.Add (Key.Space, Command.Select);
 
         // Make first square selection (0,0 to 1,1)
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.ShiftMask | KeyCode.CursorDown });
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.ShiftMask | KeyCode.CursorRight });
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.Space });
+        tableView.NewKeyDownEvent (new (new (KeyCode.ShiftMask | KeyCode.CursorDown)));
+        tableView.NewKeyDownEvent (new (new (KeyCode.ShiftMask | KeyCode.CursorRight)));
+        tableView.NewKeyDownEvent (new (new (KeyCode.Space)));
         Assert.Equal (4, tableView.GetAllSelectedCells ().Count ());
 
         // Make second square selection leaving 1 unselected line between them
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorLeft });
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorDown });
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.CursorDown });
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.ShiftMask | KeyCode.CursorDown });
-        tableView.NewKeyDownEvent (new Key { KeyCode = KeyCode.ShiftMask | KeyCode.CursorRight });
+        tableView.NewKeyDownEvent (new (new (KeyCode.CursorLeft)));
+        tableView.NewKeyDownEvent (new ( new (KeyCode.CursorDown)));
+        tableView.NewKeyDownEvent (new ( new (KeyCode.CursorDown)));
+        tableView.NewKeyDownEvent (new (new (KeyCode.ShiftMask | KeyCode.CursorDown)));
+        tableView.NewKeyDownEvent (new (new (KeyCode.ShiftMask | KeyCode.CursorRight)));
 
         // 2 square selections
         Assert.Equal (8, tableView.GetAllSelectedCells ().Count ());

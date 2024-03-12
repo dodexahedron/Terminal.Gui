@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 using System.Text.RegularExpressions;
 using Terminal.Gui.Resources;
@@ -71,17 +72,17 @@ public class FileDialog : Dialog
 
         _btnOk.KeyDown += (s, k) =>
                           {
-                              NavigateIf (k, KeyCode.CursorLeft, _btnCancel);
-                              NavigateIf (k, KeyCode.CursorUp, _tableView);
+                              NavigateIf (k.Key, KeyCode.CursorLeft, _btnCancel);
+                              NavigateIf (k.Key, KeyCode.CursorUp, _tableView);
                           };
 
         _btnCancel = new Button { Y = Pos.AnchorEnd (1), X = Pos.Right (_btnOk) + 1, Text = Strings.btnCancel };
 
         _btnCancel.KeyDown += (s, k) =>
                               {
-                                  NavigateIf (k, KeyCode.CursorLeft, _btnToggleSplitterCollapse);
-                                  NavigateIf (k, KeyCode.CursorUp, _tableView);
-                                  NavigateIf (k, KeyCode.CursorRight, _btnOk);
+                                  NavigateIf (k.Key, KeyCode.CursorLeft, _btnToggleSplitterCollapse);
+                                  NavigateIf (k.Key, KeyCode.CursorUp, _tableView);
+                                  NavigateIf (k.Key, KeyCode.CursorRight, _btnOk);
                               };
         _btnCancel.Accept += (s, e) => { Application.RequestStop (); };
 
@@ -103,9 +104,9 @@ public class FileDialog : Dialog
                            {
                                ClearFeedback ();
 
-                               AcceptIf (k, KeyCode.Enter);
+                               AcceptIf (k.Key, KeyCode.Enter);
 
-                               SuppressIfBadChar (k);
+                               SuppressIfBadChar (k.Key);
                            };
 
         _tbPath.Autocomplete = new AppendAutocomplete (_tbPath);
@@ -153,17 +154,17 @@ public class FileDialog : Dialog
                               {
                                   if (_tableView.SelectedRow <= 0)
                                   {
-                                      NavigateIf (k, KeyCode.CursorUp, _tbPath);
+                                      NavigateIf (k.Key, KeyCode.CursorUp, _tbPath);
                                   }
 
                                   if (_tableView.SelectedRow == _tableView.Table.Rows - 1)
                                   {
-                                      NavigateIf (k, KeyCode.CursorDown, _btnToggleSplitterCollapse);
+                                      NavigateIf (k.Key, KeyCode.CursorDown, _btnToggleSplitterCollapse);
                                   }
 
                                   if (_splitContainer.Tiles.First ().ContentView.Visible && _tableView.SelectedColumn == 0)
                                   {
-                                      NavigateIf (k, KeyCode.CursorLeft, _treeView);
+                                      NavigateIf (k.Key, KeyCode.CursorLeft, _treeView);
                                   }
 
                                   if (k.Handled)
@@ -208,13 +209,13 @@ public class FileDialog : Dialog
 
         _tbFind.KeyDown += (s, o) =>
                            {
-                               if (o.KeyCode == KeyCode.Enter)
+                               if (o.Key.KeyCode == KeyCode.Enter)
                                {
                                    RestartSearch ();
                                    o.Handled = true;
                                }
 
-                               if (o.KeyCode == KeyCode.Esc)
+                               if (o.Key.KeyCode == KeyCode.Esc)
                                {
                                    if (CancelSearch ())
                                    {
@@ -224,12 +225,12 @@ public class FileDialog : Dialog
 
                                if (_tbFind.CursorIsAtEnd ())
                                {
-                                   NavigateIf (o, KeyCode.CursorRight, _btnCancel);
+                                   NavigateIf (o.Key, KeyCode.CursorRight, _btnCancel);
                                }
 
                                if (_tbFind.CursorIsAtStart ())
                                {
-                                   NavigateIf (o, KeyCode.CursorLeft, _btnToggleSplitterCollapse);
+                                   NavigateIf (o.Key, KeyCode.CursorLeft, _btnToggleSplitterCollapse);
                                }
                            };
 
@@ -245,7 +246,7 @@ public class FileDialog : Dialog
         _tbPath.TextChanged += (s, e) => PathChanged ();
 
         _tableView.CellActivated += CellActivate;
-        _tableView.KeyUp += (s, k) => k.Handled = TableView_KeyUp (k);
+        _tableView.KeyUp += (s, k) => { k.Handled = TableView_KeyUp (k.Key); };
         _tableView.SelectedCellChanged += TableView_SelectedCellChanged;
 
         _tableView.KeyBindings.Add (Key.Home, Command.TopHome);
@@ -261,11 +262,11 @@ public class FileDialog : Dialog
                                  {
                                      if (!_treeView.CanExpand (selected) || _treeView.IsExpanded (selected))
                                      {
-                                         NavigateIf (k, KeyCode.CursorRight, _tableView);
+                                         NavigateIf (k.Key, KeyCode.CursorRight, _tableView);
                                      }
                                      else if (_treeView.GetObjectRow (selected) == 0)
                                      {
-                                         NavigateIf (k, KeyCode.CursorUp, _tbPath);
+                                         NavigateIf (k.Key, KeyCode.CursorUp, _tbPath);
                                      }
                                  }
 
@@ -274,7 +275,7 @@ public class FileDialog : Dialog
                                      return;
                                  }
 
-                                 k.Handled = TreeView_KeyDown (k);
+                                 k.Handled = TreeView_KeyDown (k.Key);
                              };
 
         AllowsMultipleSelection = false;
@@ -1035,9 +1036,9 @@ public class FileDialog : Dialog
         return toReturn;
     }
 
-    private bool NavigateIf (Key keyEvent, KeyCode isKey, View to)
+    private bool NavigateIf (Key key, KeyCode isKey, View to)
     {
-        if (keyEvent.KeyCode == isKey)
+        if (key.KeyCode == isKey)
         {
             to.FocusFirst ();
 
@@ -1333,7 +1334,7 @@ public class FileDialog : Dialog
 
     private static string StripArrows (string columnName) { return columnName.Replace (" (▼)", string.Empty).Replace (" (▲)", string.Empty); }
 
-    private void SuppressIfBadChar (Key k)
+    private void SuppressIfBadChar (in Key k)
     {
         // don't let user type bad letters
         var ch = (char)k;
@@ -1344,40 +1345,27 @@ public class FileDialog : Dialog
         }
     }
 
-    private bool TableView_KeyUp (Key keyEvent)
+    [SuppressMessage ("ReSharper", "SwitchStatementHandlesSomeKnownEnumValuesWithDefault", Justification = "Intentional catch-all")]
+    private bool TableView_KeyUp (in Key k)
     {
-        if (keyEvent.KeyCode == KeyCode.Backspace)
+        switch (k.KeyCode)
         {
-            return _history.Back ();
+            case KeyCode.ShiftMask | KeyCode.Backspace:
+                return _history.Forward ();
+            case KeyCode.Backspace:
+                return _history.Back ();
+            case KeyCode.Delete:
+                Delete ();
+                return true;
+            case KeyCode.CtrlMask | KeyCode.R:
+                Rename ();
+                return true;
+            case KeyCode.CtrlMask | KeyCode.N:
+                New ();
+                return true;
+            default:
+                return false;
         }
-
-        if (keyEvent.KeyCode == (KeyCode.ShiftMask | KeyCode.Backspace))
-        {
-            return _history.Forward ();
-        }
-
-        if (keyEvent.KeyCode == KeyCode.Delete)
-        {
-            Delete ();
-
-            return true;
-        }
-
-        if (keyEvent.KeyCode == (KeyCode.CtrlMask | KeyCode.R))
-        {
-            Rename ();
-
-            return true;
-        }
-
-        if (keyEvent.KeyCode == (KeyCode.CtrlMask | KeyCode.N))
-        {
-            New ();
-
-            return true;
-        }
-
-        return false;
     }
 
     private void TableView_SelectedCellChanged (object sender, SelectedCellChangedEventArgs obj)

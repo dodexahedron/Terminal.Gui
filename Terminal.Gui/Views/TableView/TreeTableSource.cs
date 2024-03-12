@@ -127,7 +127,7 @@ public class TreeTableSource<T> : IEnumerableTableSource<T>, IDisposable where T
 
     private Branch<T> RowToBranch (int row) { return _tree.BuildLineMap ().ElementAt (row); }
 
-    private void Table_KeyPress (object sender, Key e)
+    private void Table_KeyPress (object sender, KeyEventArgs e)
     {
         if (!IsInTreeColumn (_tableView.SelectedColumn, true))
         {
@@ -141,7 +141,7 @@ public class TreeTableSource<T> : IEnumerableTableSource<T>, IDisposable where T
             return;
         }
 
-        if (e.KeyCode == KeyCode.CursorLeft)
+        if (e.Key.KeyCode == KeyCode.CursorLeft)
         {
             if (_tree.IsExpanded (obj))
             {
@@ -150,7 +150,7 @@ public class TreeTableSource<T> : IEnumerableTableSource<T>, IDisposable where T
             }
         }
 
-        if (e.KeyCode == KeyCode.CursorRight)
+        if (e.Key.KeyCode == KeyCode.CursorRight)
         {
             if (_tree.CanExpand (obj) && !_tree.IsExpanded (obj))
             {

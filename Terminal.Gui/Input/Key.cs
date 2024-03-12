@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-namespace Terminal.Gui;
+namespace Terminal.Gui.Input;
 
 /// <summary>
 ///     Provides an abstraction for common keyboard operations and state. Used for processing keyboard input and
@@ -70,7 +70,7 @@ namespace Terminal.Gui;
 ///         </list>
 ///     </para>
 /// </remarks>
-public sealed partial record Key : IEqualityOperators<Key,Key,bool>
+public sealed partial record Key : IEqualityOperators<Key, Key, bool>
 {
     /// <summary>Constructs a new <see cref="Key"/></summary>
     [SetsRequiredMembers]
@@ -79,7 +79,7 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     /// <summary>Constructs a new <see cref="Key"/>, initialized from <paramref name="k"/> or <see cref="Gui.KeyCode.Null"/>, if not provided.</summary>
     /// <param name="k">The key</param>
     [SetsRequiredMembers]
-    public Key ([ConstantExpected(Max = uint.MaxValue, Min = uint.MinValue)]KeyCode k = KeyCode.Null) { KeyCode = k; }
+    public Key ([ConstantExpected (Max = uint.MaxValue, Min = uint.MinValue)] KeyCode k = KeyCode.Null) { KeyCode = k; }
 
     /// <summary>Constructs a new <see cref="Key"/> from a char.</summary>
     /// <remarks>
@@ -95,23 +95,20 @@ public sealed partial record Key : IEqualityOperators<Key,Key,bool>
     [SetsRequiredMembers]
     public Key (char ch)
     {
-        switch (ch)
-        {
-            case >= 'A' and <= 'Z':
-                // Upper case A..Z mean "Shift-char" so we need to add Shift
-                KeyCode = (KeyCode)ch | KeyCode.ShiftMask;
+    #if DEBUG
+        KeyCode =
+    #else
+        _keyCode =
+    #endif
+            ch switch
+                  {
+                      // Upper case A..Z mean "Shift-char" so we need to add Shift
+                      >= 'A' and <= 'Z' => (KeyCode)ch | KeyCode.ShiftMask,
 
-                break;
-            case >= 'a' and <= 'z':
-                // Lower case a..z mean no shift, so we need to store as Key.A...Key.Z
-                KeyCode = (KeyCode)(ch - 32);
-
-                return;
-            default:
-                KeyCode = (KeyCode)ch;
-
-                break;
-        }
+                      // Lower case a..z mean no shift, so we need to store as Key.A...Key.Z
+                      >= 'a' and <= 'z' => (KeyCode)(ch - 32),
+                      _ => (KeyCode)ch
+                  };
     }
 
     /// <summary>

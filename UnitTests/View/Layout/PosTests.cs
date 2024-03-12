@@ -475,7 +475,7 @@ public class PosTests
 
         field.KeyDown += (s, k) =>
                          {
-                             if (k.KeyCode == KeyCode.Enter)
+                             if (k.Key.KeyCode == KeyCode.Enter)
                              {
                                  field.Text = $"View {count}";
                                  var view2 = new View { X = 0, Y = field.Y, Width = 20, Text = field.Text };
@@ -494,7 +494,7 @@ public class PosTests
                                  {
                                      while (count < 20)
                                      {
-                                         field.NewKeyDownEvent (Key.Enter);
+                                         field.NewKeyDownEvent (new (Key.Enter));
                                      }
 
                                      Application.RequestStop ();
@@ -545,7 +545,7 @@ public class PosTests
 
         field.KeyDown += (s, k) =>
                          {
-                             if (k.KeyCode == KeyCode.Enter)
+                             if (k.Key.KeyCode == KeyCode.Enter)
                              {
                                  Assert.Equal ($"View {count - 1}", listViews [count - 1].Text);
                                  view.Remove (listViews [count - 1]);
@@ -562,7 +562,7 @@ public class PosTests
                                  {
                                      while (count > 0)
                                      {
-                                         field.NewKeyDownEvent (Key.Enter);
+                                         field.NewKeyDownEvent (new (Key.Enter));
                                      }
 
                                      Application.RequestStop ();

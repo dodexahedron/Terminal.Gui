@@ -36,7 +36,7 @@ public class DimTests
 
         field.KeyDown += (s, k) =>
                          {
-                             if (k.KeyCode == KeyCode.Enter)
+                             if (k.Key.KeyCode == KeyCode.Enter)
                              {
                                  field.Text = $"Label {count}";
                                  var label = new Label { X = 0, Y = view.Bounds.Height, /*Width = 20,*/ Text = field.Text };
@@ -55,7 +55,7 @@ public class DimTests
                                  {
                                      while (count < 20)
                                      {
-                                         field.NewKeyDownEvent (Key.Enter);
+                                         field.NewKeyDownEvent (new (Key.Enter));
                                      }
 
                                      Application.RequestStop ();
@@ -125,7 +125,7 @@ public class DimTests
 
         field.KeyDown += (s, k) =>
                          {
-                             if (k.KeyCode == KeyCode.Enter)
+                             if (k.Key.KeyCode == KeyCode.Enter)
                              {
                                  Assert.Equal ($"Label {count - 1}", listLabels [count - 1].Text);
                                  view.Remove (listLabels [count - 1]);
@@ -142,7 +142,7 @@ public class DimTests
                                  {
                                      while (count > 0)
                                      {
-                                         field.NewKeyDownEvent (Key.Enter);
+                                         field.NewKeyDownEvent (new (Key.Enter));
                                      }
 
                                      Application.RequestStop ();

@@ -447,9 +447,9 @@ public class TreeViewFileSystem : Scenario
         }
     }
 
-    private void TreeViewFiles_KeyPress (object sender, Key obj)
+    private void TreeViewFiles_KeyPress (object sender, KeyEventArgs e)
     {
-        if (obj.KeyCode == (KeyCode.R | KeyCode.CtrlMask))
+        if (e.Key.KeyCode == (KeyCode.R | KeyCode.CtrlMask))
         {
             IFileSystemInfo selected = _treeViewFiles.SelectedObject;
 

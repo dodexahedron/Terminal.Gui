@@ -51,7 +51,7 @@ public class TreeTableSourceTests : IDisposable
         Assert.Equal (0, tv.SelectedColumn);
 
         // when pressing right we should expand the top route
-        tv.NewKeyDownEvent (Key.CursorRight);
+        tv.NewKeyDownEvent (new (Key.CursorRight));
 
         tv.Draw ();
 
@@ -68,7 +68,7 @@ public class TreeTableSourceTests : IDisposable
         TestHelpers.AssertDriverContentsAre (expected, _output);
 
         // when pressing left we should collapse the top route again
-        tv.NewKeyDownEvent (Key.CursorLeft);
+        tv.NewKeyDownEvent (new (Key.CursorLeft));
 
         tv.Draw ();
 
@@ -175,13 +175,13 @@ public class TreeTableSourceTests : IDisposable
         Assert.Equal (0, tv.SelectedColumn);
 
         // when pressing right we move to tree column
-        tv.NewKeyDownEvent (Key.CursorRight);
+        tv.NewKeyDownEvent (new (Key.CursorRight));
 
         // now we are in tree column
         Assert.Equal (0, tv.SelectedRow);
         Assert.Equal (1, tv.SelectedColumn);
 
-        Application.Top.NewKeyDownEvent (Key.CursorRight);
+        Application.Top.NewKeyDownEvent (new (Key.CursorRight));
 
         tv.Draw ();
 
@@ -198,8 +198,8 @@ public class TreeTableSourceTests : IDisposable
 
         TestHelpers.AssertDriverContentsAre (expected, _output);
 
-        tv.NewKeyDownEvent (Key.CursorDown);
-        tv.NewKeyDownEvent (Key.Space);
+        tv.NewKeyDownEvent (new (Key.CursorDown));
+        tv.NewKeyDownEvent (new (Key.Space));
         tv.Draw ();
 
         expected =

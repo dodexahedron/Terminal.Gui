@@ -513,36 +513,36 @@ public abstract class ConsoleDriver
     #region Mouse and Keyboard
 
     /// <summary>Event fired when a key is pressed down. This is a precursor to <see cref="KeyUp"/>.</summary>
-    public event EventHandler<Key> KeyDown;
+    public event EventHandler<KeyEventArgs> KeyDown;
 
     /// <summary>
     ///     Called when a key is pressed down. Fires the <see cref="KeyDown"/> event. This is a precursor to
     ///     <see cref="OnKeyUp"/>.
     /// </summary>
-    /// <param name="a"></param>
-    public void OnKeyDown (Key a) { KeyDown?.Invoke (this, a); }
+    /// <param name="e"></param>
+    protected void OnKeyDown (KeyEventArgs e) { KeyDown?.Invoke (this, e); }
 
     /// <summary>Event fired when a key is released.</summary>
     /// <remarks>
     ///     Drivers that do not support key release events will fire this event after <see cref="KeyDown"/> processing is
     ///     complete.
     /// </remarks>
-    public event EventHandler<Key> KeyUp;
+    public event EventHandler<KeyEventArgs> KeyUp;
 
     /// <summary>Called when a key is released. Fires the <see cref="KeyUp"/> event.</summary>
     /// <remarks>
     ///     Drivers that do not support key release events will calls this method after <see cref="OnKeyDown"/> processing
     ///     is complete.
     /// </remarks>
-    /// <param name="a"></param>
-    public void OnKeyUp (Key a) { KeyUp?.Invoke (this, a); }
+    /// <param name="e"></param>
+    protected void OnKeyUp (KeyEventArgs e) { KeyUp?.Invoke (this, e); }
 
     /// <summary>Event fired when a mouse event occurs.</summary>
     public event EventHandler<MouseEventEventArgs> MouseEvent;
 
     /// <summary>Called when a mouse event occurs. Fires the <see cref="MouseEvent"/> event.</summary>
-    /// <param name="a"></param>
-    public void OnMouseEvent (MouseEventEventArgs a) { MouseEvent?.Invoke (this, a); }
+    /// <param name="e"></param>
+    protected void OnMouseEvent (MouseEventEventArgs e) { MouseEvent?.Invoke (this, e); }
 
     /// <summary>Simulates a key press.</summary>
     /// <param name="keyChar">The key character.</param>

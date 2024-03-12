@@ -346,8 +346,8 @@ public class FakeDriver : ConsoleDriver
         }
 
         KeyCode map = MapKey (consoleKeyInfo);
-        OnKeyDown (new Key (map));
-        OnKeyUp (new Key (map));
+        OnKeyDown (new (map));
+        OnKeyUp (new (map));
 
         //OnKeyPressed (new KeyEventArgs (map));
     }

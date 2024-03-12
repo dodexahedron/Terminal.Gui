@@ -474,10 +474,10 @@ public class HexView : View
     ///     Method used to invoke the <see cref="PositionChanged"/> event passing the <see cref="HexViewEventArgs"/>
     ///     arguments.
     /// </summary>
-    public virtual void OnPositionChanged () { PositionChanged?.Invoke (this, new HexViewEventArgs (Position, CursorPosition, BytesPerLine)); }
+    protected virtual void OnPositionChanged () { PositionChanged?.Invoke (this, new HexViewEventArgs (Position, CursorPosition, BytesPerLine)); }
 
     /// <inheritdoc/>
-    public override bool OnProcessKeyDown (Key keyEvent)
+    public override bool OnProcessKeyDown (KeyEventArgs e)
     {
         if (!AllowEdits)
         {
@@ -485,7 +485,7 @@ public class HexView : View
         }
 
         // Ignore control characters and other special keys
-        if (keyEvent < Key.Space || keyEvent.KeyCode > KeyCode.CharMask)
+        if (e.Key < Key.Space || e.Key.KeyCode > KeyCode.CharMask)
         {
             return false;
         }
@@ -493,7 +493,8 @@ public class HexView : View
         if (leftSide)
         {
             int value;
-            var k = (char)keyEvent.KeyCode;
+            // TODO: Try to avoid this cast.
+            var k = (char)e.Key.KeyCode;
 
             if (k >= 'A' && k <= 'F')
             {

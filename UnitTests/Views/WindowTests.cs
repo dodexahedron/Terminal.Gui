@@ -23,7 +23,7 @@ public class WindowTests
         Application.Top.Add (win);
         Application.Begin (Application.Top);
 
-        Exception exception = Record.Exception (() => win.NewKeyDownEvent (KeyCode.AltMask));
+        Exception exception = Record.Exception (() => win.NewKeyDownEvent (new (new (KeyCode.AltMask))));
         Assert.Null (exception);
     }
 

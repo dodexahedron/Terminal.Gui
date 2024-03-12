@@ -43,16 +43,16 @@ public class TimeFieldTests
         var tf2 = new TimeField { Time = TimeSpan.Parse ("12:59:01") };
 
         // Select all text
-        Assert.True (tf2.NewKeyDownEvent (Key.End.WithShift));
+        Assert.True (tf2.NewKeyDownEvent (new (Key.End.WithShift)));
         Assert.Equal (1, tf2.SelectedStart);
         Assert.Equal (8, tf2.SelectedLength);
         Assert.Equal (9, tf2.CursorPosition);
 
         // Copy from tf2
-        Assert.True (tf2.NewKeyDownEvent (Key.C.WithCtrl));
+        Assert.True (tf2.NewKeyDownEvent (new (Key.C.WithCtrl)));
 
         // Paste into tf1
-        Assert.True (tf1.NewKeyDownEvent (Key.V.WithCtrl));
+        Assert.True (tf1.NewKeyDownEvent (new (Key.V.WithCtrl)));
         Assert.Equal (" 12:59:01", tf1.Text);
         Assert.Equal (9, tf1.CursorPosition);
     }
@@ -79,22 +79,22 @@ public class TimeFieldTests
         var tf = new TimeField ();
 
         // Start selection
-        Assert.True (tf.NewKeyDownEvent (Key.CursorLeft.WithShift));
+        Assert.True (tf.NewKeyDownEvent (new (Key.CursorLeft.WithShift)));
         Assert.Equal (1, tf.SelectedStart);
         Assert.Equal (1, tf.SelectedLength);
         Assert.Equal (0, tf.CursorPosition);
 
         // Without selection
-        Assert.True (tf.NewKeyDownEvent (Key.CursorLeft));
+        Assert.True (tf.NewKeyDownEvent (new (Key.CursorLeft)));
         Assert.Equal (-1, tf.SelectedStart);
         Assert.Equal (0, tf.SelectedLength);
         Assert.Equal (1, tf.CursorPosition);
         tf.CursorPosition = 8;
-        Assert.True (tf.NewKeyDownEvent (Key.CursorRight.WithShift));
+        Assert.True (tf.NewKeyDownEvent (new (Key.CursorRight.WithShift)));
         Assert.Equal (8, tf.SelectedStart);
         Assert.Equal (1, tf.SelectedLength);
         Assert.Equal (9, tf.CursorPosition);
-        Assert.True (tf.NewKeyDownEvent (Key.CursorRight));
+        Assert.True (tf.NewKeyDownEvent (new (Key.CursorRight)));
         Assert.Equal (-1, tf.SelectedStart);
         Assert.Equal (0, tf.SelectedLength);
         Assert.Equal (8, tf.CursorPosition);
@@ -106,11 +106,11 @@ public class TimeFieldTests
         Assert.Equal (5, tf.CursorPosition);
 
         // Start selection
-        Assert.True (tf.NewKeyDownEvent (Key.CursorRight.WithShift));
+        Assert.True (tf.NewKeyDownEvent (new (Key.CursorRight.WithShift)));
         Assert.Equal (5, tf.SelectedStart);
         Assert.Equal (1, tf.SelectedLength);
         Assert.Equal (6, tf.CursorPosition);
-        Assert.True (tf.NewKeyDownEvent (Key.CursorRight));
+        Assert.True (tf.NewKeyDownEvent (new (Key.CursorRight)));
         Assert.Equal (-1, tf.SelectedStart);
         Assert.Equal (0, tf.SelectedLength);
         Assert.Equal (5, tf.CursorPosition);
@@ -125,43 +125,43 @@ public class TimeFieldTests
         Assert.Equal (9, tf.CursorPosition);
         tf.CursorPosition = 1;
         tf.ReadOnly = true;
-        Assert.True (tf.NewKeyDownEvent (Key.Delete));
+        Assert.True (tf.NewKeyDownEvent (new (Key.Delete)));
         Assert.Equal (" 12:12:19", tf.Text);
         tf.ReadOnly = false;
-        Assert.True (tf.NewKeyDownEvent (Key.D.WithCtrl));
+        Assert.True (tf.NewKeyDownEvent (new (Key.D.WithCtrl)));
         Assert.Equal (" 02:12:19", tf.Text);
         tf.CursorPosition = 4;
         tf.ReadOnly = true;
-        Assert.True (tf.NewKeyDownEvent (Key.Delete));
+        Assert.True (tf.NewKeyDownEvent (new (Key.Delete)));
         Assert.Equal (" 02:12:19", tf.Text);
         tf.ReadOnly = false;
-        Assert.True (tf.NewKeyDownEvent (Key.Backspace));
+        Assert.True (tf.NewKeyDownEvent (new (Key.Backspace)));
         Assert.Equal (" 02:02:19", tf.Text);
-        Assert.True (tf.NewKeyDownEvent (Key.Home));
+        Assert.True (tf.NewKeyDownEvent (new (Key.Home)));
         Assert.Equal (1, tf.CursorPosition);
-        Assert.True (tf.NewKeyDownEvent (Key.End));
+        Assert.True (tf.NewKeyDownEvent (new (Key.End)));
         Assert.Equal (8, tf.CursorPosition);
-        Assert.True (tf.NewKeyDownEvent (Key.A.WithCtrl));
+        Assert.True (tf.NewKeyDownEvent (new (Key.A.WithCtrl)));
         Assert.Equal (1, tf.CursorPosition);
-        Assert.True (tf.NewKeyDownEvent (Key.E.WithCtrl));
+        Assert.True (tf.NewKeyDownEvent (new (Key.E.WithCtrl)));
         Assert.Equal (8, tf.CursorPosition);
-        Assert.True (tf.NewKeyDownEvent (Key.CursorLeft));
+        Assert.True (tf.NewKeyDownEvent (new (Key.CursorLeft)));
         Assert.Equal (7, tf.CursorPosition);
-        Assert.True (tf.NewKeyDownEvent (Key.CursorRight));
+        Assert.True (tf.NewKeyDownEvent (new (Key.CursorRight)));
         Assert.Equal (8, tf.CursorPosition);
 
         // Non-numerics are ignored
-        Assert.False (tf.NewKeyDownEvent (Key.A));
+        Assert.False (tf.NewKeyDownEvent (new (Key.A)));
         tf.ReadOnly = true;
         tf.CursorPosition = 1;
-        Assert.True (tf.NewKeyDownEvent (Key.D1));
+        Assert.True (tf.NewKeyDownEvent (new (Key.D1)));
         Assert.Equal (" 02:02:19", tf.Text);
         tf.ReadOnly = false;
-        Assert.True (tf.NewKeyDownEvent (Key.D1));
+        Assert.True (tf.NewKeyDownEvent (new (Key.D1)));
         Assert.Equal (" 12:02:19", tf.Text);
         Assert.Equal (2, tf.CursorPosition);
 #if UNIX_KEY_BINDINGS
-        Assert.True (tf.NewKeyDownEvent (Key.D.WithAlt));
+        Assert.True (tf.NewKeyDownEvent (new (Key.D.WithAlt)));
         Assert.Equal (" 10:02:19", tf.Text);
 #endif
     }
@@ -175,13 +175,13 @@ public class TimeFieldTests
         tf.CursorPosition = 2;
 
         // Now select the separator :
-        Assert.True (tf.NewKeyDownEvent (Key.CursorRight.WithShift));
+        Assert.True (tf.NewKeyDownEvent (new (Key.CursorRight.WithShift)));
         Assert.Equal (2, tf.SelectedStart);
         Assert.Equal (1, tf.SelectedLength);
         Assert.Equal (3, tf.CursorPosition);
 
         // Type 3 over the separator
-        Assert.True (tf.NewKeyDownEvent (Key.D3));
+        Assert.True (tf.NewKeyDownEvent (new (Key.D3)));
 
         // The format was normalized and replaced again with :
         Assert.Equal (" 12:12:19", tf.Text);

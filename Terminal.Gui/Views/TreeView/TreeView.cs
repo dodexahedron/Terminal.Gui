@@ -1196,7 +1196,7 @@ public class TreeView<T> : View, ITreeView where T : class
     }
 
     /// <inheritdoc/>
-    public override bool OnProcessKeyDown (Key keyEvent)
+    public override bool OnProcessKeyDown (KeyEventArgs e)
     {
         if (!Enabled)
         {
@@ -1207,21 +1207,19 @@ public class TreeView<T> : View, ITreeView where T : class
         {
             // BUGBUG: this should move to OnInvokingKeyBindings
             // If not a keybinding, is the key a searchable key press?
-            if (CollectionNavigatorBase.IsCompatibleKey (keyEvent) && AllowLetterBasedNavigation)
+            if (CollectionNavigatorBase.IsCompatibleKey (e.Key) && AllowLetterBasedNavigation)
             {
-                IReadOnlyCollection<Branch<T>> map;
-
                 // If there has been a call to InvalidateMap since the last time
                 // we need a new one to reflect the new exposed tree state
-                map = BuildLineMap ();
+                IReadOnlyCollection<Branch<T>> map = BuildLineMap ();
 
                 // Find the current selected object within the tree
                 int current = map.IndexOf (b => b.Model == SelectedObject);
-                int? newIndex = KeystrokeNavigator?.GetNextMatchingItem (current, (char)keyEvent);
+                int newIndex = KeystrokeNavigator?.GetNextMatchingItem (current, (char)e.Key) ?? -1;
 
-                if (newIndex is int && newIndex != -1)
+                if (newIndex != -1)
                 {
-                    SelectedObject = map.ElementAt ((int)newIndex).Model;
+                    SelectedObject = map.ElementAt (newIndex).Model;
                     EnsureVisible (selectedObject);
                     SetNeedsDisplay ();
 

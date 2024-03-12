@@ -854,13 +854,13 @@ At 0,0
     {
         var r = new View ();
 
-        Assert.False (r.OnKeyDown (new Key { KeyCode = KeyCode.Null }));
+        Assert.False (r.OnKeyDown (new (new ())));
 
         //Assert.False (r.OnKeyDown (new KeyEventArgs () { Key = Key.Unknown }));
-        Assert.False (r.OnKeyUp (new Key { KeyCode = KeyCode.Null }));
-        Assert.False (r.OnMouseEvent (new MouseEvent { Flags = MouseFlags.AllEvents }));
-        Assert.False (r.OnMouseEnter (new MouseEvent { Flags = MouseFlags.AllEvents }));
-        Assert.False (r.OnMouseLeave (new MouseEvent { Flags = MouseFlags.AllEvents }));
+        Assert.False (r.OnKeyUp (new (new ())));
+        Assert.False (r.OnMouseEvent (new () { Flags = MouseFlags.AllEvents }));
+        Assert.False (r.OnMouseEnter (new () { Flags = MouseFlags.AllEvents }));
+        Assert.False (r.OnMouseLeave (new () { Flags = MouseFlags.AllEvents }));
 
         var v1 = new View ();
         Assert.False (r.OnEnter (v1));
@@ -1148,21 +1148,21 @@ At 0,0
             ClearNeedsDisplay ();
         }
 
-        public override bool OnKeyDown (Key keyEvent)
+        public override bool OnKeyDown (KeyEventArgs e)
         {
             IsKeyDown = true;
 
             return true;
         }
 
-        public override bool OnKeyUp (Key keyEvent)
+        public override bool OnKeyUp (KeyEventArgs e)
         {
             IsKeyUp = true;
 
             return true;
         }
 
-        public override bool OnProcessKeyDown (Key keyEvent)
+        public override bool OnProcessKeyDown (KeyEventArgs e)
         {
             IsKeyPress = true;
 

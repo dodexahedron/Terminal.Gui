@@ -974,7 +974,7 @@ public class TableView : View
     }
 
     /// <inheritdoc/>
-    public override bool OnProcessKeyDown (Key keyEvent)
+    public override bool OnProcessKeyDown (KeyEventArgs e)
     {
         if (TableIsNullOrInvisible ())
         {
@@ -986,12 +986,12 @@ public class TableView : View
         if (CollectionNavigator != null
             && HasFocus
             && Table.Rows != 0
-            && CollectionNavigatorBase.IsCompatibleKey (keyEvent)
-            && !keyEvent.KeyCode.HasFlag (KeyCode.CtrlMask)
-            && !keyEvent.KeyCode.HasFlag (KeyCode.AltMask)
-            && Rune.IsLetterOrDigit ((Rune)keyEvent))
+            && CollectionNavigatorBase.IsCompatibleKey (e.Key)
+            && !e.Key.KeyCode.HasFlag (KeyCode.CtrlMask)
+            && !e.Key.KeyCode.HasFlag (KeyCode.AltMask)
+            && Rune.IsLetterOrDigit ((Rune)e.Key))
         {
-            return CycleToNextTableEntryBeginningWith (keyEvent);
+            return CycleToNextTableEntryBeginningWith (e.Key);
         }
 
         return false;
@@ -1521,7 +1521,7 @@ public class TableView : View
             return false;
         }
 
-        int match = CollectionNavigator.GetNextMatchingItem (row, (char)keyEvent);
+        int match = CollectionNavigator.GetNextMatchingItem (row, (char)keyEvent) ?? -1;
 
         if (match != -1)
         {

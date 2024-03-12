@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 
 namespace Terminal.Gui;
 
@@ -72,15 +72,17 @@ public interface IAutocomplete
     /// <param name="me">The mouse event.</param>
     /// <param name="fromHost">If was called from the popup or from the host.</param>
     /// <returns><c>true</c>if the mouse can be handled <c>false</c>otherwise.</returns>
+    // BUG: This and other methods to directly raise events do not belong in this interface
+    // Interfaces define a public contract, and these aren't appropriate public methods.
     bool OnMouseEvent (MouseEvent me, bool fromHost = false);
 
     /// <summary>
     ///     Handle key events before <see cref="HostControl"/> e.g. to make key events like up/down apply to the
     ///     autocomplete control instead of changing the cursor position in the underlying text view.
     /// </summary>
-    /// <param name="a">The key event.</param>
+    /// <param name="e">The key event.</param>
     /// <returns><c>true</c>if the key can be handled <c>false</c>otherwise.</returns>
-    bool ProcessKey (Key a);
+    bool ProcessKey (KeyEventArgs e);
 
     /// <summary>Renders the autocomplete dialog inside the given <see cref="HostControl"/> at the given point.</summary>
     /// <param name="renderAt"></param>

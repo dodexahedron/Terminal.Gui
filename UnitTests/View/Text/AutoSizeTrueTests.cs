@@ -576,7 +576,7 @@ public class AutoSizeTrueTests
 
         field.KeyDown += (s, k) =>
                          {
-                             if (k.KeyCode == KeyCode.Enter)
+                             if (k.Key.KeyCode == KeyCode.Enter)
                              {
                                  ((FakeDriver)Application.Driver).SetBufferSize (22, count + 4);
                                  Rectangle pos = TestHelpers.AssertDriverContentsWithFrameAre (expecteds [count], _output);
@@ -612,11 +612,11 @@ public class AutoSizeTrueTests
                                  {
                                      while (count < 21)
                                      {
-                                         field.NewKeyDownEvent (Key.Enter);
+                                         field.NewKeyDownEvent (new (Key.Enter));
 
                                          if (count == 20)
                                          {
-                                             field.NewKeyDownEvent (Key.Enter);
+                                             field.NewKeyDownEvent (new (Key.Enter));
 
                                              break;
                                          }
@@ -682,7 +682,7 @@ public class AutoSizeTrueTests
 
         field.KeyDown += (s, k) =>
                          {
-                             if (k.KeyCode == KeyCode.Enter)
+                             if (k.Key.KeyCode == KeyCode.Enter)
                              {
                                  ((FakeDriver)Application.Driver).SetBufferSize (22, count + 4);
                                  Rectangle pos = TestHelpers.AssertDriverContentsWithFrameAre (expecteds [count], _output);
@@ -716,11 +716,11 @@ public class AutoSizeTrueTests
                                  {
                                      while (count > -1)
                                      {
-                                         field.NewKeyDownEvent (Key.Enter);
+                                         field.NewKeyDownEvent (new (Key.Enter));
 
                                          if (count == 0)
                                          {
-                                             field.NewKeyDownEvent (Key.Enter);
+                                             field.NewKeyDownEvent (new (Key.Enter));
 
                                              break;
                                          }

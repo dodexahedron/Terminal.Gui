@@ -62,26 +62,22 @@ public class AppendAutocomplete : AutocompleteBase
     public override bool OnMouseEvent (MouseEvent me, bool fromHost = false) { return false; }
 
     /// <inheritdoc/>
-    public override bool ProcessKey (Key a)
+    public override bool ProcessKey (KeyEventArgs e)
     {
-        Key key = a.KeyCode;
-
-        if (key == SelectionKey)
+        if (e.Key.KeyCode == SelectionKey)
         {
             return AcceptSelectionIfAny ();
         }
 
-        if (key == Key.CursorUp)
+        switch (e.Key.KeyCode)
         {
-            return CycleSuggestion (1);
+            case KeyCode.CursorUp:
+                return CycleSuggestion (1);
+            case KeyCode.CursorDown:
+                return CycleSuggestion (-1);
         }
 
-        if (key == Key.CursorDown)
-        {
-            return CycleSuggestion (-1);
-        }
-
-        if (key == CloseKey && Suggestions.Any ())
+        if (e.Key.KeyCode == CloseKey && Suggestions.Count != 0)
         {
             ClearSuggestions ();
             _suspendSuggestions = true;
@@ -89,7 +85,7 @@ public class AppendAutocomplete : AutocompleteBase
             return true;
         }
 
-        if (char.IsLetterOrDigit ((char)a))
+        if (char.IsLetterOrDigit ((char)e.Key))
         {
             _suspendSuggestions = false;
         }

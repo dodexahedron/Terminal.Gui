@@ -83,7 +83,6 @@ public partial class View
         return args.Handled;
     }
 
-    // TODO: OnMouseEvent should not be public virtual, but protected.
     /// <summary>Called when a mouse event occurs within the view's <see cref="Bounds"/>.</summary>
     /// <remarks>
     /// <para>

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace Terminal.Gui;
+﻿namespace Terminal.Gui;
 
 public partial class View
 {
@@ -77,14 +75,6 @@ public partial class View
         get => _hotKey;
         set
         {
-            if (value is null)
-            {
-                throw new ArgumentException (
-                                             @"HotKey must not be null. Use Key.Empty to clear the HotKey.",
-                                             nameof (value)
-                                            );
-            }
-
             if (AddKeyBindingsForHotKey (_hotKey, value))
             {
                 // This will cause TextFormatter_HotKeyChanged to be called, firing HotKeyChanged
@@ -368,7 +358,7 @@ public partial class View
     /// </remarks>
     /// <param name="keyEvent"></param>
     /// <returns><see langword="true"/> if the event was handled.</returns>
-    public bool NewKeyDownEvent (Key keyEvent)
+    public bool NewKeyDownEvent (KeyEventArgs keyEvent)
     {
         if (!Enabled)
         {
@@ -417,11 +407,12 @@ public partial class View
         return keyEvent.Handled;
     }
 
+    #nullable enable
     /// <summary>
     ///     Low-level API called when the user presses a key, allowing a view to pre-process the key down event. This is
     ///     called from <see cref="NewKeyDownEvent"/> before <see cref="OnInvokingKeyBindings"/>.
     /// </summary>
-    /// <param name="keyEvent">Contains the details about the key that produced the event.</param>
+    /// <param name="e">Contains the details about the key that produced the event.</param>
     /// <returns>
     ///     <see langword="false"/> if the key press was not handled. <see langword="true"/> if the keypress was handled
     ///     and no other view should see it.
@@ -431,14 +422,13 @@ public partial class View
     ///         For processing <see cref="HotKey"/>s and commands, use <see cref="Command"/> and
     ///         <see cref="KeyBindings.Add(Key, Command[])"/>instead.
     ///     </para>
-    ///     <para>Fires the <see cref="KeyDown"/> event.</para>
+    ///     <para>Raises the <see cref="KeyDown"/> event.</para>
     /// </remarks>
-    public virtual bool OnKeyDown (Key keyEvent)
+    public virtual bool OnKeyDown (KeyEventArgs e)
     {
-        // fire event
-        KeyDown?.Invoke (this, keyEvent);
+        KeyDown?.Invoke (this, e);
 
-        return keyEvent.Handled;
+        return e.Handled;
     }
 
     /// <summary>
@@ -453,7 +443,7 @@ public partial class View
     ///     </para>
     ///     <para>See <see href="../docs/keyboard.md">for an overview of Terminal.Gui keyboard APIs.</see></para>
     /// </remarks>
-    public event EventHandler<Key> KeyDown;
+    public event EventHandler<KeyEventArgs>? KeyDown;
 
     /// <summary>
     ///     Low-level API called when the user presses a key, allowing views do things during key down events. This is
@@ -479,8 +469,9 @@ public partial class View
     ///         KeyUp events.
     ///     </para>
     /// </remarks>
-    public virtual bool OnProcessKeyDown (Key keyEvent)
+    public virtual bool OnProcessKeyDown (KeyEventArgs keyEvent)
     {
+        // BUG: With this commented out, the event is never raised.
         //ProcessKeyDown?.Invoke (this, keyEvent);
         return keyEvent.Handled;
     }
@@ -501,7 +492,8 @@ public partial class View
     ///     </para>
     ///     <para>See <see href="../docs/keyboard.md">for an overview of Terminal.Gui keyboard APIs.</see></para>
     /// </remarks>
-    public event EventHandler<Key> ProcessKeyDown;
+    public event EventHandler<KeyEventArgs>? ProcessKeyDown;
+    #nullable restore
 
     #endregion KeyDown Event
 
@@ -528,7 +520,7 @@ public partial class View
     /// </remarks>
     /// <param name="keyEvent"></param>
     /// <returns><see langword="true"/> if the event was handled.</returns>
-    public bool NewKeyUpEvent (Key keyEvent)
+    public bool NewKeyUpEvent (KeyEventArgs keyEvent)
     {
         if (!Enabled)
         {
@@ -570,7 +562,7 @@ public partial class View
     ///     </para>
     ///     <para>See <see href="../docs/keyboard.md">for an overview of Terminal.Gui keyboard APIs.</see></para>
     /// </remarks>
-    public virtual bool OnKeyUp (Key keyEvent)
+    public virtual bool OnKeyUp (KeyEventArgs keyEvent)
     {
         // fire event
         KeyUp?.Invoke (this, keyEvent);
@@ -592,7 +584,7 @@ public partial class View
     ///         <para>See <see href="../docs/keyboard.md">for an overview of Terminal.Gui keyboard APIs.</see></para>
     ///     </remarks>
     /// </summary>
-    public event EventHandler<Key> KeyUp;
+    public event EventHandler<KeyEventArgs> KeyUp;
 
     #endregion KeyUp Event
 
@@ -613,18 +605,18 @@ public partial class View
     ///     <para>Fires the <see cref="InvokingKeyBindings"/> event.</para>
     ///     <para>See <see href="../docs/keyboard.md">for an overview of Terminal.Gui keyboard APIs.</see></para>
     /// </remarks>
-    /// <param name="keyEvent">Contains the details about the key that produced the event.</param>
+    /// <param name="e">Contains the details about the key that produced the event.</param>
     /// <returns>
     ///     <see langword="false"/> if the key press was not handled. <see langword="true"/> if the keypress was handled
     ///     and no other view should see it.
     /// </returns>
-    public virtual bool? OnInvokingKeyBindings (Key keyEvent)
+    public virtual bool? OnInvokingKeyBindings (KeyEventArgs e)
     {
         // fire event only if there's an app or hotkey binding for the key
-        if (KeyBindings.TryGet (keyEvent, KeyBindingScope.Application | KeyBindingScope.HotKey, out KeyBinding _))
+        if (KeyBindings.TryGet (e.Key, KeyBindingScope.Application | KeyBindingScope.HotKey, out KeyBinding _))
         {
-            InvokingKeyBindings?.Invoke (this, keyEvent);
-            if (keyEvent.Handled)
+            InvokingKeyBindings?.Invoke (this, e);
+            if (e.Handled)
             {
                 return true;
             }
@@ -637,7 +629,7 @@ public partial class View
         //   `InvokeKeyBindings` returns `false`. Continue passing the event (return `false` from `OnInvokeKeyBindings`)..
         // * If key bindings were found, and any handled the key (at least one `Command` returned `true`),
         //   `InvokeKeyBindings` returns `true`. Continue passing the event (return `false` from `OnInvokeKeyBindings`).
-        bool? handled = InvokeKeyBindings (keyEvent);
+        bool? handled = InvokeKeyBindings (e);
 
         if (handled is { } && (bool)handled)
         {
@@ -649,17 +641,17 @@ public partial class View
         // Now, process any key bindings in the subviews that are tagged to KeyBindingScope.HotKey.
         foreach (View view in Subviews.Where (
                                               v => v.KeyBindings.TryGet (
-                                                                         keyEvent,
+                                                                         e.Key,
                                                                          KeyBindingScope.HotKey,
                                                                          out KeyBinding _
                                                                         )
                                              ))
         {
             // TODO: I think this TryGet is not needed due to the one in the lambda above. Use `Get` instead?
-            if (view.KeyBindings.TryGet (keyEvent, KeyBindingScope.HotKey, out KeyBinding binding))
+            if (view.KeyBindings.TryGet (e.Key, KeyBindingScope.HotKey, out KeyBinding binding))
             {
                 //keyEvent.Scope = KeyBindingScope.HotKey;
-                handled = view.OnInvokingKeyBindings (keyEvent);
+                handled = view.OnInvokingKeyBindings (e);
 
                 if (handled is { } && (bool)handled)
                 {
@@ -672,26 +664,26 @@ public partial class View
     }
 
     /// <summary>
-    ///     Invoked when a key is pressed that may be mapped to a key binding. Set <see cref="Key.Handled"/> to true to
+    ///     Invoked when a key is pressed that may be mapped to a key binding. Set <see cref="KeyEventArgs.Handled"/> to true to
     ///     stop the key from being processed by other views.
     /// </summary>
-    public event EventHandler<Key> InvokingKeyBindings;
+    public event EventHandler<KeyEventArgs> InvokingKeyBindings;
 
     /// <summary>
-    ///     Invokes any binding that is registered on this <see cref="View"/> and matches the <paramref name="key"/>
+    ///     Invokes any binding that is registered on this <see cref="View"/> and matches the <paramref name="e"/>
     ///     <para>See <see href="../docs/keyboard.md">for an overview of Terminal.Gui keyboard APIs.</see></para>
     /// </summary>
-    /// <param name="key">The key event passed.</param>
+    /// <param name="e">The key event passed.</param>
     /// <returns>
-    ///     <see langword="null"/> if no command was bound the <paramref name="key"/>. <see langword="true"/> if
+    ///     <see langword="null"/> if no command was bound the <paramref name="e"/>. <see langword="true"/> if
     ///     commands were invoked and at least one handled the command. <see langword="false"/> if commands were invoked and at
     ///     none handled the command.
     /// </returns>
-    protected bool? InvokeKeyBindings (Key key)
+    protected bool? InvokeKeyBindings (KeyEventArgs e)
     {
         bool? toReturn = null;
 
-        if (!KeyBindings.TryGet (key, out KeyBinding binding))
+        if (!KeyBindings.TryGet (e.Key, out KeyBinding binding))
         {
             return null;
         }
@@ -701,7 +693,7 @@ public partial class View
             if (!CommandImplementations.ContainsKey (command))
             {
                 throw new NotSupportedException (
-                                                 @$"A KeyBinding was set up for the command {command} ({key}) but that command is not supported by this View ({GetType ().Name})"
+                                                 @$"A KeyBinding was set up for the command {command} ({e}) but that command is not supported by this View ({GetType ().Name})"
                                                 );
             }
 

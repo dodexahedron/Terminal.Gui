@@ -555,12 +555,12 @@ internal class UICatalogApp
             // user to type and the items that match get selected). We implement it in the app instead. 
             ScenarioList.KeyDown += (s, a) =>
                                     {
-                                        if (CollectionNavigatorBase.IsCompatibleKey (a))
+                                        if (CollectionNavigatorBase.IsCompatibleKey (a.Key))
                                         {
                                             int? newItem =
                                                 _scenarioCollectionNav?.GetNextMatchingItem (
                                                                                              ScenarioList.SelectedRow,
-                                                                                             (char)a
+                                                                                             (char)a.Key
                                                                                             );
 
                                             if (newItem is int v && newItem != -1)

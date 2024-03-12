@@ -78,7 +78,7 @@ internal class KeyBindingsDialog : Dialog
 
         dlg.KeyDown += (s, k) =>
                        {
-                           key = k.KeyCode;
+                           key = k.Key.KeyCode;
                            Application.RequestStop ();
                        };
         Application.Run (dlg);

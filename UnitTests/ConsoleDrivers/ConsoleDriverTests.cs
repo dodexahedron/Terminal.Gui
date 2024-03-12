@@ -57,8 +57,8 @@ public class ConsoleDriverTests
         // TODO: Double-check the AsRun() calls here
         view.KeyDown += (s, e) =>
                         {
-                            Assert.Equal (new Rune(text [idx]), e.AsRune ());
-                            rText += e.AsRune ();
+                            Assert.Equal (new Rune(text [idx]), e.Key.AsRune ());
+                            rText += e.Key.AsRune ();
                             Assert.Equal (rText, text.Substring (0, idx + 1));
                             e.Handled = true;
                             idx++;

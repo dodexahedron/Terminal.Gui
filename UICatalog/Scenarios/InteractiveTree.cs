@@ -125,9 +125,9 @@ public class InteractiveTree : Scenario
         }
     }
 
-    private void TreeView_KeyPress (object sender, Key obj)
+    private void TreeView_KeyPress (object sender, KeyEventArgs e)
     {
-        if (obj.KeyCode == KeyCode.Delete)
+        if (e.Key.KeyCode == KeyCode.Delete)
         {
             ITreeNode toDelete = _treeView.SelectedObject;
 
@@ -136,7 +136,7 @@ public class InteractiveTree : Scenario
                 return;
             }
 
-            obj.Handled = true;
+            e.Handled = true;
 
             // if it is a root object remove it
             if (_treeView.Objects.Contains (toDelete))

@@ -177,14 +177,14 @@ public class TimeField : TextField
     }
 
     /// <inheritdoc/>
-    public override bool OnProcessKeyDown (Key a)
+    public override bool OnProcessKeyDown (KeyEventArgs a)
     {
         // Ignore non-numeric characters.
-        if (a.KeyCode is >= (KeyCode)(int)KeyCode.D0 and <= (KeyCode)(int)KeyCode.D9)
+        if (a.Key.KeyCode is >= KeyCode.D0 and <= KeyCode.D9)
         {
             if (!ReadOnly)
             {
-                if (SetText ((Rune)a))
+                if (SetText ((Rune)a.Key))
                 {
                     IncCursorPosition ();
                 }
@@ -198,7 +198,7 @@ public class TimeField : TextField
 
     /// <summary>Event firing method that invokes the <see cref="TimeChanged"/> event.</summary>
     /// <param name="args">The event arguments</param>
-    public virtual void OnTimeChanged (DateTimeEventArgs<TimeSpan> args) { TimeChanged?.Invoke (this, args); }
+    protected virtual void OnTimeChanged (DateTimeEventArgs<TimeSpan> args) { TimeChanged?.Invoke (this, args); }
 
     /// <summary>TimeChanged event, raised when the Date has changed.</summary>
     /// <remarks>This event is raised when the <see cref="Time"/> changes.</remarks>

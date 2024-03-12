@@ -276,7 +276,7 @@ public class BackgroundWorkerCollection : Scenario
 
             KeyDown += (s, e) =>
                        {
-                           if (e.KeyCode == KeyCode.Esc)
+                           if (e.Key.KeyCode == KeyCode.Esc)
                            {
                                OnReportClosed (this, EventArgs.Empty);
                            }

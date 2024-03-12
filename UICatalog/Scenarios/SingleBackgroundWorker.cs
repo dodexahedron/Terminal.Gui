@@ -216,7 +216,7 @@ public class SingleBackgroundWorker : Scenario
                             {
                                 // Prevents Ctrl+Q from closing this.
                                 // Only Ctrl+C is allowed.
-                                if (e == Application.QuitKey)
+                                if (e.Key == Application.QuitKey)
                                 {
                                     e.Handled = true;
                                 }

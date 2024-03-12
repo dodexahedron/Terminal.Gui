@@ -48,7 +48,7 @@ public abstract class CollectionNavigatorBase
     ///     The index of the item that matches what the user has typed. Returns <see langword="-1"/> if no item in the
     ///     collection matched.
     /// </returns>
-    public int GetNextMatchingItem (int currentIndex, char keyStruck)
+    public int? GetNextMatchingItem (int currentIndex, char keyStruck)
     {
         if (!char.IsControl (keyStruck))
         {

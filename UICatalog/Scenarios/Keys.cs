@@ -18,13 +18,14 @@ public class Keys : Scenario
         var edit = new TextField { X = Pos.Right (editLabel) + 1, Y = Pos.Top (editLabel), Width = Dim.Fill (2) };
         Win.Add (edit);
 
-        edit.KeyDown += (s, a) => { keyPressedList.Add (a.ToString ()); };
+        // PERF: String? Ideally no, please.
+        edit.KeyDown += (s, a) => { keyPressedList.Add (a.Key.ToString ()); };
 
         edit.InvokingKeyBindings += (s, a) =>
                                     {
-                                        if (edit.KeyBindings.TryGet (a, out KeyBinding binding))
+                                        if (edit.KeyBindings.TryGet (a.Key, out KeyBinding binding))
                                         {
-                                            invokingKeyBindingsList.Add ($"{a}: {string.Join (",", binding.Commands)}");
+                                            invokingKeyBindingsList.Add ($"{a.Key}: {string.Join (",", binding.Commands)}");
                                         }
                                     };
 
@@ -114,7 +115,7 @@ public class Keys : Scenario
         Application.KeyDown += (s, a) => KeyDownPressUp (a, "Down");
         Application.KeyUp += (s, a) => KeyDownPressUp (a, "Up");
 
-        void KeyDownPressUp (Key args, string updown)
+        void KeyDownPressUp (KeyEventArgs args, string updown)
         {
             // BUGBUG: KeyEvent.ToString is badly broken
             var msg = $"Key{updown,-7}: {args}";

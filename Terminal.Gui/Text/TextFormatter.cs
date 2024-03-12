@@ -100,7 +100,8 @@ public sealed class TextFormatter : INotifyPropertyChanged
     /// </summary>
     public bool FillRemaining { get; set; }
 
-    /// <summary>Gets or sets the hot key. Fires the <see cref="HotKeyChanged"/> event.</summary>
+    /// <summary>Gets or sets the hot key.</summary>
+    /// <remarks>Raises the <see cref="HotKeyChanged"/> event.</remarks>
     public Key HotKey
     {
         get => _hotKey;
@@ -268,7 +269,7 @@ public sealed class TextFormatter : INotifyPropertyChanged
         // Is that comment just obsolete?
         // Are there any other cases in which we can short-circuit this method here?
         // This case still seems valid, just not for the reason in the above comment.
-        if (string.IsNullOrEmpty (Text))
+        if (string.IsNullOrEmpty (_text))
         {
             return;
         }
@@ -693,9 +694,8 @@ public sealed class TextFormatter : INotifyPropertyChanged
 
         string? text = _text;
 
-        if (FindHotKey (_text, HotKeySpecifier, out _hotKeyPos, out Key newHotKey))
+        if (FindHotKey (_text, HotKeySpecifier, out _hotKeyPos, out _hotKey))
         {
-            HotKey = newHotKey;
             text = RemoveHotKeySpecifier (Text, _hotKeyPos, HotKeySpecifier);
             text = ReplaceHotKeyWithTag (text, _hotKeyPos);
         }

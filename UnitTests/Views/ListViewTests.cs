@@ -368,26 +368,26 @@ Item 6",
         lv.BeginInit ();
         lv.EndInit ();
         Assert.Equal (-1, lv.SelectedItem);
-        Assert.True (lv.NewKeyDownEvent (Key.CursorDown));
+        Assert.True (lv.NewKeyDownEvent (new (Key.CursorDown)));
         Assert.Equal (0, lv.SelectedItem);
-        Assert.True (lv.NewKeyDownEvent (Key.CursorUp));
+        Assert.True (lv.NewKeyDownEvent (new (Key.CursorUp)));
         Assert.Equal (0, lv.SelectedItem);
-        Assert.True (lv.NewKeyDownEvent (Key.PageDown));
+        Assert.True (lv.NewKeyDownEvent (new (Key.PageDown)));
         Assert.Equal (2, lv.SelectedItem);
         Assert.Equal (2, lv.TopItem);
-        Assert.True (lv.NewKeyDownEvent (Key.PageUp));
+        Assert.True (lv.NewKeyDownEvent (new (Key.PageUp)));
         Assert.Equal (0, lv.SelectedItem);
         Assert.Equal (0, lv.TopItem);
         Assert.False (lv.Source.IsMarked (lv.SelectedItem));
-        Assert.True (lv.NewKeyDownEvent (Key.Space));
+        Assert.True (lv.NewKeyDownEvent (new (Key.Space)));
         Assert.True (lv.Source.IsMarked (lv.SelectedItem));
         var opened = false;
         lv.OpenSelectedItem += (s, _) => opened = true;
-        Assert.True (lv.NewKeyDownEvent (Key.Enter));
+        Assert.True (lv.NewKeyDownEvent (new (Key.Enter)));
         Assert.True (opened);
-        Assert.True (lv.NewKeyDownEvent (Key.End));
+        Assert.True (lv.NewKeyDownEvent (new (Key.End)));
         Assert.Equal (2, lv.SelectedItem);
-        Assert.True (lv.NewKeyDownEvent (Key.Home));
+        Assert.True (lv.NewKeyDownEvent (new (Key.Home)));
         Assert.Equal (0, lv.SelectedItem);
     }
 
@@ -500,7 +500,7 @@ Item 6",
         // bind shift down to move down twice in control
         lv.KeyBindings.Add (Key.CursorDown.WithShift, Command.LineDown, Command.LineDown);
 
-        var ev = Key.CursorDown.WithShift;
+        KeyEventArgs ev = new (Key.CursorDown.WithShift);
 
         Assert.True (lv.NewKeyDownEvent (ev), "The first time we move down 2 it should be possible");
 
@@ -535,7 +535,7 @@ Item 6",
         var ev = Key.Space.WithShift;
 
         // view should indicate that it has accepted and consumed the event
-        Assert.True (lv.NewKeyDownEvent (ev));
+        Assert.True (lv.NewKeyDownEvent (new (ev)));
 
         // first item should now be selected
         Assert.Equal (0, lv.SelectedItem);
@@ -546,7 +546,7 @@ Item 6",
         Assert.False (lv.Source.IsMarked (2));
 
         // Press key combo again
-        Assert.True (lv.NewKeyDownEvent (ev));
+        Assert.True (lv.NewKeyDownEvent (new(ev)));
 
         // second item should now be selected
         Assert.Equal (1, lv.SelectedItem);
@@ -557,21 +557,21 @@ Item 6",
         Assert.False (lv.Source.IsMarked (2));
 
         // Press key combo again
-        Assert.True (lv.NewKeyDownEvent (ev));
+        Assert.True (lv.NewKeyDownEvent (new (ev)));
         Assert.Equal (2, lv.SelectedItem);
         Assert.True (lv.Source.IsMarked (0));
         Assert.True (lv.Source.IsMarked (1));
         Assert.False (lv.Source.IsMarked (2));
 
         // Press key combo again
-        Assert.True (lv.NewKeyDownEvent (ev));
+        Assert.True (lv.NewKeyDownEvent (new (ev)));
         Assert.Equal (2, lv.SelectedItem); // cannot move down any further
         Assert.True (lv.Source.IsMarked (0));
         Assert.True (lv.Source.IsMarked (1));
         Assert.True (lv.Source.IsMarked (2)); // but can toggle marked
 
         // Press key combo again 
-        Assert.True (lv.NewKeyDownEvent (ev));
+        Assert.True (lv.NewKeyDownEvent (new (ev)));
         Assert.Equal (2, lv.SelectedItem); // cannot move down any further
         Assert.True (lv.Source.IsMarked (0));
         Assert.True (lv.Source.IsMarked (1));

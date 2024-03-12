@@ -268,7 +268,7 @@ public partial class View : Responder, ISupportInitializeNotification
         Debug.Assert (InternalSubviews.Count == 0);
     }
 
-    private bool CanBeVisible (View view)
+    private static bool CanBeVisible (View view)
     {
         if (!view.Visible)
         {

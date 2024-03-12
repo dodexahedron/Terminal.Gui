@@ -103,9 +103,9 @@ public class FileDialogTests
 #if BROKE_IN_2927
         Send ('f', ConsoleKey.F, false, true, false);
 #else
-        Application.OnKeyDown (Key.Tab);
-        Application.OnKeyDown (Key.Tab);
-        Application.OnKeyDown (Key.Tab);
+        Application.OnKeyDown (new(Key.Tab));
+        Application.OnKeyDown (new(Key.Tab));
+        Application.OnKeyDown (new(Key.Tab));
 #endif
 
         Assert.IsType<TextField> (dlg.MostFocused);

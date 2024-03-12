@@ -715,14 +715,14 @@ public class ListView : View
     }
 
     /// <inheritdoc/>
-    public override bool OnProcessKeyDown (Key a)
+    public override bool OnProcessKeyDown (KeyEventArgs e)
     {
         // Enable user to find & select an item by typing text
-        if (CollectionNavigatorBase.IsCompatibleKey (a))
+        if (CollectionNavigatorBase.IsCompatibleKey (e.Key))
         {
-            int? newItem = KeystrokeNavigator?.GetNextMatchingItem (SelectedItem, (char)a);
+            int? newItem = KeystrokeNavigator?.GetNextMatchingItem (SelectedItem, (char)e.Key);
 
-            if (newItem is int && newItem != -1)
+            if (newItem is not null and not -1)
             {
                 SelectedItem = (int)newItem;
                 EnsureSelectedItemVisible ();

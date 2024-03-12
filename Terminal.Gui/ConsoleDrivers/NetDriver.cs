@@ -1130,8 +1130,8 @@ internal class NetDriver : ConsoleDriver
                     break;
                 }
 
-                OnKeyDown (new Key (map));
-                OnKeyUp (new Key (map));
+                OnKeyDown (new (map));
+                OnKeyUp (new (map));
 
                 break;
             case EventType.Mouse:

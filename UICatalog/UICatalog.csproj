@@ -45,5 +45,6 @@
     <Using Include="System.Drawing.Size" Alias="Size" />
     <Using Include="System.Drawing.SizeF" Alias="SizeF" />
     <Using Include="Terminal.Gui" />
+    <Using Include="Terminal.Gui.Input" />
   </ItemGroup>
 </Project>

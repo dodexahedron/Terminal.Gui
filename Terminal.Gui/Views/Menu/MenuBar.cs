@@ -1514,14 +1514,14 @@ public class MenuBar : View
     }
 
     /// <inheritdoc/>
-    public override bool? OnInvokingKeyBindings (Key key)
+    public override bool? OnInvokingKeyBindings (KeyEventArgs e)
     {
         // This is a bit of a hack. We want to handle the key bindings for menu bar but
         // InvokeKeyBindings doesn't pass any context so we can't tell which item it is for.
         // So before we call the base class we set SelectedItem appropriately.
         // TODO: Figure out if there's a way to have KeyBindings pass context instead. Maybe a KeyBindingContext property?
 
-        if (KeyBindings.TryGet (key, out _))
+        if (KeyBindings.TryGet (e.Key, out _))
         {
             _menuBarItemToActivate = -1;
             _menuItemToSelect = null;
@@ -1530,20 +1530,20 @@ public class MenuBar : View
             for (var i = 0; i < Menus.Length; i++)
             {
                 // Recurse through the menu to find one with the shortcut.
-                if (FindShortcutInChildMenu (key.KeyCode, Menus [i], out _menuItemToSelect))
+                if (FindShortcutInChildMenu (e.Key.KeyCode, Menus [i], out _menuItemToSelect))
                 {
                     _menuBarItemToActivate = i;
                     //keyEvent.Scope = KeyBindingScope.HotKey;
 
-                    return base.OnInvokingKeyBindings (key);
+                    return base.OnInvokingKeyBindings (e);
                 }
 
                 // Now see if any of the menu bar items have a hot key that matches
                 // Technically this is not possible because menu bar items don't have 
-                // shortcuts or Actions. But it's here for completeness. 
+                // shortcuts or Actions. But it's here for completeness.
                 KeyCode? shortcut = Menus [i]?.Shortcut;
 
-                if (key == shortcut)
+                if (e.Key.KeyCode == shortcut)
                 {
                     throw new InvalidOperationException ("Menu bar items cannot have shortcuts");
                 }
@@ -1561,16 +1561,18 @@ public class MenuBar : View
                 // No submenu item matched (or the menu is closed)
 
                 // Check if one of the menu bar item has a hot key that matches
+                // BUG: Possible runtime error on cast to char if Menus [i]?.HotKey.Value evaluates to null.
                 var hotKey = new Key ((char)Menus [i]?.HotKey.Value);
 
                 if (hotKey != Key.Empty)
                 {
-                    bool matches = key == hotKey || key == hotKey.WithAlt || key == hotKey.NoShift.WithAlt;
+                    // PERF: This is way too heavy for what it does.
+                    bool matches = e.Key == hotKey || e.Key == hotKey.WithAlt || e.Key == hotKey.NoShift.WithAlt;
 
                     if (IsMenuOpen)
                     {
                         // If the menu is open, only match if Alt is not pressed.
-                        matches = key == hotKey;
+                        matches = e.Key == hotKey;
                     }
 
                     if (matches)
@@ -1584,7 +1586,7 @@ public class MenuBar : View
             }
         }
 
-        return base.OnInvokingKeyBindings (key);
+        return base.OnInvokingKeyBindings (e);
     }
 
     // TODO: Update to use Key instead of KeyCode
@@ -1647,21 +1649,21 @@ public class MenuBar : View
     }
 
     /// <inheritdoc/>
-    protected internal override bool OnMouseEvent  (MouseEvent me)
+    protected internal override bool OnMouseEvent  (MouseEvent e)
     {
-        if (!_handled && !HandleGrabView (me, this))
+        if (!_handled && !HandleGrabView (e, this))
         {
             return false;
         }
 
         _handled = false;
 
-        if (me.Flags == MouseFlags.Button1Pressed
-            || me.Flags == MouseFlags.Button1DoubleClicked
-            || me.Flags == MouseFlags.Button1TripleClicked
-            || me.Flags == MouseFlags.Button1Clicked
-            || (me.Flags == MouseFlags.ReportMousePosition && _selected > -1)
-            || (me.Flags.HasFlag (MouseFlags.Button1Pressed | MouseFlags.ReportMousePosition) && _selected > -1))
+        if (e.Flags == MouseFlags.Button1Pressed
+            || e.Flags == MouseFlags.Button1DoubleClicked
+            || e.Flags == MouseFlags.Button1TripleClicked
+            || e.Flags == MouseFlags.Button1Clicked
+            || (e.Flags == MouseFlags.ReportMousePosition && _selected > -1)
+            || (e.Flags.HasFlag (MouseFlags.Button1Pressed | MouseFlags.ReportMousePosition) && _selected > -1))
         {
             int pos = _xOrigin;
             Point locationOffset = default;
@@ -1672,13 +1674,13 @@ public class MenuBar : View
                 locationOffset.Y += SuperView.Border.Thickness.Top;
             }
 
-            int cx = me.X - locationOffset.X;
+            int cx = e.X - locationOffset.X;
 
             for (var i = 0; i < Menus.Length; i++)
             {
                 if (cx >= pos && cx < pos + _leftPadding + Menus [i].TitleLength + Menus [i].Help.GetColumns () + _rightPadding)
                 {
-                    if (me.Flags == MouseFlags.Button1Clicked)
+                    if (e.Flags == MouseFlags.Button1Clicked)
                     {
                         if (Menus [i].IsTopLevel)
                         {
@@ -1692,9 +1694,9 @@ public class MenuBar : View
                             Activate (i);
                         }
                     }
-                    else if (me.Flags == MouseFlags.Button1Pressed
-                             || me.Flags == MouseFlags.Button1DoubleClicked
-                             || me.Flags == MouseFlags.Button1TripleClicked)
+                    else if (e.Flags == MouseFlags.Button1Pressed
+                             || e.Flags == MouseFlags.Button1DoubleClicked
+                             || e.Flags == MouseFlags.Button1TripleClicked)
                     {
                         if (IsMenuOpen && !Menus [i].IsTopLevel)
                         {
@@ -1707,8 +1709,8 @@ public class MenuBar : View
                     }
                     else if (_selected != i
                              && _selected > -1
-                             && (me.Flags == MouseFlags.ReportMousePosition
-                                 || (me.Flags == MouseFlags.Button1Pressed && me.Flags == MouseFlags.ReportMousePosition)))
+                             && (e.Flags == MouseFlags.ReportMousePosition
+                                 || (e.Flags == MouseFlags.Button1Pressed && e.Flags == MouseFlags.ReportMousePosition)))
                     {
                         if (IsMenuOpen)
                         {
@@ -1735,7 +1737,7 @@ public class MenuBar : View
                     return true;
                 }
 
-                if (i == Menus.Length - 1 && me.Flags == MouseFlags.Button1Clicked)
+                if (i == Menus.Length - 1 && e.Flags == MouseFlags.Button1Clicked)
                 {
                     if (IsMenuOpen && !Menus [i].IsTopLevel)
                     {

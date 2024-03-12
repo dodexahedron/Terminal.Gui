@@ -278,11 +278,11 @@ public class TileView : View
 
     //// BUGBUG: Why is this not handled by a key binding???
     /// <inheritdoc/>
-    public override bool OnProcessKeyDown (Key keyEvent)
+    public override bool OnProcessKeyDown (KeyEventArgs keyEvent)
     {
         var focusMoved = false;
 
-        if (keyEvent.KeyCode == ToggleResizable)
+        if (keyEvent.Key.KeyCode == ToggleResizable)
         {
             foreach (TileViewLineView l in _splitterLines)
             {

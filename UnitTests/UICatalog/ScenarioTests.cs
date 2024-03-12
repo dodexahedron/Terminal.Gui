@@ -42,12 +42,12 @@ public class ScenarioTests
             // The only key we care about is the QuitKey
             Application.Top.KeyDown += (sender, args) =>
                                        {
-                                           _output.WriteLine ($"  Keypress: {args.KeyCode}");
+                                           _output.WriteLine ($"  Keypress: {args.Key.KeyCode}");
 
                                            // BUGBUG: (#2474) For some reason ReadKey is not returning the QuitKey for some Scenarios
                                            // by adding this Space it seems to work.
                                            // See #2474 for why this is commented out
-                                           Assert.Equal (Application.QuitKey.KeyCode, args.KeyCode);
+                                           Assert.Equal (Application.QuitKey.KeyCode, args.Key.KeyCode);
                                        };
 
             uint abortTime = 500;
@@ -627,7 +627,7 @@ public class ScenarioTests
         Application.Top.KeyDown += (sender, args) =>
                                    {
                                        // See #2474 for why this is commented out
-                                       Assert.Equal (KeyCode.CtrlMask | KeyCode.Q, args.KeyCode);
+                                       Assert.Equal (KeyCode.CtrlMask | KeyCode.Q, args.Key.KeyCode);
                                    };
 
         generic.Init ();

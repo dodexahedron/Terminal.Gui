@@ -869,6 +869,9 @@ public class TextField : View
         }
 
         // Give autocomplete first opportunity to respond to mouse clicks
+        // BUG: Should not be able to raise events from a type in a different hierarchy.
+        // This should either be approached another way or a dedicated method added to do this.
+        // Altering the approach is much better for multiple reasons.
         if (SelectedLength == 0 && Autocomplete.OnMouseEvent (ev, true))
         {
             return true;
@@ -1074,7 +1077,7 @@ public class TextField : View
     }
 
     /// <inheritdoc/>
-    public override bool? OnInvokingKeyBindings (Key a)
+    public override bool? OnInvokingKeyBindings (KeyEventArgs a)
     {
         // Give autocomplete first opportunity to respond to key presses
         if (SelectedLength == 0 && Autocomplete.Suggestions.Count > 0 && Autocomplete.ProcessKey (a))
@@ -1117,7 +1120,7 @@ public class TextField : View
     /// </summary>
     /// <param name="a"></param>
     /// <returns></returns>
-    public override bool OnProcessKeyDown (Key a)
+    public override bool OnProcessKeyDown (KeyEventArgs a)
     {
         // Remember the cursor position because the new calculated cursor position is needed
         // to be set BEFORE the TextChanged event is triggered.
@@ -1125,7 +1128,7 @@ public class TextField : View
         _preTextChangedCursorPos = _cursorPosition;
 
         // Ignore other control characters.
-        if (!a.IsKeyCodeAtoZ && (a.KeyCode < KeyCode.Space || a.KeyCode > KeyCode.CharMask))
+        if (a.Key is { IsKeyCodeAtoZ: false, KeyCode: < KeyCode.Space or > KeyCode.CharMask })
         {
             return false;
         }
@@ -1135,7 +1138,7 @@ public class TextField : View
             return true;
         }
 
-        InsertText (a, true);
+        InsertText (a.Key, true);
 
         return true;
     }

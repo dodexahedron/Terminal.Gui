@@ -92,7 +92,7 @@ public class VkeyPacketSimulator : Scenario
         tvOutput.KeyDown += (s, e) =>
                             {
                                 //System.Diagnostics.Debug.WriteLine ($"Output - KeyDown: {e.KeyCode}");
-                                if (e.NoAlt.NoCtrl.NoShift == KeyCode.Null)
+                                if (e.Key.NoAlt.NoCtrl.NoShift == KeyCode.Null)
                                 {
                                     _wasUnknown = true;
                                     e.Handled = true;
@@ -108,6 +108,10 @@ public class VkeyPacketSimulator : Scenario
 
                                     if (handled == null || handled == false)
                                     {
+                                        // BUG: This needs to not be done this way because that method needs to be protected.
+                                        // While simulations are great, everything in UICatalog should either conform to the
+                                        // design of Terminal.Gui's visible API or be very explicit when violating it, such as
+                                        // calling this method via reflection, which is perfectly fine here.
                                         if (!tvOutput.OnProcessKeyDown (e))
                                         {
                                             Application.Invoke (
@@ -115,7 +119,7 @@ public class VkeyPacketSimulator : Scenario
                                                                                         "Keys",
                                                                                         $"'{
                                                                                             Key.ToString (
-                                                                                                          e.KeyCode,
+                                                                                                          e.Key.KeyCode,
                                                                                                           MenuBar.ShortcutDelimiter
                                                                                                          )
                                                                                         }' pressed!",
@@ -135,7 +139,7 @@ public class VkeyPacketSimulator : Scenario
         tvInput.KeyDown += (s, e) =>
                            {
                                //System.Diagnostics.Debug.WriteLine ($"Input - KeyDown: {e.KeyCode.Key}");
-                               if (e.KeyCode == Key.Empty)
+                               if (e.Key == Key.Empty)
                                {
                                    _wasUnknown = true;
                                    e.Handled = true;
@@ -148,12 +152,12 @@ public class VkeyPacketSimulator : Scenario
 
         tvInput.InvokingKeyBindings += (s, e) =>
                                        {
-                                           Key ev = e;
+                                           Key ev = e.Key;
 
                                            //System.Diagnostics.Debug.WriteLine ($"Input - KeyPress: {ev}");
                                            //System.Diagnostics.Debug.WriteLine ($"Input - KeyPress - _keyboardStrokes: {_keyboardStrokes.Count}");
 
-                                           if (!e.IsValid)
+                                           if (!e.Key.IsValid)
                                            {
                                                _wasUnknown = true;
                                                e.Handled = true;
@@ -161,7 +165,7 @@ public class VkeyPacketSimulator : Scenario
                                                return;
                                            }
 
-                                           _keyboardStrokes.Add (e.KeyCode);
+                                           _keyboardStrokes.Add (e.Key.KeyCode);
                                        };
 
         tvInput.KeyUp += (s, e) =>

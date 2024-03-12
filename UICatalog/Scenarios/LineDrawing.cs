@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Terminal.Gui;
@@ -53,10 +53,10 @@ public class LineDrawing : Scenario
         }
 
         //// BUGBUG: Why is this not handled by a key binding???
-        public override bool OnKeyDown (Key e)
+        public override bool OnKeyDown (KeyEventArgs e)
         {
             // BUGBUG: These should be implemented with key bindings
-            if (e.KeyCode == (KeyCode.Z | KeyCode.CtrlMask))
+            if (e.Key.KeyCode == (KeyCode.Z | KeyCode.CtrlMask))
             {
                 StraightLine pop = _currentLayer.RemoveLastLine ();
 
@@ -69,7 +69,7 @@ public class LineDrawing : Scenario
                 }
             }
 
-            if (e.KeyCode == (KeyCode.Y | KeyCode.CtrlMask))
+            if (e.Key.KeyCode == (KeyCode.Y | KeyCode.CtrlMask))
             {
                 if (_undoHistory.Any ())
                 {
@@ -84,7 +84,7 @@ public class LineDrawing : Scenario
             return false;
         }
 
-        protected override bool OnMouseEvent (MouseEvent mouseEvent)
+        protected internal override bool OnMouseEvent (MouseEvent mouseEvent)
         {
             if (mouseEvent.Flags.HasFlag (MouseFlags.Button1Pressed))
             {

@@ -337,16 +337,16 @@ public class Editor : Scenario
 
         Win.KeyDown += (s, e) =>
                        {
-                           if (_winDialog != null && (e.KeyCode == KeyCode.Esc || e == Application.QuitKey))
+                           if (_winDialog != null && (e.Key.KeyCode == KeyCode.Esc || e.Key == Application.QuitKey))
                            {
                                DisposeWinDialog ();
                            }
-                           else if (e == Application.QuitKey)
+                           else if (e.Key == Application.QuitKey)
                            {
                                Quit ();
                                e.Handled = true;
                            }
-                           else if (_winDialog != null && e.KeyCode == (KeyCode.Tab | KeyCode.CtrlMask))
+                           else if (_winDialog != null && e.Key.KeyCode == (KeyCode.Tab | KeyCode.CtrlMask))
                            {
                                if (_tabView.SelectedTab == _tabView.Tabs.ElementAt (_tabView.Tabs.Count - 1))
                                {
@@ -359,7 +359,7 @@ public class Editor : Scenario
 
                                e.Handled = true;
                            }
-                           else if (_winDialog != null && e.KeyCode == (KeyCode.Tab | KeyCode.CtrlMask | KeyCode.ShiftMask))
+                           else if (_winDialog != null && e.Key.KeyCode == (KeyCode.Tab | KeyCode.CtrlMask | KeyCode.ShiftMask))
                            {
                                if (_tabView.SelectedTab == _tabView.Tabs.ElementAt (0))
                                {

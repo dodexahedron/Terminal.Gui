@@ -3321,6 +3321,8 @@ public class TextView : View
     /// <inheritdoc/>
     protected internal override bool OnMouseEvent  (MouseEvent ev)
     {
+        // PERF: OUCH!
+        // TODO: Condense to one comparison to a single bitwise (ideally constant) value
         if (!ev.Flags.HasFlag (MouseFlags.Button1Clicked)
             && !ev.Flags.HasFlag (MouseFlags.Button1Pressed)
             && !ev.Flags.HasFlag (MouseFlags.Button1Pressed | MouseFlags.ReportMousePosition)
@@ -3697,31 +3699,32 @@ public class TextView : View
     }
 
     /// <inheritdoc/>
-    public override bool? OnInvokingKeyBindings (Key a)
+    public override bool? OnInvokingKeyBindings (KeyEventArgs e)
     {
-        if (!a.IsValid)
+        if (!e.Key.IsValid)
         {
             return false;
         }
 
         // Give autocomplete first opportunity to respond to key presses
-        if (SelectedLength == 0 && Autocomplete.Suggestions.Count > 0 && Autocomplete.ProcessKey (a))
+        if (SelectedLength == 0 && Autocomplete.Suggestions.Count > 0 && Autocomplete.ProcessKey (e))
         {
             return true;
         }
 
-        return base.OnInvokingKeyBindings (a);
+        return base.OnInvokingKeyBindings (e);
     }
 
     /// <inheritdoc/>
-    public override bool OnKeyUp (Key key)
+    public override bool OnKeyUp (KeyEventArgs e)
     {
-        if (key == Key.Space.WithCtrl)
+        // This is deceptively expensive
+        if (e.Key == Key.Space.WithCtrl)
         {
             return true;
         }
 
-        return base.OnKeyUp (key);
+        return base.OnKeyUp (e);
     }
 
     /// <inheritdoc/>
@@ -3736,7 +3739,7 @@ public class TextView : View
     }
 
     /// <inheritdoc/>
-    public override bool OnProcessKeyDown (Key a)
+    public override bool OnProcessKeyDown (KeyEventArgs e)
     {
         if (!CanFocus)
         {
@@ -3746,12 +3749,12 @@ public class TextView : View
         ResetColumnTrack ();
 
         // Ignore control characters and other special keys
-        if (!a.IsKeyCodeAtoZ && (a.KeyCode < KeyCode.Space || a.KeyCode > KeyCode.CharMask))
+        if (e.Key is { IsKeyCodeAtoZ: false, KeyCode: < KeyCode.Space or > KeyCode.CharMask })
         {
             return false;
         }
 
-        InsertText (a);
+        InsertText (e.Key);
         DoNeededAction ();
 
         return true;

@@ -32,8 +32,8 @@ public class MessageBoxTests
 
                                          case 2:
                                              // Tab to btn2
-                                             Application.OnKeyDown (Key.Tab);
-                                             Application.OnKeyDown (Key.Enter);
+                                             Application.OnKeyDown (new(new(Key.Tab)));
+                                             Application.OnKeyDown (new(new(Key.Enter)));
 
                                              break;
 
@@ -71,7 +71,7 @@ public class MessageBoxTests
                                              break;
 
                                          case 2:
-                                             Application.OnKeyDown (Key.Esc);
+                                             Application.OnKeyDown (new(new(Key.Esc)));
 
                                              break;
 
@@ -110,8 +110,8 @@ public class MessageBoxTests
 
                                          case 2:
                                              // Tab to btn2
-                                             Application.OnKeyDown (Key.Tab);
-                                             Application.OnKeyDown (Key.Space);
+                                             Application.OnKeyDown (new(Key.Tab));
+                                             Application.OnKeyDown (new(Key.Space));
 
                                              break;
 

@@ -165,12 +165,12 @@ public class DynamicMenuBar : Scenario
 
             TextShortcut.KeyDown += (s, e) =>
                                     {
-                                        if (!ProcessKey (e))
+                                        if (!ProcessKey (e.Key))
                                         {
                                             return;
                                         }
 
-                                        if (CheckShortcut (e.KeyCode, true))
+                                        if (CheckShortcut (e.Key.KeyCode, true))
                                         {
                                             e.Handled = true;
                                         }
@@ -226,7 +226,7 @@ public class DynamicMenuBar : Scenario
 
             TextShortcut.KeyUp += (s, e) =>
                                   {
-                                      if (CheckShortcut (e.KeyCode, false))
+                                      if (CheckShortcut (e.Key.KeyCode, false))
                                       {
                                           e.Handled = true;
                                       }

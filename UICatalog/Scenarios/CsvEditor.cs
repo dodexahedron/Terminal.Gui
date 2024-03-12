@@ -660,9 +660,9 @@ public class CsvEditor : Scenario
         SetTable (_currentTable.DefaultView.ToTable ());
     }
 
-    private void TableViewKeyPress (object sender, Key e)
+    private void TableViewKeyPress (object sender, KeyEventArgs e)
     {
-        if (e.KeyCode == KeyCode.Delete)
+        if (e.Key.KeyCode == KeyCode.Delete)
         {
             if (_tableView.FullRowSelect)
             {

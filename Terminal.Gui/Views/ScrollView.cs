@@ -366,14 +366,14 @@ public class ScrollView : View
     }
 
     /// <inheritdoc/>
-    public override bool OnKeyDown (Key a)
+    public override bool OnKeyDown (KeyEventArgs e)
     {
-        if (base.OnKeyDown (a))
+        if (base.OnKeyDown (e))
         {
             return true;
         }
 
-        bool? result = InvokeKeyBindings (a);
+        bool? result = InvokeKeyBindings (e);
 
         if (result is { })
         {

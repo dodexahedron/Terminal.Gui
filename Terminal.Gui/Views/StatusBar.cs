@@ -224,19 +224,18 @@ public class StatusBar : View
     }
 
     /// <inheritdoc/>
-    public override bool? OnInvokingKeyBindings (Key keyEvent)
+    public override bool? OnInvokingKeyBindings (KeyEventArgs e)
     {
         // This is a bit of a hack. We want to handle the key bindings for status bar but
         // InvokeKeyBindings doesn't pass any context so we can't tell which item it is for.
         // So before we call the base class we set SelectedItem appropriately.
-        Key key = new (keyEvent);
 
-        if (KeyBindings.TryGet (key, out _))
+        if (KeyBindings.TryGet (e.Key, out _))
         {
             // Search RadioLabels 
             foreach (StatusItem item in Items)
             {
-                if (item.Shortcut == key)
+                if (item.Shortcut == e.Key)
                 {
                     _itemToInvoke = item;
                     //keyEvent.Scope = KeyBindingScope.HotKey;
@@ -246,7 +245,7 @@ public class StatusBar : View
             }
         }
 
-        return base.OnInvokingKeyBindings (keyEvent);
+        return base.OnInvokingKeyBindings (e);
     }
 
     /// <summary>Removes a <see cref="StatusItem"/> at specified index of <see cref="Items"/>.</summary>

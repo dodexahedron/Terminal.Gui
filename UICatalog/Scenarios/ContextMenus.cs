@@ -56,7 +56,7 @@ public class ContextMenus : Scenario
 
         Win.KeyDown += (s, e) =>
                        {
-                           if (e.KeyCode == winContextMenuKey)
+                           if (e.Key.KeyCode == winContextMenuKey)
                            {
                                ShowContextMenu (mousePos.X, mousePos.Y);
                                e.Handled = true;

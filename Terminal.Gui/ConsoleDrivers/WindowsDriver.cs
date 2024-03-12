@@ -1376,11 +1376,11 @@ internal class WindowsDriver : ConsoleDriver
                 if (inputEvent.KeyEvent.bKeyDown)
                 {
                     // Avoid sending repeat key down events
-                    OnKeyDown (new Key (map));
+                    OnKeyDown (new (map));
                 }
                 else
                 {
-                    OnKeyUp (new Key (map));
+                    OnKeyUp (new (map));
                 }
 
                 break;

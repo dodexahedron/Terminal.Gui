@@ -467,7 +467,7 @@ public class KeyTests
     [InlineData ("x99")]
     [InlineData ("0x99")]
     [InlineData ("Ctrl-Ctrl")]
-    public void TryParse_ShouldReturnFalse_On_InvalidKey (string keyString) { Assert.False (Key.TryParse (keyString, out Key _)); }
+    public void TryParse_ShouldReturnFalse_On_InvalidKey (string keyString) { Assert.False (Key.TryParse (keyString, out _)); }
 
     // TryParse
     [Theory]
@@ -514,9 +514,8 @@ public class KeyTests
     [InlineData ("Alt-A-Ctrl", KeyCode.A | KeyCode.CtrlMask | KeyCode.AltMask)]
     public void TryParse_ShouldReturnTrue_WhenValidKey (string keyString, KeyCode expected)
     {
-        Assert.True (Key.TryParse (keyString, out Key key));
-        Key expectedKey = expected;
-        Assert.Equal (expectedKey.ToString (), key.ToString ());
+        Assert.True (Key.TryParse (keyString, out Key? key));
+        Assert.Equal (expected, key?.KeyCode);
     }
 
     [Fact]

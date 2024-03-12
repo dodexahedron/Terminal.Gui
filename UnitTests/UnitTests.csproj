@@ -55,6 +55,7 @@
   <ItemGroup>
     <Using Include="System.Drawing" />
     <Using Include="Terminal.Gui" />
+    <Using Include="Terminal.Gui.Input" />
     <Using Include="Xunit" />
   </ItemGroup>
   <PropertyGroup Label="FineCodeCoverage">

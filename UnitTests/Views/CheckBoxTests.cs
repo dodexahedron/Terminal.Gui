@@ -45,13 +45,13 @@ public class CheckBoxTests
         Application.Begin (top);
 
         Assert.False (checkBox.Checked);
-        Assert.True (checkBox.NewKeyDownEvent (Key.Space));
+        Assert.True (checkBox.NewKeyDownEvent (new (Key.Space)));
         Assert.True (checkBox.Checked);
         Assert.True (checkBox.OnMouseEvent (new MouseEvent { X = 0, Y = 0, Flags = MouseFlags.Button1Clicked }));
         Assert.False (checkBox.Checked);
 
         checkBox.AllowNullChecked = true;
-        Assert.True (checkBox.NewKeyDownEvent (Key.Space));
+        Assert.True (checkBox.NewKeyDownEvent (new (Key.Space)));
         Assert.Null (checkBox.Checked);
         Application.Refresh ();
 
@@ -62,7 +62,7 @@ public class CheckBoxTests
                                                      );
         Assert.True (checkBox.OnMouseEvent (new MouseEvent { X = 0, Y = 0, Flags = MouseFlags.Button1Clicked }));
         Assert.True (checkBox.Checked);
-        Assert.True (checkBox.NewKeyDownEvent (Key.Space));
+        Assert.True (checkBox.NewKeyDownEvent (new (Key.Space)));
         Assert.False (checkBox.Checked);
         Assert.True (checkBox.OnMouseEvent (new MouseEvent { X = 0, Y = 0, Flags = MouseFlags.Button1Clicked }));
         Assert.Null (checkBox.Checked);
@@ -287,35 +287,35 @@ public class CheckBoxTests
 
         ckb.Text = "_Test";
         Assert.Equal (Key.T, ckb.HotKey);
-        Assert.True (ckb.NewKeyDownEvent (Key.T));
+        Assert.True (ckb.NewKeyDownEvent (new (Key.T)));
         Assert.True (ckb.Checked);
         Assert.True (toggled);
 
         ckb.Text = "T_est";
         toggled = false;
         Assert.Equal (Key.E, ckb.HotKey);
-        Assert.True (ckb.NewKeyDownEvent (Key.E.WithAlt));
+        Assert.True (ckb.NewKeyDownEvent (new (Key.E.WithAlt)));
         Assert.True (toggled);
         Assert.False (ckb.Checked);
 
         toggled = false;
         Assert.Equal (Key.E, ckb.HotKey);
-        Assert.True (ckb.NewKeyDownEvent (Key.E));
+        Assert.True (ckb.NewKeyDownEvent (new (Key.E)));
         Assert.True (toggled);
         Assert.True (ckb.Checked);
 
         toggled = false;
-        Assert.True (ckb.NewKeyDownEvent (Key.Space));
+        Assert.True (ckb.NewKeyDownEvent (new (Key.Space)));
         Assert.True (toggled);
         Assert.False (ckb.Checked);
 
         toggled = false;
-        Assert.True (ckb.NewKeyDownEvent (Key.Space));
+        Assert.True (ckb.NewKeyDownEvent (new (Key.Space)));
         Assert.True (toggled);
         Assert.True (ckb.Checked);
 
         toggled = false;
-        Assert.False (ckb.NewKeyDownEvent (Key.Enter));
+        Assert.False (ckb.NewKeyDownEvent (new (Key.Enter)));
         Assert.False (toggled);
         Assert.True (ckb.Checked);
     }

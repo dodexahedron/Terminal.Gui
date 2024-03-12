@@ -366,9 +366,9 @@ public class ListColumns : Scenario
                                     };
     }
 
-    private void TableViewKeyPress (object sender, Key e)
+    private void TableViewKeyPress (object sender, KeyEventArgs e)
     {
-        if (e.KeyCode == KeyCode.Delete)
+        if (e.Key.KeyCode == KeyCode.Delete)
         {
             // set all selected cells to null
             foreach (Point pt in _listColView.GetAllSelectedCells ())

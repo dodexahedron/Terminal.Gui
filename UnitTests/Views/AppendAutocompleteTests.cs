@@ -151,10 +151,10 @@ public class AppendAutocompleteTests
         tf.Draw ();
         tf.PositionCursor ();
         TestHelpers.AssertDriverContentsAre ("", output);
-        tf.NewKeyDownEvent (Key.M);
-        tf.NewKeyDownEvent (Key.Y);
-        tf.NewKeyDownEvent (Key.Space);
-        tf.NewKeyDownEvent (Key.F);
+        tf.NewKeyDownEvent (new (Key.M));
+        tf.NewKeyDownEvent (new (Key.Y));
+        tf.NewKeyDownEvent (new (Key.Space));
+        tf.NewKeyDownEvent (new (Key.F));
         Assert.Equal ("my f", tf.Text);
 
         // Even though there is no match on case we should still get the suggestion
@@ -184,7 +184,7 @@ public class AppendAutocompleteTests
         tf.PositionCursor ();
         TestHelpers.AssertDriverContentsAre ("", output);
 
-        tf.NewKeyDownEvent (new Key ('f'));
+        tf.NewKeyDownEvent (new (new ('f')));
 
         tf.Draw ();
         tf.PositionCursor ();

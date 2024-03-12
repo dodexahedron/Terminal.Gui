@@ -408,19 +408,19 @@ public class Wizard : Dialog
     ///     <see cref="OnProcessKeyDown"/> to instead fire the <see cref="Cancelled"/> event when Wizard is being used as a
     ///     non-modal (see <see cref="Wizard.Modal"/>.
     /// </summary>
-    /// <param name="key"></param>
+    /// <param name="e"></param>
     /// <returns></returns>
-    public override bool OnProcessKeyDown (Key key)
+    public override bool OnProcessKeyDown (KeyEventArgs e)
     {
         //// BUGBUG: Why is this not handled by a key binding???
         if (!Modal)
         {
-            if (key == Key.Esc)
+            if (e.Key == Key.Esc)
             {
-                    var args = new WizardButtonEventArgs ();
-                    Cancelled?.Invoke (this, args);
+                var args = new WizardButtonEventArgs ();
+                Cancelled?.Invoke (this, args);
 
-                    return false;
+                return false;
             }
         }
 

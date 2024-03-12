@@ -583,13 +583,13 @@ internal sealed class Menu : View
     }
 
     /// <inheritdoc/>
-    public override bool? OnInvokingKeyBindings (Key keyEvent)
+    public override bool? OnInvokingKeyBindings (KeyEventArgs e)
     {
         // This is a bit of a hack. We want to handle the key bindings for menu bar but
         // InvokeKeyBindings doesn't pass any context so we can't tell which item it is for.
         // So before we call the base class we set SelectedItem appropriately.
 
-        KeyCode key = keyEvent.KeyCode;
+        KeyCode key = e.Key.KeyCode;
 
         if (KeyBindings.TryGet (key, out _))
         {
@@ -600,7 +600,7 @@ internal sealed class Menu : View
 
             if (children is null)
             {
-                return base.OnInvokingKeyBindings (keyEvent);
+                return base.OnInvokingKeyBindings (e);
             }
 
             // Search for shortcuts first. If there's a shortcut, we don't want to activate the menu item.
@@ -612,7 +612,7 @@ internal sealed class Menu : View
                     _menuItemToSelect = c;
                     //keyEvent.Scope = KeyBindingScope.HotKey;
 
-                    return base.OnInvokingKeyBindings (keyEvent);
+                    return base.OnInvokingKeyBindings (e);
                 }
 
                 MenuBarItem subMenu = _barItems.SubMenu (c);
@@ -621,7 +621,7 @@ internal sealed class Menu : View
                 {
                     //keyEvent.Scope = KeyBindingScope.HotKey;
 
-                    return base.OnInvokingKeyBindings (keyEvent);
+                    return base.OnInvokingKeyBindings (e);
                 }
             }
 
@@ -649,12 +649,12 @@ internal sealed class Menu : View
                     _menuItemToSelect = children [c];
                     _currentChild = c;
 
-                    return base.OnInvokingKeyBindings (keyEvent);
+                    return base.OnInvokingKeyBindings (e);
                 }
             }
         }
 
-        bool? handled = base.OnInvokingKeyBindings (keyEvent);
+        bool? handled = base.OnInvokingKeyBindings (e);
 
         if (handled is { } && (bool)handled)
         {
@@ -662,7 +662,7 @@ internal sealed class Menu : View
         }
 
         // This supports the case where the menu bar is a context menu
-        return _host.OnInvokingKeyBindings (keyEvent);
+        return _host.OnInvokingKeyBindings (e);
     }
 
     private bool FindShortcutInChildMenu (KeyCode key, MenuBarItem menuBarItem)

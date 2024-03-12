@@ -290,17 +290,16 @@ public class RadioGroup : View
     }
 
     /// <inheritdoc/>
-    public override bool? OnInvokingKeyBindings (Key keyEvent)
+    public override bool? OnInvokingKeyBindings (KeyEventArgs e)
     {
         // This is a bit of a hack. We want to handle the key bindings for the radio group but
         // InvokeKeyBindings doesn't pass any context so we can't tell if the key binding is for
         // the radio group or for one of the radio buttons. So before we call the base class
         // we set SelectedItem appropriately.
 
-        Key key = keyEvent;
-
-        if (KeyBindings.TryGet (key, out _))
+        if (KeyBindings.TryGet (e.Key, out _))
         {
+            // PERF: This can likely get a boost.
             // Search RadioLabels 
             for (var i = 0; i < _radioLabels.Count; i++)
             {
@@ -310,7 +309,7 @@ public class RadioGroup : View
                                               out _,
                                               out Key hotKey
                                              )
-                    && key.NoAlt.NoCtrl.NoShift == hotKey)
+                    && e.Key.NoAlt.NoCtrl.NoShift == hotKey)
                 {
                     SelectedItem = i;
                     break;
@@ -318,7 +317,7 @@ public class RadioGroup : View
             }
         }
 
-        return base.OnInvokingKeyBindings (keyEvent);
+        return base.OnInvokingKeyBindings (e);
     }
 
     /// <summary>Called when the view orientation has changed. Invokes the <see cref="OrientationChanged"/> event.</summary>

@@ -303,8 +303,8 @@ public static partial class Application
     }
 
     private static void Driver_SizeChanged (object sender, SizeChangedEventArgs e) { OnSizeChanging (e); }
-    private static void Driver_KeyDown (object sender, Key e) { OnKeyDown (e); }
-    private static void Driver_KeyUp (object sender, Key e) { OnKeyUp (e); }
+    private static void Driver_KeyDown (object sender, KeyEventArgs e) { OnKeyDown (e); }
+    private static void Driver_KeyUp (object sender, KeyEventArgs e) { OnKeyUp (e); }
     private static void Driver_MouseEvent (object sender, MouseEventEventArgs e) { OnMouseEvent (e); }
 
     /// <summary>Gets of list of <see cref="ConsoleDriver"/> types that are available.</summary>
@@ -1684,7 +1684,7 @@ public static partial class Application
     ///     <see cref="KeyDown"/> and <see cref="KeyUp"/> events.
     ///     <para>Fired after <see cref="KeyDown"/> and before <see cref="KeyUp"/>.</para>
     /// </remarks>
-    public static event EventHandler<Key> KeyDown;
+    public static event EventHandler<KeyEventArgs> KeyDown;
 
     /// <summary>
     ///     Called by the <see cref="ConsoleDriver"/> when the user presses a key. Fires the <see cref="KeyDown"/> event
@@ -1694,23 +1694,23 @@ public static partial class Application
     /// <remarks>Can be used to simulate key press events.</remarks>
     /// <param name="keyEvent"></param>
     /// <returns><see langword="true"/> if the key was handled.</returns>
-    public static bool OnKeyDown (Key keyEvent)
+    public static bool OnKeyDown (KeyEventArgs e)
     {
         if (!_initialized)
         {
             return true;
         }
 
-        KeyDown?.Invoke (null, keyEvent);
+        KeyDown?.Invoke (null, e);
 
-        if (keyEvent.Handled)
+        if (e.Handled)
         {
             return true;
         }
 
-        foreach (Toplevel topLevel in _topLevels.ToList ())
+        foreach (Toplevel topLevel in _topLevels)
         {
-            if (topLevel.NewKeyDownEvent (keyEvent))
+            if (topLevel.NewKeyDownEvent (e))
             {
                 return true;
             }
@@ -1726,15 +1726,15 @@ public static partial class Application
         {
             foreach (View view in topLevel.Subviews.Where (
                                                            v => v.KeyBindings.TryGet (
-                                                                                      keyEvent,
+                                                                                      e.Key,
                                                                                       KeyBindingScope.Application,
                                                                                       out KeyBinding _
                                                                                      )
                                                           ))
             {
-                if (view.KeyBindings.TryGet (keyEvent.KeyCode, KeyBindingScope.Application, out KeyBinding _))
+                if (view.KeyBindings.TryGet (e.Key.KeyCode, KeyBindingScope.Application, out KeyBinding _))
                 {
-                    bool? handled = view.OnInvokingKeyBindings (keyEvent);
+                    bool? handled = view.OnInvokingKeyBindings (e);
 
                     if (handled is { } && (bool)handled)
                     {
@@ -1759,7 +1759,7 @@ public static partial class Application
     ///     <see cref="KeyDown"/> and <see cref="KeyUp"/> events.
     ///     <para>Fired after <see cref="KeyDown"/>.</para>
     /// </remarks>
-    public static event EventHandler<Key> KeyUp;
+    public static event EventHandler<KeyEventArgs> KeyUp;
 
     /// <summary>
     ///     Called by the <see cref="ConsoleDriver"/> when the user releases a key. Fires the <see cref="KeyUp"/> event
@@ -1768,7 +1768,7 @@ public static partial class Application
     /// <remarks>Can be used to simulate key press events.</remarks>
     /// <param name="a"></param>
     /// <returns><see langword="true"/> if the key was handled.</returns>
-    public static bool OnKeyUp (Key a)
+    public static bool OnKeyUp (KeyEventArgs a)
     {
         if (!_initialized)
         {

@@ -18,16 +18,16 @@ public class ViewKeyBindingTests
         Application.Top.Add (view);
         Application.Begin (Application.Top);
 
-        Application.OnKeyDown (Key.A);
+        Application.OnKeyDown (new(Key.A));
         Assert.True (invoked);
 
         invoked = false;
-        Application.OnKeyDown (Key.H);
+        Application.OnKeyDown (new(Key.H));
         Assert.True (invoked);
 
         invoked = false;
         Assert.False (view.HasFocus);
-        Application.OnKeyDown (Key.F);
+        Application.OnKeyDown (new(Key.F));
         Assert.False (invoked);
         Assert.False (view.FocusedCommand);
 
@@ -35,7 +35,7 @@ public class ViewKeyBindingTests
         view.CanFocus = true;
         view.SetFocus ();
         Assert.True (view.HasFocus);
-        Application.OnKeyDown (Key.F);
+        Application.OnKeyDown (new(Key.F));
         Assert.True (invoked);
 
         Assert.True (view.ApplicationCommand);
@@ -54,7 +54,7 @@ public class ViewKeyBindingTests
         Application.Top.Add (view);
         Application.Begin (Application.Top);
 
-        Application.OnKeyDown (Key.Z);
+        Application.OnKeyDown (new(Key.Z));
         Assert.False (invoked);
         Assert.False (view.ApplicationCommand);
         Assert.False (view.HotKeyCommand);
@@ -62,7 +62,7 @@ public class ViewKeyBindingTests
 
         invoked = false;
         Assert.False (view.HasFocus);
-        Application.OnKeyDown (Key.F);
+        Application.OnKeyDown (new(Key.F));
         Assert.False (invoked);
         Assert.False (view.ApplicationCommand);
         Assert.False (view.HotKeyCommand);
@@ -81,18 +81,18 @@ public class ViewKeyBindingTests
         Application.Begin (Application.Top);
 
         invoked = false;
-        Application.OnKeyDown (Key.H);
+        Application.OnKeyDown (new(Key.H));
         Assert.True (invoked);
         Assert.True (view.HotKeyCommand);
 
         view.HotKey = KeyCode.Z;
         invoked = false;
         view.HotKeyCommand = false;
-        Application.OnKeyDown (Key.H); // old hot key
+        Application.OnKeyDown (new(Key.H)); // old hot key
         Assert.False (invoked);
         Assert.False (view.HotKeyCommand);
 
-        Application.OnKeyDown (Key.Z); // new hot key
+        Application.OnKeyDown (new(Key.Z)); // new hot key
         Assert.True (invoked);
         Assert.True (view.HotKeyCommand);
     }
@@ -108,12 +108,12 @@ public class ViewKeyBindingTests
         Application.Top.Add (view);
         Application.Begin (Application.Top);
 
-        Application.OnKeyDown (Key.Z);
+        Application.OnKeyDown (new(Key.Z));
         Assert.False (invoked);
         Assert.False (view.HotKeyCommand);
 
         invoked = false;
-        Application.OnKeyDown (Key.F);
+        Application.OnKeyDown (new(Key.F));
         Assert.False (view.HotKeyCommand);
     }
 

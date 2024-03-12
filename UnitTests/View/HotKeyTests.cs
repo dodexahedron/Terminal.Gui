@@ -86,7 +86,7 @@ public class HotKeyTests
         var view = new View { HotKeySpecifier = (Rune)'^', Title = "^Test" };
         view.CanFocus = true;
         Assert.False (view.HasFocus);
-        view.NewKeyDownEvent (KeyCode.T | mask);
+        view.NewKeyDownEvent (new (new (KeyCode.T | mask)));
         Assert.Equal (expected, view.HasFocus);
     }
 
@@ -100,8 +100,7 @@ public class HotKeyTests
         var superView = new View ();
         superView.Add (view);
 
-        var ke = Key.A;
-        superView.NewKeyDownEvent (ke);
+        superView.NewKeyDownEvent (new (Key.A));
     }
 
     [Fact]
@@ -115,8 +114,7 @@ public class HotKeyTests
         view.CanFocus = true;
         Assert.False (view.HasFocus);
 
-        var ke = Key.T;
-        superView.NewKeyDownEvent (ke);
+        superView.NewKeyDownEvent (new (Key.T));
         Assert.True (view.HasFocus);
     }
 

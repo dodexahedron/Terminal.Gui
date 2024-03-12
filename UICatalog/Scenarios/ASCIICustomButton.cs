@@ -254,9 +254,9 @@ public class ASCIICustomButtonTest : Scenario
             }
         }
 
-        private void Button_KeyPress (object sender, Key obj)
+        private void Button_KeyPress (object sender, KeyEventArgs e)
         {
-            switch (obj.KeyCode)
+            switch (e.Key.KeyCode)
             {
                 case KeyCode.End:
                     _scrollView.ContentOffset = new Point (
@@ -265,12 +265,12 @@ public class ASCIICustomButtonTest : Scenario
                                                              - _scrollView.Frame.Height
                                                              + (_scrollView.ShowHorizontalScrollIndicator ? 1 : 0))
                                                           );
-                    obj.Handled = true;
+                    e.Handled = true;
 
                     return;
                 case KeyCode.Home:
                     _scrollView.ContentOffset = new Point (_scrollView.ContentOffset.X, 0);
-                    obj.Handled = true;
+                    e.Handled = true;
 
                     return;
                 case KeyCode.PageDown:
@@ -286,7 +286,7 @@ public class ASCIICustomButtonTest : Scenario
                                                                               : 0))
                                                                     )
                                                           );
-                    obj.Handled = true;
+                    e.Handled = true;
 
                     return;
                 case KeyCode.PageUp:
@@ -298,7 +298,7 @@ public class ASCIICustomButtonTest : Scenario
                                                                      0
                                                                     )
                                                           );
-                    obj.Handled = true;
+                    e.Handled = true;
 
                     return;
             }

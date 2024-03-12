@@ -1,4 +1,4 @@
-﻿//
+//
 // TextValidateField.cs: single-line text editor with validation through providers.
 //
 // Authors:
@@ -541,6 +541,7 @@ namespace Terminal.Gui
 
                 if (_provider.Fixed == false && TextAlignment == TextAlignment.Right && Text.Length > 0)
                 {
+                    // But I thought this was C#! 😉
                     c++;
                 }
 
@@ -615,7 +616,7 @@ namespace Terminal.Gui
         }
 
         /// <inheritdoc/>
-        public override bool OnProcessKeyDown (Key a)
+        public override bool OnProcessKeyDown (KeyEventArgs e)
         {
             if (_provider is null)
             {
@@ -624,12 +625,12 @@ namespace Terminal.Gui
 
             // TODO: Clean this up
             // default (Rune) is just when its value is zero.
-            if (a.AsRune () == default (Rune))
+            if ((uint)e.Key == 0u)
             {
                 return false;
             }
 
-            Rune key = a.AsRune ();
+            Rune key = e.Key.AsRune ();
 
             bool inserted = _provider.InsertAt ((char)key.Value, _cursorPosition);
 

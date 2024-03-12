@@ -147,8 +147,8 @@ internal class CursesDriver : ConsoleDriver
             key = (KeyCode)keyChar;
         }
 
-        OnKeyDown (new Key (key));
-        OnKeyUp (new Key (key));
+        OnKeyDown (new (new (key)));
+        OnKeyUp (new (new (key)));
 
         //OnKeyPressed (new KeyEventArgsEventArgs (key));
     }
@@ -577,21 +577,21 @@ internal class CursesDriver : ConsoleDriver
                     }
                 }
 
-                input.keyEventArgs = new (input.k);
+                input.Key = new (input.k);
             }
             else
             {
-                input.keyEventArgs = Key.Esc;
+                input.Key = Key.Esc;
             }
 
-            OnKeyDown (input.keyEventArgs);
-            OnKeyUp (input.keyEventArgs);
+            OnKeyDown (new(input.Key));
+            OnKeyUp (new(input.Key));
         }
         else if (input.wch == Curses.KeyTab)
         {
             input.k = MapCursesKey (input.wch);
-            OnKeyDown (new (input.k));
-            OnKeyUp (new (input.k));
+            OnKeyDown (new (input.Key));
+            OnKeyUp (new (input.Key));
         }
         else
         {
@@ -688,8 +688,8 @@ internal class CursesDriver : ConsoleDriver
                 else
                 {
                     data.k = ConsoleKeyMapping.MapConsoleKeyInfoToKeyCode (consoleKeyInfo);
-                    data.keyEventArgs = new Key (data.k);
-                    OnKeyDown (data.keyEventArgs);
+                    data.Key = data.Key;
+                    OnKeyDown (new (data.Key));
                 }
             }
             else
@@ -956,7 +956,7 @@ internal class CursesDriver : ConsoleDriver
         public ref int code;
         public ref KeyCode k;
         public ref int wch;
-        public Key keyEventArgs;
+        public Key Key;
         public ConsoleKeyInfo [] cki;
     }
 }

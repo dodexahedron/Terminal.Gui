@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿#nullable enable
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Terminal.Gui;
@@ -9,7 +10,7 @@ public class KeyJsonConverter : JsonConverter<Key>
     /// <inheritdoc/>
     public override Key Read (ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return Key.TryParse (reader.GetString (), out Key key) ? key : Key.Empty;
+        return Key.TryParse (reader.GetString (), out Key? key) ? key : Key.Empty;
     }
 
     /// <inheritdoc/>

@@ -38,21 +38,21 @@ public class SendKeys : Scenario
 
         txtResult.KeyDown += (s, e) =>
                              {
-                                 rKeys += (char)e.KeyCode;
+                                 rKeys += (char)e.Key;
 
-                                 if (!IsShift && e.IsShift)
+                                 if (!IsShift && e.Key.IsShift)
                                  {
                                      rControlKeys += " Shift ";
                                      IsShift = true;
                                  }
 
-                                 if (!IsAlt && e.IsAlt)
+                                 if (!IsAlt && e.Key.IsAlt)
                                  {
                                      rControlKeys += " Alt ";
                                      IsAlt = true;
                                  }
 
-                                 if (!IsCtrl && e.IsCtrl)
+                                 if (!IsCtrl && e.Key.IsCtrl)
                                  {
                                      rControlKeys += " Ctrl ";
                                      IsCtrl = true;
@@ -102,7 +102,7 @@ public class SendKeys : Scenario
 
         Win.KeyDown += (s, e) =>
                        {
-                           if (e.KeyCode == KeyCode.Enter)
+                           if (e.Key.KeyCode == KeyCode.Enter)
                            {
                                ProcessInput ();
                                e.Handled = true;

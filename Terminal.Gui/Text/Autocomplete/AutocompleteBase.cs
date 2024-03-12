@@ -51,11 +51,14 @@ public abstract class AutocompleteBase : IAutocomplete
     /// <inheritdoc/>
     public virtual AutocompleteContext Context { get; set; }
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
+    // BUG: TODO: These need to be protected and also therefore not in the interface.
+    // There is also at least one other use that currently violates encapsulation that needs to be changed
+    // so that this can be protected and not protected internal.
     public abstract bool OnMouseEvent (MouseEvent me, bool fromHost = false);
 
     /// <inheritdoc/>
-    public abstract bool ProcessKey (Key a);
+    public abstract bool ProcessKey (KeyEventArgs e);
 
     /// <inheritdoc/>
     public abstract void RenderOverlay (Point renderAt);
