@@ -139,6 +139,6 @@
     <!-- Embed source files that are not tracked by the source control manager in the PDB -->
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <EnableSourceLink>true</EnableSourceLink>
-    <Authors>Miguel de Icaza, Tig Kindel (@tig), @BDisp</Authors>
+    <Authors>Miguel de Icaza, Charlie Kindel (@tig), @BDisp, @dodexahedron</Authors>
   </PropertyGroup>
 </Project>
