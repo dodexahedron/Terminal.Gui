@@ -36,7 +36,7 @@ internal interface IMainLoopDriver
 ///     Monitoring of file descriptors is only available on Unix, there does not seem to be a way of supporting this
 ///     on Windows.
 /// </remarks>
-internal class MainLoop : IDisposable
+public class MainLoop : IDisposable
 {
     internal List<Func<bool>> _idleHandlers = new ();
     internal SortedList<long, Timeout> _timeouts = new ();

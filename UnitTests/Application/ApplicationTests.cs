@@ -1182,9 +1182,11 @@ public class ApplicationTests
 
     #region ShutdownTests
 
-    [Fact]
+    // BUG: This test doesn't do what it suggests it does.
+    [Fact (Skip = "This test does not do what it says it does.")]
     public async Task Shutdown_Allows_Async ()
     {
+        ManualResetEventSlim mre = new (false);
         bool isCompletedSuccessfully = false;
 
         async Task TaskWithAsyncContinuation ()

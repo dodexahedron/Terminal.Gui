@@ -2,10 +2,13 @@
 
 namespace Terminal.Gui;
 
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 /// <summary>
 ///     True color picker using HSL
 /// </summary>
-public class ColorPicker : View
+public class ColorPicker : View, INotifyPropertyChanging, INotifyPropertyChanged
 {
     /// <summary>
     ///     Creates a new instance of <see cref="ColorPicker"/>. Use
@@ -105,14 +108,23 @@ public class ColorPicker : View
     public Color SelectedColor
     {
         get => _selectedColor;
-        set => SetSelectedColor (value, true);
+        set
+        {
+            SetSelectedColor (value, true);
+        }
     }
+
+    private ColorPickerStyle _style = new ();
 
     /// <summary>
     ///     Style settings for the color picker.  After making changes ensure you call
     ///     <see cref="ApplyStyleChanges"/>.
     /// </summary>
-    public ColorPickerStyle Style { get; set; } = new ();
+    public ColorPickerStyle Style
+    {
+        get => _style;
+        set => SetField (ref _style, value);
+    }
 
     private void CreateNameField ()
     {
@@ -230,12 +242,11 @@ public class ColorPicker : View
     {
         if (_selectedColor != value)
         {
-            Color old = _selectedColor;
+            RaisePropertyChanging (this, new (nameof (SelectedColor)));
             _selectedColor = value;
+            RaisePropertyChanged (this, new (nameof (SelectedColor)));
 
-            ColorChanged?.Invoke (
-                                  this,
-                                  new (value));
+            ColorChanged?.Invoke (this, new (value));
         }
 
         SyncSubViewValues (syncBars);

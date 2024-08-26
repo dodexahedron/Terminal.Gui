@@ -1,6 +1,6 @@
 ﻿namespace Terminal.Gui;
 
-internal class FakeMainLoop : IMainLoopDriver
+public class FakeMainLoop : IMainLoopDriver
 {
     public Action<ConsoleKeyInfo> MockKeyPressed;
 

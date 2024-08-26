@@ -1,53 +1,42 @@
 namespace Terminal.Gui.ConsoleDrivers.Net;
 
 using System.Runtime.InteropServices;
-using CommunityToolkit.Diagnostics;
+using Windows.Interop;
 using Microsoft.Win32.SafeHandles;
+using static Windows.Interop.PInvoke;
+using static Windows.Interop.STD_HANDLE;
+using static Windows.Interop.CONSOLE_MODE;
+
+///// <summary>
+///// Values of console IO handles from the win32 API, as DWORD (UInt32)
+///// </summary>
+//internal enum STD_HANDLE : uint
+//{
+//    STD_INPUT_HANDLE = 4294967286U,
+//    STD_OUTPUT_HANDLE = 4294967285U,
+//    STD_ERROR_HANDLE = 4294967284U,
+//}
 
 [MustDisposeResource]
 internal sealed partial class NetWinVTConsole : IDisposable
 {
-    private const uint DISABLE_NEWLINE_AUTO_RETURN = 8;
-    private const uint ENABLE_ECHO_INPUT = 4;
-    private const uint ENABLE_EXTENDED_FLAGS = 128;
-    private const uint ENABLE_INSERT_MODE = 32;
-    private const uint ENABLE_LINE_INPUT = 2;
-    private const uint ENABLE_LVB_GRID_WORLDWIDE = 10;
-    private const uint ENABLE_MOUSE_INPUT = 16;
-
-    // Input modes.
-    private const uint ENABLE_PROCESSED_INPUT = 1;
-
-    // Output modes.
-    private const uint ENABLE_PROCESSED_OUTPUT = 1;
-    private const uint ENABLE_QUICK_EDIT_MODE = 64;
-    private const uint ENABLE_VIRTUAL_TERMINAL_INPUT = 512;
-    private const uint ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4;
-    private const uint ENABLE_WINDOW_INPUT = 8;
-    private const uint ENABLE_WRAP_AT_EOL_OUTPUT = 2;
-    private const int STD_ERROR_HANDLE = -12;
-    private const int STD_INPUT_HANDLE = -10;
-    private const int STD_OUTPUT_HANDLE = -11;
-
-    private readonly SafeHandleMinusOneIsInvalid _errorHandle;
-    private readonly SafeHandleMinusOneIsInvalid _inputHandle;
-    private readonly SafeHandleMinusOneIsInvalid _outputHandle;
-    private readonly uint _originalErrorConsoleMode;
-    private readonly uint _originalInputConsoleMode;
-    private readonly uint _originalOutputConsoleMode;
-
     public NetWinVTConsole ()
     {
-        _inputHandle = GetStdHandle (STD_INPUT_HANDLE);
+        if (GetStdHandle (STD_INPUT_HANDLE) is not { IsInvalid: not true } stdin)
+        {
+            throw new IOException ($"Failed to get input console mode. Invalid handle. Error code: {GetLastError ()}.");
+        }
 
-        if (!GetConsoleMode (_inputHandle, out uint mode))
+        _inputHandle = stdin;
+
+        if (!GetConsoleMode (_inputHandle, out CONSOLE_MODE mode))
         {
             throw new IOException ($"Failed to get input console mode, error code: {GetLastError ()}.");
         }
 
         _originalInputConsoleMode = mode;
 
-        if ((mode & ENABLE_VIRTUAL_TERMINAL_INPUT) < ENABLE_VIRTUAL_TERMINAL_INPUT)
+        if ((mode & ENABLE_VIRTUAL_TERMINAL_INPUT) == 0U)
         {
             mode |= ENABLE_VIRTUAL_TERMINAL_INPUT;
 
@@ -57,7 +46,12 @@ internal sealed partial class NetWinVTConsole : IDisposable
             }
         }
 
-        _outputHandle = GetStdHandle (STD_OUTPUT_HANDLE);
+        if (GetStdHandle (STD_OUTPUT_HANDLE) is not { IsInvalid: not true } stdout)
+        {
+            throw new IOException ($"Failed to get output console mode. Invalid handle. Error code: {GetLastError ()}.");
+        }
+
+        _outputHandle = stdout;
 
         if (!GetConsoleMode (_outputHandle, out mode))
         {
@@ -76,7 +70,12 @@ internal sealed partial class NetWinVTConsole : IDisposable
             }
         }
 
-        _errorHandle = GetStdHandle (STD_ERROR_HANDLE);
+        if (GetStdHandle (STD_ERROR_HANDLE) is not { IsInvalid: not true } stderr)
+        {
+            throw new IOException ($"Failed to get error console mode. Invalid handle. Error code: {GetLastError ()}.");
+        }
+
+        _errorHandle = stderr;
 
         if (!GetConsoleMode (_errorHandle, out mode))
         {
@@ -85,7 +84,7 @@ internal sealed partial class NetWinVTConsole : IDisposable
 
         _originalErrorConsoleMode = mode;
 
-        if ((mode & DISABLE_NEWLINE_AUTO_RETURN) < DISABLE_NEWLINE_AUTO_RETURN)
+        if ((mode & DISABLE_NEWLINE_AUTO_RETURN) != DISABLE_NEWLINE_AUTO_RETURN)
         {
             mode |= DISABLE_NEWLINE_AUTO_RETURN;
 
@@ -93,6 +92,34 @@ internal sealed partial class NetWinVTConsole : IDisposable
             {
                 throw new IOException ($"Failed to set error console mode, error code: {GetLastError ()}.");
             }
+        }
+    }
+
+    private readonly SafeFileHandle _errorHandle;
+    private readonly SafeFileHandle _inputHandle;
+    private readonly SafeFileHandle _outputHandle;
+    private readonly CONSOLE_MODE _originalErrorConsoleMode;
+    private readonly CONSOLE_MODE _originalInputConsoleMode;
+    private readonly CONSOLE_MODE _originalOutputConsoleMode;
+
+    //[MustDisposeResource (false)]
+    //[LibraryImport ("kernel32", SetLastError = true)]
+    //private static partial SafeFileHandle GetStdHandle (nint nStdHandle);
+
+    //[LibraryImport ("kernel32", SetLastError = true)]
+    //[return: MarshalAs (UnmanagedType.Bool)]
+    //private static partial bool SetConsoleMode (nint hConsoleHandle, uint dwMode);
+
+    private volatile bool _disposed;
+
+    /// <inheritdoc/>
+    public void Dispose ()
+    {
+        if (!_disposed)
+        {
+            Dispose (true);
+            _disposed = true;
+            GC.SuppressFinalize (this);
         }
     }
 
@@ -114,21 +141,6 @@ internal sealed partial class NetWinVTConsole : IDisposable
         }
     }
 
-    [LibraryImport ("kernel32")]
-    private static partial bool GetConsoleMode (SafeHandle hConsoleHandle, out uint lpMode);
-
-    [LibraryImport ("kernel32")]
-    private static partial uint GetLastError ();
-
-    [MustDisposeResource (false)]
-    [LibraryImport ("kernel32", SetLastError = true)]
-    private static partial SafeHandleMinusOneIsInvalid GetStdHandle (int nStdHandle);
-
-    [LibraryImport ("kernel32")]
-    private static partial bool SetConsoleMode (SafeHandle hConsoleHandle, uint dwMode);
-
-    private volatile bool _disposed;
-
     private void Dispose (bool disposing)
     {
         if (disposing)
@@ -139,17 +151,13 @@ internal sealed partial class NetWinVTConsole : IDisposable
         }
     }
 
-    /// <inheritdoc />
-    public void Dispose ()
-    {
-        if (!_disposed)
-        {
-            Dispose (true);
-            _disposed = true;
-            GC.SuppressFinalize (this);
-        }
-    }
+    //[LibraryImport ("kernel32", SetLastError = true)]
+    //[return: MarshalAs(UnmanagedType.Bool)]
+    //private static partial bool GetConsoleMode (nint hConsoleHandle, out uint lpMode);
 
-    /// <inheritdoc />
+    [LibraryImport ("kernel32")]
+    private static partial uint GetLastError ();
+
+    /// <inheritdoc/>
     ~NetWinVTConsole () { Dispose (false); }
 }

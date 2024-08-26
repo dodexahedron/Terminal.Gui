@@ -97,8 +97,8 @@ internal readonly unsafe struct HANDLE (nint Value)
     [Experimental ("TGEXP0001")]
     public static explicit operator HANDLE (SafeHandle value) => new (value.DangerousGetHandle ());
 
-    /// <summary>Explicit conversion from <see cref="HANDLE"/> to <see langword="nint"/> by returning <see cref="Value"/>.</summary>
-    public static explicit operator nint (HANDLE value) => value.Value;
+    /// <summary>Implicit conversion from <see cref="HANDLE"/> to <see langword="nint"/> by returning <see cref="Value"/>.</summary>
+    public static implicit operator nint (HANDLE value) => value.Value;
 
     /// <summary>
     ///     Explicit conversion from <see cref="HANDLE"/> to <see cref="SafeFileHandle"/> via <see cref="SafeFileHandle(nint,bool)"/>,

@@ -30,7 +30,7 @@ internal readonly record struct BOOL : IEqualityOperators<BOOL, BOOL, bool>, ITr
     /// <inheritdoc/>
     public override int GetHashCode () => Value.GetHashCode ();
 
-    public static explicit operator BOOL (int value) => new (value);
+    public static implicit operator BOOL (int value) => new (value);
     public static bool operator false (BOOL value) => value.Value == 0;
 
     public static implicit operator int (BOOL value) => value.Value;
