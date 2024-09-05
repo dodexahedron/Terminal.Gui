@@ -267,33 +267,6 @@ public static class ConsoleKeyMapping
         return modifiers;
     }
 
-    /// <summary>Gets <see cref="ConsoleModifiers"/> from <see cref="bool"/> modifiers.</summary>
-    /// <param name="shift">The shift key.</param>
-    /// <param name="alt">The alt key.</param>
-    /// <param name="control">The control key.</param>
-    /// <returns>The console modifiers.</returns>
-    public static ConsoleModifiers GetModifiers (bool shift, bool alt, bool control)
-    {
-        var modifiers = new ConsoleModifiers ();
-
-        if (shift)
-        {
-            modifiers |= ConsoleModifiers.Shift;
-        }
-
-        if (alt)
-        {
-            modifiers |= ConsoleModifiers.Alt;
-        }
-
-        if (control)
-        {
-            modifiers |= ConsoleModifiers.Control;
-        }
-
-        return modifiers;
-    }
-
     /// <summary>
     ///     Get the <see cref="ConsoleKeyInfo"/> from a unicode character and modifiers (e.g. (Key)'a' and
     ///     (Key)Key.CtrlMask).

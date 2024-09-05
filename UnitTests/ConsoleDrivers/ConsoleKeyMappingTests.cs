@@ -618,4 +618,14 @@ public class ConsoleKeyMappingTests
             (ConsoleModifiers.None, '_')                                                   => '-',
             (_, _)                                                                         => keyValue
         };
+
+    /// <summary>Gets <see cref="ConsoleModifiers"/> from <see cref="bool"/> modifiers.</summary>
+    /// <param name="shift">The shift key.</param>
+    /// <param name="alt">The alt key.</param>
+    /// <param name="control">The control key.</param>
+    /// <returns>The console modifiers.</returns>
+    private static ConsoleModifiers GetModifiers (bool shift, bool alt, bool control) =>
+        (shift ? ConsoleModifiers.Shift : 0)
+      | (alt ? ConsoleModifiers.Alt : 0)
+      | (control ? ConsoleModifiers.Control : 0);
 }
