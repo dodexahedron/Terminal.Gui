@@ -1,4 +1,4 @@
-namespace Terminal.Gui.ConsoleDrivers.Windows.Interop;
+﻿namespace Terminal.Gui.ConsoleDrivers.Windows.Interop;
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -26,7 +26,7 @@ using System.Runtime.CompilerServices;
                      "InconsistentNaming",
                      Justification = "Following recommendation to keep types named the same as the native types.")]
 internal readonly struct BOOL : IEqualityOperators<BOOL, BOOL, bool>, IEqualityOperators<BOOL, bool, bool>,
-                                       ITrueFalseOperators<BOOL>, IEquatable<bool>
+                                ITrueFalseOperators<BOOL>, IEquatable<bool>, IEquatable<BOOL>
 {
     /// <summary>
     ///     Creates a new <see cref="BOOL"/> directly from the provided <see cref="int"/>.
@@ -53,25 +53,33 @@ internal readonly struct BOOL : IEqualityOperators<BOOL, BOOL, bool>, IEqualityO
 
     [MethodImpl (MethodImplOptions.AggressiveInlining)]
     public static bool operator != (BOOL left, bool right) => !left.Equals (right);
+
     [MethodImpl (MethodImplOptions.AggressiveInlining)]
     public static bool operator == (BOOL left, BOOL right) => left.Equals (right);
 
     [MethodImpl (MethodImplOptions.AggressiveInlining)]
     public static bool operator != (BOOL left, BOOL right) => !left.Equals (right);
 
-    /// <inheritdoc/>
-    [MethodImpl (MethodImplOptions.AggressiveInlining)]
-    public bool Equals (BOOL other) => IsTrue == other.IsTrue;
-
-    /// <inheritdoc/>
+    /// <inheritdoc cref="ValueType.Equals(object?)"/>
+    /// <remarks>This is value equality.</remarks>
     [MethodImpl (MethodImplOptions.AggressiveInlining)]
     public bool Equals (bool other) => other == IsTrue;
+
+    /// <inheritdoc cref="ValueType.Equals(object?)"/>
+    /// <remarks>This is value equality.</remarks>
+    [MethodImpl (MethodImplOptions.AggressiveInlining)]
+    public bool Equals (BOOL other) => IsTrue == other.IsTrue;
 
     [MethodImpl (MethodImplOptions.AggressiveInlining)]
     public static bool operator false (BOOL value) => value.IsFalse;
 
     [MethodImpl (MethodImplOptions.AggressiveInlining)]
     public static bool operator true (BOOL value) => value.IsTrue;
+
+    /// <inheritdoc cref="ValueType.Equals(object?)"/>
+    /// <remarks>This is value equality.</remarks>
+    [MethodImpl (MethodImplOptions.AggressiveInlining)]
+    public override bool Equals (object? obj) => obj is BOOL other && Equals (other);
 
     /// <inheritdoc/>
     [MethodImpl (MethodImplOptions.AggressiveInlining)]
