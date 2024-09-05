@@ -1,4 +1,4 @@
-﻿namespace Terminal.Gui.ConsoleDrivers.Windows.Interop;
+namespace Terminal.Gui.ConsoleDrivers.Windows.Interop;
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -37,14 +37,14 @@ internal readonly struct BOOL : IEqualityOperators<BOOL, BOOL, bool>, IEqualityO
     ///     is recommended.
     /// </remarks>
     /// <remarks><see cref="INumberBase{TSelf}.Zero"/> is the only value interpreted as <see langword="false"/>.</remarks>
-    internal BOOL (int value) { Value = value; }
+    private BOOL (int value) { Value = value; }
 
     /// <summary>
     ///     Constructor which sets the new <see cref="BOOL"/> to <see cref="IBinaryNumber{T}.AllBitsSet"/> for <see langword="true"/> or
     ///     <see cref="IBinaryNumber{T}.Zero"/> for <see langword="false"/>.
     /// </summary>
     /// <param name="value">The equivalent <see langword="bool"/> value to initialize the new <see cref="BOOL"/> to.</param>
-    internal BOOL (bool value) { Value = value ? -1 : 0; }
+    private BOOL (bool value) { Value = value ? -1 : 0; }
 
     internal readonly int Value;
 
