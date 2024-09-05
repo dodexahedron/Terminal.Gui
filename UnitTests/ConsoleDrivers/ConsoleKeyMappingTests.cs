@@ -581,168 +581,41 @@ public class ConsoleKeyMappingTests
             { '-', '_', (KeyCode)'_' | KeyCode.ShiftMask },
         };
 
-    private static uint GetKeyValueUInt32 (uint keyValue, ConsoleModifiers modifiers)
-    {
-        if (modifiers == ConsoleModifiers.Shift && keyValue - 32 is >= 'A' and <= 'Z')
+    private static uint GetKeyValueUInt32 (uint keyValue, ConsoleModifiers modifiers) =>
+        (modifiers, keyValue) switch
         {
-            return keyValue - 32;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue is >= 'A' and <= 'Z')
-        {
-            return keyValue + 32;
-        }
-
-        if (modifiers == ConsoleModifiers.Shift && keyValue - 32 is >= 'À' and <= 'Ý')
-        {
-            return keyValue - 32;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue is >= 'À' and <= 'Ý')
-        {
-            return keyValue + 32;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is '0')
-        {
-            return keyValue + 13;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue - 13 is '0')
-        {
-            return keyValue - 13;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is >= '1' and <= '9' and not '7')
-        {
-            return keyValue - 16;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue + 16 is >= '1' and <= '9' and not '7')
-        {
-            return keyValue + 16;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is '7')
-        {
-            return keyValue - 8;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue + 8 is '7')
-        {
-            return keyValue + 8;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is '\'')
-        {
-            return keyValue + 24;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue - 24 is '\'')
-        {
-            return keyValue - 24;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is '«')
-        {
-            return keyValue + 16;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue - 16 is '«')
-        {
-            return keyValue - 16;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is '\\')
-        {
-            return keyValue + 32;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue - 32 is '\\')
-        {
-            return keyValue - 32;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is '+')
-        {
-            return keyValue - 1;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue + 1 is '+')
-        {
-            return keyValue + 1;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is '´')
-        {
-            return keyValue - 84;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue + 84 is '´')
-        {
-            return keyValue + 84;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is 'º')
-        {
-            return keyValue - 16;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue + 16 is 'º')
-        {
-            return keyValue + 16;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is '~')
-        {
-            return keyValue - 32;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue + 32 is '~')
-        {
-            return keyValue + 32;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is '<')
-        {
-            return keyValue + 2;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue - 2 is '<')
-        {
-            return keyValue - 2;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is ',')
-        {
-            return keyValue + 15;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue - 15 is ',')
-        {
-            return keyValue - 15;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is '.')
-        {
-            return keyValue + 12;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue - 12 is '.')
-        {
-            return keyValue - 12;
-        }
-
-        if ((modifiers & ConsoleModifiers.Shift) != 0 && keyValue is '-')
-        {
-            return keyValue + 50;
-        }
-
-        if (modifiers == ConsoleModifiers.None && keyValue - 50 is '-')
-        {
-            return keyValue - 50;
-        }
-
-        return keyValue;
-    }
+            (ConsoleModifiers.Shift, '7')                                                  => '/',
+            (ConsoleModifiers.Shift, >= '1' and <= '9' and not '7')                        => keyValue - 16,
+            (ConsoleModifiers.Shift, _) when keyValue - 32 is >= 'A' and <= 'Z'            => keyValue - 32,
+            (ConsoleModifiers.Shift, _) when keyValue - 32 is >= 'À' and <= 'Ý'            => keyValue - 32,
+            (ConsoleModifiers.Shift, '0')                                                  => '=',
+            (ConsoleModifiers.Shift, '\'')                                                 => '?',
+            (ConsoleModifiers.Shift, '«')                                                  => '»',
+            (ConsoleModifiers.Shift, '\\')                                                 => '|',
+            (ConsoleModifiers.Shift, '+')                                                  => '*',
+            (ConsoleModifiers.Shift, '´')                                                  => '`',
+            (ConsoleModifiers.Shift, 'º')                                                  => 'ª',
+            (ConsoleModifiers.Shift, '~')                                                  => '^',
+            (ConsoleModifiers.Shift, '<')                                                  => '>',
+            (ConsoleModifiers.Shift, ',')                                                  => ';',
+            (ConsoleModifiers.Shift, '.')                                                  => ':',
+            (ConsoleModifiers.Shift, '-')                                                  => '_',
+            (ConsoleModifiers.None, '/')                                                   => '7',
+            (ConsoleModifiers.None, _) when keyValue + 16 is >= '1' and <= '9' and not '7' => keyValue + 16,
+            (ConsoleModifiers.None, >= 'A' and <= 'Z')                                     => keyValue + 32,
+            (ConsoleModifiers.None, >= 'À' and <= 'Ý')                                     => keyValue + 32,
+            (ConsoleModifiers.None, '=')                                                   => '0',
+            (ConsoleModifiers.None, '?')                                                   => '\'',
+            (ConsoleModifiers.None, '»')                                                   => '«',
+            (ConsoleModifiers.None, '|')                                                   => '\\',
+            (ConsoleModifiers.None, '*')                                                   => '+',
+            (ConsoleModifiers.None, '`')                                                   => '´',
+            (ConsoleModifiers.None, 'ª')                                                   => 'º',
+            (ConsoleModifiers.None, '^')                                                   => '~',
+            (ConsoleModifiers.None, '>')                                                   => '<',
+            (ConsoleModifiers.None, ';')                                                   => ',',
+            (ConsoleModifiers.None, ':')                                                   => '.',
+            (ConsoleModifiers.None, '_')                                                   => '-',
+            (_, _)                                                                         => keyValue
+        };
 }
